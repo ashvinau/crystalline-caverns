@@ -1,0 +1,85 @@
+[gd_scene load_steps=7 format=3 uid="uid://b67ooeti8v4je"]
+
+[ext_resource type="Texture2D" uid="uid://ctk1g377yvpdn" path="res://art/tileset.png" id="1_neqad"]
+[ext_resource type="PackedScene" uid="uid://ccvooj6vv68fb" path="res://Character/player.tscn" id="2_3ga3r"]
+[ext_resource type="Script" path="res://levels/PlayFieldMap.gd" id="3_iq378"]
+[ext_resource type="Script" path="res://PerlinGraph.cs" id="3_y3bka"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_vvbw8"]
+texture = ExtResource("1_neqad")
+0:0/0 = 0
+0:0/0/physics_layer_0/linear_velocity = Vector2(0, 0)
+0:0/0/physics_layer_0/angular_velocity = 0.0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+1:0/0 = 0
+1:0/0/physics_layer_0/linear_velocity = Vector2(0, 0)
+1:0/0/physics_layer_0/angular_velocity = 0.0
+1:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, 8, 8, -8, 8, -8, 8, 8)
+2:0/0 = 0
+2:0/0/physics_layer_0/linear_velocity = Vector2(0, 0)
+2:0/0/physics_layer_0/angular_velocity = 0.0
+2:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, 8, -8, 8)
+3:0/0 = 0
+3:0/0/physics_layer_0/linear_velocity = Vector2(0, 0)
+3:0/0/physics_layer_0/angular_velocity = 0.0
+3:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, 8, 8, -8)
+4:0/0 = 0
+4:0/0/physics_layer_0/linear_velocity = Vector2(0, 0)
+4:0/0/physics_layer_0/angular_velocity = 0.0
+4:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, 8, -8, -8, 8, -8)
+0:1/0 = 0
+0:1/0/physics_layer_0/linear_velocity = Vector2(0, 0)
+0:1/0/physics_layer_0/angular_velocity = 0.0
+1:1/0 = 0
+1:1/0/physics_layer_0/linear_velocity = Vector2(0, 0)
+1:1/0/physics_layer_0/angular_velocity = 0.0
+2:1/0 = 0
+2:1/0/physics_layer_0/linear_velocity = Vector2(0, 0)
+2:1/0/physics_layer_0/angular_velocity = 0.0
+3:1/0 = 0
+3:1/0/physics_layer_0/linear_velocity = Vector2(0, 0)
+3:1/0/physics_layer_0/angular_velocity = 0.0
+0:2/0 = 0
+0:2/0/physics_layer_0/linear_velocity = Vector2(0, 0)
+0:2/0/physics_layer_0/angular_velocity = 0.0
+1:2/0 = 0
+1:2/0/physics_layer_0/linear_velocity = Vector2(0, 0)
+1:2/0/physics_layer_0/angular_velocity = 0.0
+2:2/0 = 0
+2:2/0/physics_layer_0/linear_velocity = Vector2(0, 0)
+2:2/0/physics_layer_0/angular_velocity = 0.0
+3:2/0 = 0
+3:2/0/physics_layer_0/linear_velocity = Vector2(0, 0)
+3:2/0/physics_layer_0/angular_velocity = 0.0
+
+[sub_resource type="TileSet" id="TileSet_u8d8u"]
+physics_layer_0/collision_layer = 1
+sources/1 = SubResource("TileSetAtlasSource_vvbw8")
+
+[node name="PlayField" type="Node2D"]
+position = Vector2(21, -123)
+
+[node name="PlayFieldMap" type="TileMap" parent="."]
+tile_set = SubResource("TileSet_u8d8u")
+format = 2
+layer_0/name = "Ground"
+layer_0/tile_data = PackedInt32Array(-1507323, 1, 0, -1441787, 1, 0, -1376251, 1, 0, -1310715, 1, 0, -1507322, 1, 0, -1441786, 1, 0, -1376250, 1, 0, -1310714, 1, 0, -1507321, 1, 0, -1441785, 1, 0, -1376249, 1, 0, -1310713, 1, 0, -1507320, 1, 0, -1441784, 1, 0, -1376248, 1, 0, -1310712, 1, 0, -1507319, 1, 0, -1441783, 1, 0, -1376247, 1, 0, -1310711, 1, 0, -1507318, 1, 0, -1441782, 1, 0, -1376246, 1, 0, -1310710, 1, 0, -1507317, 1, 0, -1441781, 1, 0, -1376245, 1, 0, -1310709, 1, 0, -1507316, 1, 0, -1441780, 1, 0, -1376244, 1, 0, -1310708, 1, 0, -1507315, 1, 0, -1441779, 1, 0, -1376243, 1, 0, -1310707, 1, 0, -1507314, 1, 0, -1441778, 1, 0, -1376242, 1, 0, -1310706, 1, 0, -1507313, 1, 0, -1441777, 1, 0, -1376241, 1, 0, -1310705, 1, 0, -1507312, 1, 0, -1441776, 1, 0, -1376240, 1, 0, -1310704, 1, 0, -1507311, 1, 0, -1441775, 1, 0, -1376239, 1, 0, -1310703, 1, 0)
+script = ExtResource("3_iq378")
+
+[node name="PerlinGraph" type="Node" parent="PlayFieldMap"]
+script = ExtResource("3_y3bka")
+
+[node name="Player" parent="." instance=ExtResource("2_3ga3r")]
+position = Vector2(138, -390)
+jump_velocity = -400.0
+double_jump_velocity = -300.0
+
+[node name="RemoteTransform2D" type="RemoteTransform2D" parent="Player"]
+position = Vector2(-8, 3)
+remote_path = NodePath("../../MainCamera")
+
+[node name="MainCamera" type="Camera2D" parent="."]
+position = Vector2(130, -387)
+process_callback = 0
+position_smoothing_enabled = true
+position_smoothing_speed = 30.0
