@@ -29,6 +29,11 @@ func _physics_process(delta):
 		if was_in_air == true:
 			land()
 		was_in_air = false
+		
+	# Respawn
+	if Input.is_action_pressed("respawn"):
+		var playFieldNode = get_node("/root/PlayField/PlayFieldMap")
+		playFieldNode.respawn()
 
 	# Handle jump.
 	if Input.is_action_just_pressed("jump"):
