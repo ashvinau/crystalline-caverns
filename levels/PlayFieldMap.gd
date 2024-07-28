@@ -1,20 +1,18 @@
 extends TileMap
 
 const RAND_SEED = 16384
+const IGNORE_VAL = 42
 
 @onready var perlinNode = $PerlinGraph
 @onready var playerNode = get_node("../Player")
 @onready var collisionNode = get_node("../Player/CollisionShape2D")
 
 var perlinMatrix : Array = []
+var geoMatrix : Array = []
 # Perlin matrix dimensions
 var width = 512
 var height = 512
 
-var mapLocX = 0
-var mapLocY = 0
-
-var spawnedMaps: Array
 var spawnLoc: Vector2i
 
 # Called when the node enters the scene tree for the first time.
@@ -22,20 +20,101 @@ func _init():
 	var tile_set = self.tile_set
 	seed(RAND_SEED)
 		
-	# Initialize blank matrix	
+	# Initialize perlin matrix	
 	for x in width:
 		perlinMatrix.append([])
 		for y in height:
 			perlinMatrix[x].append(0)
+	# Copy perlin matrix for modification		
+	geoMatrix = perlinMatrix.duplicate(true)
 			
-func setPlayFieldMap(offsetx: int, offsety: int):
-	if (!spawnedMaps.has(Vector2i(offsetx, offsety))):
+func setGeoMatrix():
+	for x in width:
+		for y in height:
+			if (perlinMatrix[x][y] <= 130):
+				geoMatrix[x][y] = 1 # Solid square tile
+	
+	for x in width:
+		for y in height:
+			# Fill in single block potholes
+			if (checkGeoIndex(Vector2i(x,y),0,IGNORE_VAL,IGNORE_VAL,1,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL,1,IGNORE_VAL)):
+				geoMatrix[x][y] = 1
+			if (checkGeoIndex(Vector2i(x,y),0,1,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL,1,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL)):
+				geoMatrix[x][y] = 1
+			# Remove single block protrusions
+			if (checkGeoIndex(Vector2i(x,y),1,IGNORE_VAL,IGNORE_VAL,0,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL,0,IGNORE_VAL)):
+				geoMatrix[x][y] = 0
+			if (checkGeoIndex(Vector2i(x,y),1,0,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL,0,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL)):
+				geoMatrix[x][y] = 0
+			# Adding block id 2, lower right triangle
+			if (checkGeoIndex(Vector2i(x,y),1,0,IGNORE_VAL,1,IGNORE_VAL,1,IGNORE_VAL,0,0)):
+				geoMatrix[x][y] = 2
+			# Adding block id 3, lower left triangle
+			if (checkGeoIndex(Vector2i(x,y),1,0,0,0,IGNORE_VAL,1,IGNORE_VAL,1,IGNORE_VAL)):
+				geoMatrix[x][y] = 3
+			# Adding block id 4, upper left triangle
+			if (checkGeoIndex(Vector2i(x,y),1,1,IGNORE_VAL,0,0,0,IGNORE_VAL,1,IGNORE_VAL)):
+				geoMatrix[x][y] = 4
+			# Adding block id 5, upper right triangle
+			if (checkGeoIndex(Vector2i(x,y),1,1,IGNORE_VAL,1,IGNORE_VAL,0,0,0,IGNORE_VAL)):
+				geoMatrix[x][y] = 5
+			
+			
+				
+func checkGeoIndex(index : Vector2i, target, n, ne, e, se, s, sw, w, nw) -> bool:	
+	var x = index.x
+	var y = index.y
+	
+	if geoMatrix[x][y] != target:
+		return false
+	if n != IGNORE_VAL && geoMatrix[x][SafeIndex(Vector2i(x,y-1)).y] != n:
+		return false
+	if ne != IGNORE_VAL && geoMatrix[SafeIndex(Vector2i(x+1,y-1)).x][SafeIndex(Vector2i(x+1,y-1)).y] != ne:
+		return false
+	if e != IGNORE_VAL && geoMatrix[SafeIndex(Vector2i(x+1,y)).x][y] != e:
+		return false
+	if se != IGNORE_VAL && geoMatrix[SafeIndex(Vector2i(x+1,y+1)).x][SafeIndex(Vector2i(x+1,y+1)).y] != se:
+		return false
+	if s != IGNORE_VAL && geoMatrix[x][SafeIndex(Vector2i(x,y+1)).y] != s:
+		return false
+	if sw != IGNORE_VAL && geoMatrix[SafeIndex(Vector2i(x-1,y+1)).x][SafeIndex(Vector2i(x-1,y+1)).y] != sw:
+		return false
+	if w != IGNORE_VAL && geoMatrix[SafeIndex(Vector2i(x-1,y)).x][y] != w:
+		return false
+	if nw != IGNORE_VAL && geoMatrix[SafeIndex(Vector2i(x-1,y-1)).x][SafeIndex(Vector2i(x-1,y-1)).y] != nw:
+		return false	
+	
+	return true
+	
+
+func SafeIndex(index : Vector2i) -> Vector2i:
+	var x = index.x
+	var y = index.y
+	
+	if (x < 0):
+		x = x + width
+	elif (x >= width):
+		x = x - width
+	elif (y < 0):
+		y = y + height
+	elif (y >= height):
+		y = y - height
+		
+	return Vector2i(x,y)	
+			
+func setPlayFieldMap(offsetX, offsetY):
 		for x in width:
 			for y in height:
-				if (perlinMatrix[x][y] <= 130):
-					set_cell(0, Vector2i(x+offsetx,y+offsety), 1, Vector2i(0,0), 0)		
-		spawnedMaps.append(Vector2i(offsetx, offsety))
-		print("Spawned map: ", Vector2i(offsetx, offsety))
+				if (geoMatrix[x][y] == 1): # Solid block
+					set_cell(0, Vector2i(x+offsetX,y+offsetY), 1, Vector2i(0,0), 0)	
+				elif (geoMatrix[x][y] == 2): # LR triangle
+					set_cell(0, Vector2i(x+offsetX,y+offsetY), 1, Vector2i(1,0), 0)
+				elif (geoMatrix[x][y] == 3): # LL triangle
+					set_cell(0, Vector2i(x+offsetX,y+offsetY), 1, Vector2i(2,0), 0)
+				elif (geoMatrix[x][y] == 4): # UL triangle
+					set_cell(0, Vector2i(x+offsetX,y+offsetY), 1, Vector2i(4,0), 0)
+				elif (geoMatrix[x][y] == 5): # UR triangle
+					set_cell(0, Vector2i(x+offsetX,y+offsetY), 1, Vector2i(3,0), 0)
 			
 func fillPerlinMatrix():
 	perlinNode.CPerlinGraph(width, height, RAND_SEED, 0.1, 2, 6, 0.4)
@@ -139,7 +218,12 @@ func generateSpawn():
 
 func _ready():
 	fillPerlinMatrix()	
+	setGeoMatrix()
 	setPlayFieldMap(0,0)
+	setPlayFieldMap(width,height)
+	setPlayFieldMap(-width,-height)
+	setPlayFieldMap(width,-height)
+	setPlayFieldMap(-width,height)
 	generateSpawn()	
 	displayPreview()	
 
