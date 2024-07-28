@@ -39,28 +39,42 @@ func setGeoMatrix():
 			# Fill in single block potholes
 			if (checkGeoIndex(Vector2i(x,y),0,IGNORE_VAL,IGNORE_VAL,1,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL,1,IGNORE_VAL)):
 				geoMatrix[x][y] = 1
-			if (checkGeoIndex(Vector2i(x,y),0,1,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL,1,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL)):
+			elif (checkGeoIndex(Vector2i(x,y),0,1,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL,1,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL)):
 				geoMatrix[x][y] = 1
 			# Remove single block protrusions
-			if (checkGeoIndex(Vector2i(x,y),1,IGNORE_VAL,IGNORE_VAL,0,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL,0,IGNORE_VAL)):
+			elif (checkGeoIndex(Vector2i(x,y),1,IGNORE_VAL,IGNORE_VAL,0,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL,0,IGNORE_VAL)):
 				geoMatrix[x][y] = 0
-			if (checkGeoIndex(Vector2i(x,y),1,0,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL,0,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL)):
+			elif (checkGeoIndex(Vector2i(x,y),1,0,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL,0,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL)):
 				geoMatrix[x][y] = 0
 			# Adding block id 2, lower right triangle
-			if (checkGeoIndex(Vector2i(x,y),1,0,IGNORE_VAL,1,IGNORE_VAL,1,IGNORE_VAL,0,0)):
+			elif (checkGeoIndex(Vector2i(x,y),1,0,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL,0,0)):
 				geoMatrix[x][y] = 2
 			# Adding block id 3, lower left triangle
-			if (checkGeoIndex(Vector2i(x,y),1,0,0,0,IGNORE_VAL,1,IGNORE_VAL,1,IGNORE_VAL)):
+			elif (checkGeoIndex(Vector2i(x,y),1,0,0,0,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL)):
 				geoMatrix[x][y] = 3
 			# Adding block id 4, upper left triangle
-			if (checkGeoIndex(Vector2i(x,y),1,1,IGNORE_VAL,0,0,0,IGNORE_VAL,1,IGNORE_VAL)):
+			elif (checkGeoIndex(Vector2i(x,y),1,IGNORE_VAL,IGNORE_VAL,0,0,0,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL)):
 				geoMatrix[x][y] = 4
 			# Adding block id 5, upper right triangle
-			if (checkGeoIndex(Vector2i(x,y),1,1,IGNORE_VAL,1,IGNORE_VAL,0,0,0,IGNORE_VAL)):
+			elif (checkGeoIndex(Vector2i(x,y),1,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL,0,0,0,IGNORE_VAL)):
+				geoMatrix[x][y] = 5
+			# Second pass for inner corners
+			# Adding block id 2, lower right triangle
+			elif (checkGeoIndex(Vector2i(x,y),0,IGNORE_VAL,IGNORE_VAL,1,1,1,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL)):
+				geoMatrix[x][y] = 2
+			# Adding block id 3, lower left triangle
+			elif (checkGeoIndex(Vector2i(x,y),0,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL,1,1,1,IGNORE_VAL)):
+				geoMatrix[x][y] = 3
+			# Adding block id 4, upper left triangle
+			elif (checkGeoIndex(Vector2i(x,y),0,1,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL,1,1)):
+				geoMatrix[x][y] = 4
+			# Adding block id 5, upper right triangle
+			elif (checkGeoIndex(Vector2i(x,y),0,1,1,1,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL,IGNORE_VAL)):
 				geoMatrix[x][y] = 5
 			
 			
-				
+			
+
 func checkGeoIndex(index : Vector2i, target, n, ne, e, se, s, sw, w, nw) -> bool:	
 	var x = index.x
 	var y = index.y
