@@ -3,7 +3,8 @@ extends TileMap
 const RAND_SEED = 16384
 
 @onready var perlinNode = $PerlinGraph
-@onready var playerNode = get_node("/root/PlayField/Player")
+@onready var playerNode = get_node("../Player")
+@onready var collisionNode = get_node("../Player/CollisionShape2D")
 
 var perlinMatrix : Array = []
 # Perlin matrix dimensions
@@ -117,9 +118,8 @@ func raycastRight(x: int, y: int, minDist: int) -> bool:
 	return true	
 	
 func respawn():
-	playerNode.position = spawnLoc * 16
-	var cameraNode = get_node("/root/PlayField/MainCamera")
-	cameraNode.position = spawnLoc * 16
+	collisionNode.set_deferred("disabled", true)
+	playerNode.position = spawnLoc * 16	
 	
 func generateSpawn():	
 	var previewNode = $levelPreview
@@ -127,9 +127,13 @@ func generateSpawn():
 	print("Spawn Location: ", spawnLoc)	
 	var adjSpawnLoc = spawnLoc * 16
 	print("Adjusted Spawn: ", adjSpawnLoc)
-	playerNode.position = adjSpawnLoc
+		
+	collisionNode.set_deferred("disabled", true)
+	playerNode.position = adjSpawnLoc		
+	
 	previewNode.position = adjSpawnLoc
-	previewNode.position.x -= 150
+	previewNode.position.x -= 150	
+	
 	for xi in range(spawnLoc.x-5, spawnLoc.x+5):
 		set_cell(0, Vector2i(xi, spawnLoc.y+22), 1, Vector2i(0,0), 0)	
 
@@ -137,16 +141,22 @@ func _ready():
 	fillPerlinMatrix()	
 	setPlayFieldMap(0,0)
 	generateSpawn()	
-	displayPreview()
+	displayPreview()	
 
 func checkPlayerLoc():
-	var locX = int(playerNode.position.x / 16)
-	var locY = int(playerNode.position.y / 16)	
-	var modLocX = locX % width
-	if (modLocX >= width - 50):
-		mapLocX += width
-		setPlayFieldMap(mapLocX, 0)	
+	collisionNode.set_deferred("disabled", false)
+	var locX = playerNode.position.x
+	var locY = playerNode.position.y	
+	# Wrap around teleports
+	if (locX > width * 16):
+		playerNode.position.x = 0
+	elif (locX < 0):
+		playerNode.position.x = width * 16
+	elif (locY > height * 16):
+		playerNode.position.y = 0
+	elif (locY < 0):
+		playerNode.position.y = height * 16
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
+func _process(delta):	
 	checkPlayerLoc()

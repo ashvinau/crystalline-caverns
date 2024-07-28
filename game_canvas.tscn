@@ -1,0 +1,89 @@
+[gd_scene load_steps=3 format=3 uid="uid://c64heveel8h73"]
+
+[ext_resource type="Script" path="res://game_canvas.gd" id="1_esfqn"]
+[ext_resource type="PackedScene" uid="uid://b67ooeti8v4je" path="res://levels/play_field.tscn" id="1_jxcr8"]
+
+[node name="GameCanvas" type="CanvasLayer"]
+script = ExtResource("1_esfqn")
+
+[node name="CenterViewportContainer" type="SubViewportContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+
+[node name="CenterViewport" type="SubViewport" parent="CenterViewportContainer"]
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(1152, 648)
+render_target_update_mode = 4
+
+[node name="PlayField" parent="CenterViewportContainer/CenterViewport" instance=ExtResource("1_jxcr8")]
+
+[node name="CenterCamera" type="Camera2D" parent="CenterViewportContainer/CenterViewport"]
+
+[node name="LeftViewportContainer" type="SubViewportContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+
+[node name="LeftViewport" type="SubViewport" parent="LeftViewportContainer"]
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(1152, 648)
+render_target_update_mode = 4
+
+[node name="LeftCamera" type="Camera2D" parent="LeftViewportContainer/LeftViewport"]
+
+[node name="RightViewportContainer" type="SubViewportContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+
+[node name="RightViewport" type="SubViewport" parent="RightViewportContainer"]
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(1152, 648)
+render_target_update_mode = 4
+
+[node name="RightCamera" type="Camera2D" parent="RightViewportContainer/RightViewport"]
+
+[node name="TopViewportContainer" type="SubViewportContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+
+[node name="TopViewport" type="SubViewport" parent="TopViewportContainer"]
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(1152, 648)
+render_target_update_mode = 4
+
+[node name="TopCamera" type="Camera2D" parent="TopViewportContainer/TopViewport"]
+
+[node name="BottomViewportContainer" type="SubViewportContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+
+[node name="BottomViewport" type="SubViewport" parent="BottomViewportContainer"]
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(1152, 648)
+render_target_update_mode = 4
+
+[node name="BottomCamera" type="Camera2D" parent="BottomViewportContainer/BottomViewport"]

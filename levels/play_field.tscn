@@ -83,13 +83,3 @@ position = Vector2(159, -395)
 jump_velocity = -400.0
 double_jump_velocity = -300.0
 double_jumps = 20
-
-[node name="RemoteTransform2D" type="RemoteTransform2D" parent="Player"]
-position = Vector2(-8, 3)
-remote_path = NodePath("../../MainCamera")
-
-[node name="MainCamera" type="Camera2D" parent="."]
-position = Vector2(151, -392)
-process_callback = 0
-position_smoothing_enabled = true
-position_smoothing_speed = 30.0
