@@ -1,12 +1,14 @@
-[gd_scene load_steps=8 format=3 uid="uid://b67ooeti8v4je"]
+[gd_scene load_steps=13 format=3 uid="uid://b67ooeti8v4je"]
 
-[ext_resource type="Texture2D" uid="uid://ctk1g377yvpdn" path="res://art/tileset.png" id="1_neqad"]
+[ext_resource type="Texture2D" uid="uid://dg3hfo34h47oh" path="res://art/tileset.png" id="1_neqad"]
 [ext_resource type="PackedScene" uid="uid://ccvooj6vv68fb" path="res://Character/player.tscn" id="2_3ga3r"]
 [ext_resource type="Script" path="res://levels/PlayFieldMap.gd" id="3_iq378"]
 [ext_resource type="Script" path="res://PerlinGraph.cs" id="3_y3bka"]
+[ext_resource type="Shader" path="res://levels/midModulate.gdshader" id="4_sdtnt"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_vvbw8"]
 texture = ExtResource("1_neqad")
+0:0/next_alternative_id = 5
 0:0/0 = 0
 0:0/0/physics_layer_0/linear_velocity = Vector2(0, 0)
 0:0/0/physics_layer_0/angular_velocity = 0.0
@@ -27,9 +29,11 @@ texture = ExtResource("1_neqad")
 4:0/0/physics_layer_0/linear_velocity = Vector2(0, 0)
 4:0/0/physics_layer_0/angular_velocity = 0.0
 4:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, 8, -8, -8, 8, -8)
+0:1/next_alternative_id = 2
 0:1/0 = 0
 0:1/0/physics_layer_0/linear_velocity = Vector2(0, 0)
 0:1/0/physics_layer_0/angular_velocity = 0.0
+0:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 1:1/0 = 0
 1:1/0/physics_layer_0/linear_velocity = Vector2(0, 0)
 1:1/0/physics_layer_0/angular_velocity = 0.0
@@ -51,6 +55,9 @@ texture = ExtResource("1_neqad")
 3:2/0 = 0
 3:2/0/physics_layer_0/linear_velocity = Vector2(0, 0)
 3:2/0/physics_layer_0/angular_velocity = 0.0
+4:1/0 = 0
+4:1/0/physics_layer_0/linear_velocity = Vector2(0, 0)
+4:1/0/physics_layer_0/angular_velocity = 0.0
 
 [sub_resource type="TileSet" id="TileSet_u8d8u"]
 physics_layer_0/collision_layer = 1
@@ -58,10 +65,36 @@ sources/1 = SubResource("TileSetAtlasSource_vvbw8")
 
 [sub_resource type="ImageTexture" id="ImageTexture_oeq1x"]
 
+[sub_resource type="ImageTexture" id="ImageTexture_72gjw"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ckru7"]
+shader = ExtResource("4_sdtnt")
+shader_parameter/modulate = Vector4(1, 1, 1.5, 1)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_x08et"]
+texture = ExtResource("1_neqad")
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+4:0/0 = 0
+0:1/0 = 0
+1:1/0 = 0
+2:1/0 = 0
+3:1/0 = 0
+4:1/0 = 0
+0:2/0 = 0
+1:2/0 = 0
+2:2/0 = 0
+3:2/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_rruwu"]
+sources/0 = SubResource("TileSetAtlasSource_x08et")
+
 [node name="PlayField" type="Node2D"]
-position = Vector2(21, -123)
 
 [node name="PlayFieldMap" type="TileMap" parent="."]
+z_index = -2
 tile_set = SubResource("TileSet_u8d8u")
 format = 2
 layer_0/name = "Ground"
@@ -78,8 +111,84 @@ offset_bottom = -400.0
 texture = SubResource("ImageTexture_oeq1x")
 expand_mode = 1
 
+[node name="Background" type="ParallaxBackground" parent="PlayFieldMap"]
+follow_viewport_scale = 0.0
+
+[node name="Parallax1" type="ParallaxLayer" parent="PlayFieldMap/Background"]
+z_as_relative = false
+scale = Vector2(0.9, 0.9)
+motion_scale = Vector2(0.9, 0.9)
+motion_offset = Vector2(2458, 2458)
+
+[node name="Layer1" type="TextureRect" parent="PlayFieldMap/Background/Parallax1"]
+offset_left = -8192.0
+offset_top = -8192.0
+offset_right = 16384.0
+offset_bottom = 16384.0
+texture = SubResource("ImageTexture_72gjw")
+stretch_mode = 1
+
+[node name="Parallax2" type="ParallaxLayer" parent="PlayFieldMap/Background"]
+z_index = -1
+scale = Vector2(0.8, 0.8)
+motion_scale = Vector2(0.8, 0.8)
+motion_offset = Vector2(2458, 2458)
+
+[node name="Layer2" type="TextureRect" parent="PlayFieldMap/Background/Parallax2"]
+z_index = -1
+offset_left = -8192.0
+offset_top = -8192.0
+offset_right = 16384.0
+offset_bottom = 16384.0
+texture = SubResource("ImageTexture_72gjw")
+stretch_mode = 1
+
+[node name="Parallax3" type="ParallaxLayer" parent="PlayFieldMap/Background"]
+modulate = Color(0.414059, 0.685038, 0.999998, 1)
+z_index = -2
+scale = Vector2(0.7, 0.7)
+motion_scale = Vector2(0.7, 0.7)
+motion_offset = Vector2(2458, 2458)
+
+[node name="Layer3" type="TextureRect" parent="PlayFieldMap/Background/Parallax3"]
+z_index = -2
+material = SubResource("ShaderMaterial_ckru7")
+offset_left = -8192.0
+offset_top = -8192.0
+offset_right = 16384.0
+offset_bottom = 16384.0
+texture = SubResource("ImageTexture_72gjw")
+stretch_mode = 1
+
 [node name="Player" parent="." instance=ExtResource("2_3ga3r")]
 position = Vector2(159, -395)
+floor_max_angle = 0.844739
 jump_velocity = -400.0
 double_jump_velocity = -300.0
 double_jumps = 20
+
+[node name="BGViewContainer" type="SubViewportContainer" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="BGViewport1" type="SubViewport" parent="BGViewContainer"]
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(8192, 8192)
+render_target_update_mode = 4
+
+[node name="BackgroundMap1" type="TileMap" parent="BGViewContainer/BGViewport1"]
+show_behind_parent = true
+tile_set = SubResource("TileSet_rruwu")
+format = 2
+
+[node name="BGViewport2" type="SubViewport" parent="BGViewContainer"]
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(8192, 8192)
+render_target_update_mode = 4
+
+[node name="BackgroundMap2" type="TileMap" parent="BGViewContainer/BGViewport2"]
+show_behind_parent = true
+tile_set = SubResource("TileSet_rruwu")
+format = 2

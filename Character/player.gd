@@ -7,13 +7,11 @@ extends CharacterBody2D
 @export var accel : float = 5
 @export var double_jumps : int = 3
 
-var width = 512
-var height = 512
-
 # Get the gravity from the project settings to be synced with RigidBody nodes.
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 var cur_double_jumps : int = 0
 var animation_locked : bool = false
+var orientation_locked : bool = false
 var direction : Vector2 = Vector2.ZERO
 var was_in_air : bool = false
 
@@ -31,15 +29,15 @@ func _ready():
 func _physics_process(delta):
 	# Update cameras
 	centerCam.global_position = global_position
-	leftCam.global_position.x = global_position.x - (width * 16)
+	leftCam.global_position.x = global_position.x - (Globals.WIDTH * 16)
 	leftCam.global_position.y = global_position.y
-	rightCam.global_position.x = global_position.x + (width * 16) 
+	rightCam.global_position.x = global_position.x + (Globals.WIDTH * 16) 
 	rightCam.global_position.y = global_position.y
 	
 	topCam.global_position.x = global_position.x
-	topCam.global_position.y = global_position.y - (height * 16)
+	topCam.global_position.y = global_position.y - (Globals.HEIGHT * 16)
 	bottomCam.global_position.x = global_position.x
-	bottomCam.global_position.y = global_position.y + (height * 16)	
+	bottomCam.global_position.y = global_position.y + (Globals.HEIGHT * 16)	
 	
 	# Add the gravity.
 	if not is_on_floor():
@@ -57,18 +55,46 @@ func _physics_process(delta):
 
 	# Handle jump.
 	if Input.is_action_just_pressed("jump"):
-		if is_on_floor():			
+		if is_on_floor():
 			jump()
 		elif cur_double_jumps < double_jumps:
 			double_jump()
 			
 	if Input.is_action_just_released("jump"):
 		if not is_on_floor():
-			unjump()			
-
+			unjump()
+			
+	if Input.is_action_pressed("down"):
+		if is_on_floor():
+			velocity.y += 200
+			
+	if Input.is_action_pressed("attack up"):
+		atk_up()
+		
+	if Input.is_action_just_released("attack up"):
+		pass
+		
+	if Input.is_action_pressed("attack down"):
+		atk_down()
+	
+	if Input.is_action_just_released("attack down"):
+		pass
+		
+	if Input.is_action_pressed("attack left"):
+		atk_left()		
+		
+	if Input.is_action_just_released("attack left"):			
+		pass
+		
+	if Input.is_action_pressed("attack right"):
+		atk_right()		
+		
+	if Input.is_action_just_released("attack right"):		
+		pass
+		
 	# Get the input direction and handle the movement/deceleration.	
 	direction = Input.get_vector("left", "right", "up", "down")	
-	# Temporary undo vector normalization for now.
+	# Temporary undo vector normalization for now.			
 	if direction.x < 0:
 		direction.x = -1
 	elif direction.x > 0:
@@ -84,8 +110,29 @@ func _physics_process(delta):
 	
 	move_and_slide()
 	update_animation()
-	update_facing_direction()	
+	if !orientation_locked:
+		update_facing_direction()	
 	
+func atk_up():
+	animated_sprite.play("atk_up")
+	animation_locked = true
+	
+func atk_down():
+	animated_sprite.play("atk_down")
+	animation_locked = true
+	
+func atk_left():
+	animated_sprite.flip_h = true
+	animated_sprite.play("atk_h")
+	animation_locked = true
+	orientation_locked = true
+	
+func atk_right():
+	animated_sprite.flip_h = false
+	animated_sprite.play("atk_h")
+	animation_locked = true
+	orientation_locked = true
+
 func jump():
 	velocity.y = jump_velocity
 	animated_sprite.play("jump_start")
@@ -105,13 +152,13 @@ func double_jump():
 	animation_locked = true
 	cur_double_jumps += 1
 
-func update_facing_direction():
+func update_facing_direction():	
 	if direction.x > 0:
 		animated_sprite.flip_h = false
 	elif direction.x < 0:
 		animated_sprite.flip_h = true
 	
-func update_animation():
+func update_animation():	
 	if not animation_locked:
 		if not is_on_floor():
 			animated_sprite.play("jump_loop")
@@ -122,5 +169,6 @@ func update_animation():
 				animated_sprite.play("idle")
 
 func _on_animated_sprite_2d_animation_finished():
-	if (["jump_end", "jump_start", "jump_double"].has(animated_sprite.animation)):
+	if (["jump_end", "jump_start", "jump_double","atk_down","atk_up","atk_h"].has(animated_sprite.animation)):
 		animation_locked = false
+		orientation_locked = false

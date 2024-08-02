@@ -17,7 +17,7 @@ stretch = true
 [node name="CenterViewport" type="SubViewport" parent="CenterViewportContainer"]
 transparent_bg = true
 handle_input_locally = false
-size = Vector2i(1152, 648)
+size = Vector2i(1920, 1080)
 render_target_update_mode = 4
 
 [node name="PlayField" parent="CenterViewportContainer/CenterViewport" instance=ExtResource("1_jxcr8")]
@@ -35,7 +35,7 @@ stretch = true
 [node name="LeftViewport" type="SubViewport" parent="LeftViewportContainer"]
 transparent_bg = true
 handle_input_locally = false
-size = Vector2i(1152, 648)
+size = Vector2i(1920, 1080)
 render_target_update_mode = 4
 
 [node name="LeftCamera" type="Camera2D" parent="LeftViewportContainer/LeftViewport"]
@@ -51,7 +51,7 @@ stretch = true
 [node name="RightViewport" type="SubViewport" parent="RightViewportContainer"]
 transparent_bg = true
 handle_input_locally = false
-size = Vector2i(1152, 648)
+size = Vector2i(1920, 1080)
 render_target_update_mode = 4
 
 [node name="RightCamera" type="Camera2D" parent="RightViewportContainer/RightViewport"]
@@ -67,7 +67,7 @@ stretch = true
 [node name="TopViewport" type="SubViewport" parent="TopViewportContainer"]
 transparent_bg = true
 handle_input_locally = false
-size = Vector2i(1152, 648)
+size = Vector2i(1920, 1080)
 render_target_update_mode = 4
 
 [node name="TopCamera" type="Camera2D" parent="TopViewportContainer/TopViewport"]
@@ -83,7 +83,7 @@ stretch = true
 [node name="BottomViewport" type="SubViewport" parent="BottomViewportContainer"]
 transparent_bg = true
 handle_input_locally = false
-size = Vector2i(1152, 648)
+size = Vector2i(1920, 1080)
 render_target_update_mode = 4
 
 [node name="BottomCamera" type="Camera2D" parent="BottomViewportContainer/BottomViewport"]
