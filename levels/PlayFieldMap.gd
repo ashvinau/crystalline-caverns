@@ -364,7 +364,7 @@ func _ready():
 	# Background layers
 	#set_background(5, 0.7, $Background/Parallax1/Layer1,get_node("../BGViewContainer/BGViewport1/BackgroundMap1"),get_node("../BGViewContainer/BGViewport1"))	
 	#set_background(10, 0.5, $Background/Parallax2/Layer2,get_node("../BGViewContainer/BGViewport2/BackgroundMap2"),get_node("../BGViewContainer/BGViewport2"))	
-	set_rear_bg()
+	#set_rear_bg()
 
 func checkPlayerLoc():
 	collisionNode.set_deferred("disabled", false)
@@ -382,4 +382,4 @@ func checkPlayerLoc():
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):	
-	checkPlayerLoc()
+	pass

@@ -60,7 +60,8 @@ texture = ExtResource("1_neqad")
 4:1/0/physics_layer_0/angular_velocity = 0.0
 
 [sub_resource type="TileSet" id="TileSet_u8d8u"]
-physics_layer_0/collision_layer = 1
+physics_layer_0/collision_layer = 3
+physics_layer_0/collision_mask = 3
 sources/1 = SubResource("TileSetAtlasSource_vvbw8")
 
 [sub_resource type="ImageTexture" id="ImageTexture_oeq1x"]
@@ -94,7 +95,7 @@ sources/0 = SubResource("TileSetAtlasSource_x08et")
 [node name="PlayField" type="Node2D"]
 
 [node name="PlayFieldMap" type="TileMap" parent="."]
-z_index = -2
+z_index = 1
 tile_set = SubResource("TileSet_u8d8u")
 format = 2
 layer_0/name = "Ground"
@@ -104,6 +105,7 @@ script = ExtResource("3_iq378")
 script = ExtResource("3_y3bka")
 
 [node name="levelPreview" type="TextureRect" parent="PlayFieldMap"]
+z_index = -1
 offset_left = 41.0
 offset_top = -698.0
 offset_right = 339.0
@@ -118,7 +120,6 @@ follow_viewport_scale = 0.0
 z_as_relative = false
 scale = Vector2(0.9, 0.9)
 motion_scale = Vector2(0.9, 0.9)
-motion_offset = Vector2(2458, 2458)
 
 [node name="Layer1" type="TextureRect" parent="PlayFieldMap/Background/Parallax1"]
 offset_left = -8192.0
@@ -132,7 +133,6 @@ stretch_mode = 1
 z_index = -1
 scale = Vector2(0.8, 0.8)
 motion_scale = Vector2(0.8, 0.8)
-motion_offset = Vector2(2458, 2458)
 
 [node name="Layer2" type="TextureRect" parent="PlayFieldMap/Background/Parallax2"]
 z_index = -1
@@ -148,7 +148,6 @@ modulate = Color(0.414059, 0.685038, 0.999998, 1)
 z_index = -2
 scale = Vector2(0.7, 0.7)
 motion_scale = Vector2(0.7, 0.7)
-motion_offset = Vector2(2458, 2458)
 
 [node name="Layer3" type="TextureRect" parent="PlayFieldMap/Background/Parallax3"]
 z_index = -2
@@ -163,9 +162,10 @@ stretch_mode = 1
 [node name="Player" parent="." instance=ExtResource("2_3ga3r")]
 position = Vector2(159, -395)
 floor_max_angle = 0.844739
+speed_cap = 700
 jump_velocity = -400.0
 double_jump_velocity = -300.0
-double_jumps = 20
+double_jumps = 5
 
 [node name="BGViewContainer" type="SubViewportContainer" parent="."]
 offset_right = 40.0

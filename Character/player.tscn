@@ -257,9 +257,10 @@ floor_stop_on_slope = false
 script = ExtResource("1_lfer2")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+modulate = Color(1, 0.254902, 0.290196, 1)
 position = Vector2(-16, -16)
 sprite_frames = SubResource("SpriteFrames_di1sv")
-animation = &"atk_up"
+animation = &"jump_double"
 autoplay = "idle"
 centered = false
 
@@ -268,4 +269,5 @@ shape = SubResource("CapsuleShape2D_6wgwp")
 
 [node name="CoyoteTimer" type="Timer" parent="."]
 
+[connection signal="animation_changed" from="AnimatedSprite2D" to="." method="_on_animated_sprite_2d_animation_changed"]
 [connection signal="animation_finished" from="AnimatedSprite2D" to="." method="_on_animated_sprite_2d_animation_finished"]

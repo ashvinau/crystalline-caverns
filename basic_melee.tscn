@@ -1,0 +1,43 @@
+[gd_scene load_steps=6 format=3 uid="uid://d2iw2iovmunta"]
+
+[ext_resource type="Texture2D" uid="uid://dghyr142kpsc0" path="res://art/bullet-sheet.png" id="1_jqxmn"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_v3ds1"]
+atlas = ExtResource("1_jqxmn")
+region = Rect2(0, 32, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_o6bgg"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_v3ds1")
+}],
+"loop": false,
+"name": &"slash",
+"speed": 5.0
+}]
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_8dbef"]
+particle_flag_disable_z = true
+emission_shape = 3
+emission_box_extents = Vector3(1, 14, 1)
+gravity = Vector3(0, 20, 0)
+
+[sub_resource type="SegmentShape2D" id="SegmentShape2D_giol5"]
+a = Vector2(0, -12)
+b = Vector2(0, 12)
+
+[node name="BasicMelee" type="CharacterBody2D"]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_o6bgg")
+animation = &"slash"
+frame_progress = 1.0
+
+[node name="GPUParticles2D" type="GPUParticles2D" parent="AnimatedSprite2D"]
+z_index = -1
+amount = 12
+process_material = SubResource("ParticleProcessMaterial_8dbef")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("SegmentShape2D_giol5")

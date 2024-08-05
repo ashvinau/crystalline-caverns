@@ -1,6 +1,6 @@
 extends Node
 
-const RAND_SEED = 42069
+const RAND_SEED = 56854
 const WIDTH = 512
 const HEIGHT = 512
 const CLAMP = 120

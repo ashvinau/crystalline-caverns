@@ -1,17 +1,21 @@
 extends CharacterBody2D
 
-@export var speed : float = 700.0
+@export var speed : float = 500.0
+@export var speed_cap: int = 600
 @export var jump_velocity : float = -200.0
 @export var double_jump_velocity : float = -100.0
 @export var slide : float = 10
 @export var accel : float = 5
 @export var double_jumps : int = 3
+@export var shot_velocity : int = 600
+@export var shot_weight : float = 0.25
 
 # Get the gravity from the project settings to be synced with RigidBody nodes.
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 var cur_double_jumps : int = 0
 var animation_locked : bool = false
 var orientation_locked : bool = false
+var shot_lock : bool = false
 var direction : Vector2 = Vector2.ZERO
 var was_in_air : bool = false
 
@@ -22,11 +26,25 @@ var was_in_air : bool = false
 @onready var topCam = get_node("../../../../TopViewportContainer/TopViewport/TopCamera")
 @onready var bottomCam = get_node("../../../../BottomViewportContainer/BottomViewport/BottomCamera")
 
+@onready var play_field: Node2D = get_node("..") # parent node: PlayField
+
+var basic_bullet = preload("res://basic_bullet.tscn")
+var basic_melee = preload("res://basic_melee.tscn")
 
 func _ready():
 	pass
 
 func _physics_process(delta):
+	# Speed caps
+	if (self.velocity.x > speed_cap):
+		self.velocity.x = speed_cap
+	elif (self.velocity.x < -speed_cap):
+		self.velocity.x = -speed_cap
+	if (self.velocity.y > speed_cap):
+		self.velocity.y = speed_cap
+	elif (self.velocity.y < -speed_cap):
+		self.velocity.y = -speed_cap	
+	
 	# Update cameras
 	centerCam.global_position = global_position
 	leftCam.global_position.x = global_position.x - (Globals.WIDTH * 16)
@@ -68,27 +86,36 @@ func _physics_process(delta):
 		if is_on_floor():
 			velocity.y += 200
 			
-	if Input.is_action_pressed("attack up"):
-		atk_up()
+	if Input.is_action_pressed("attack up") && Input.is_action_pressed("attack left"):
+		range_attack(Vector2i(-20,-20), Vector2(-1,-1).normalized())	
+		
+	elif Input.is_action_pressed("attack up") && Input.is_action_pressed("attack right"):
+		range_attack(Vector2i(20,-20),Vector2(1,-1).normalized())		
+	
+	elif Input.is_action_pressed("attack down") && Input.is_action_pressed("attack left"):
+		range_attack(Vector2i(-20,20),Vector2(-1,1).normalized())	
+		
+	elif Input.is_action_pressed("attack down") && Input.is_action_pressed("attack right"):
+		range_attack(Vector2i(20,20),Vector2(1,1).normalized())		
+			
+	elif Input.is_action_pressed("attack up"):
+		range_attack(Vector2i(0,-20), Vector2(0,-1))	
+		
+	elif Input.is_action_pressed("attack down"):
+		range_attack(Vector2i(0,20),Vector2(0,1))	
+		
+	elif Input.is_action_pressed("attack left"):
+		range_attack(Vector2i(-20,0),Vector2(-1,0))	
+		
+	elif Input.is_action_pressed("attack right"):
+		range_attack(Vector2i(20,0),Vector2(1,0))		
 		
 	if Input.is_action_just_released("attack up"):
 		pass
-		
-	if Input.is_action_pressed("attack down"):
-		atk_down()
-	
 	if Input.is_action_just_released("attack down"):
-		pass
-		
-	if Input.is_action_pressed("attack left"):
-		atk_left()		
-		
+		pass	
 	if Input.is_action_just_released("attack left"):			
-		pass
-		
-	if Input.is_action_pressed("attack right"):
-		atk_right()		
-		
+		pass	
 	if Input.is_action_just_released("attack right"):		
 		pass
 		
@@ -112,26 +139,34 @@ func _physics_process(delta):
 	update_animation()
 	if !orientation_locked:
 		update_facing_direction()	
-	
-func atk_up():
-	animated_sprite.play("atk_up")
-	animation_locked = true
-	
-func atk_down():
-	animated_sprite.play("atk_down")
-	animation_locked = true
-	
-func atk_left():
-	animated_sprite.flip_h = true
-	animated_sprite.play("atk_h")
-	animation_locked = true
-	orientation_locked = true
-	
-func atk_right():
-	animated_sprite.flip_h = false
-	animated_sprite.play("atk_h")
+		
+	checkPlayerLoc()
+		
+func range_attack(offset: Vector2i, direction: Vector2):
+	if (direction.x > 0):
+		animated_sprite.flip_h = false
+		animated_sprite.play("atk_h")
+	elif (direction.x < 0):
+		animated_sprite.flip_h = true
+		animated_sprite.play("atk_h")
+	elif (direction.y > 0):
+		animated_sprite.play("atk_down")
+	elif (direction.y < 0):
+		animated_sprite.play("atk_up")
+		
 	animation_locked = true
 	orientation_locked = true
+	
+	if not shot_lock:
+		var bullet_inst = basic_bullet.instantiate()	
+		bullet_inst.position.x = self.position.x + offset.x
+		bullet_inst.position.y = self.position.y + offset.y	
+		play_field.add_child(bullet_inst)
+		bullet_inst.velocity.x = direction.x * shot_velocity
+		self.velocity.x += -direction.x * (shot_weight * shot_velocity)
+		bullet_inst.velocity.y = direction.y * shot_velocity
+		self.velocity.y += -direction.y * (shot_weight + shot_velocity)
+		shot_lock = true
 
 func jump():
 	velocity.y = jump_velocity
@@ -172,3 +207,25 @@ func _on_animated_sprite_2d_animation_finished():
 	if (["jump_end", "jump_start", "jump_double","atk_down","atk_up","atk_h"].has(animated_sprite.animation)):
 		animation_locked = false
 		orientation_locked = false
+		shot_lock = false		
+
+func _on_animated_sprite_2d_animation_changed():
+	shot_lock = false
+	
+func checkPlayerLoc():
+	$CollisionShape2D.set_deferred("disabled", false)
+	var locX = self.position.x
+	var locY = self.position.y	
+	# Wrap around teleports
+	if (locX > Globals.WIDTH * 16):
+		$CollisionShape2D.set_deferred("disabled", true)
+		self.position.x = 0
+	elif (locX < 0):
+		$CollisionShape2D.set_deferred("disabled", true)
+		self.position.x = Globals.WIDTH * 16
+	elif (locY > Globals.HEIGHT * 16):
+		$CollisionShape2D.set_deferred("disabled", true)
+		self.position.y = 0
+	elif (locY < 0):
+		$CollisionShape2D.set_deferred("disabled", true)
+		self.position.y = Globals.HEIGHT * 16

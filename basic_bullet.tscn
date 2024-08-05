@@ -1,15 +1,66 @@
-[gd_scene load_steps=2 format=3 uid="uid://bydj0faqw6byp"]
+[gd_scene load_steps=8 format=3 uid="uid://bydj0faqw6byp"]
+
+[ext_resource type="Texture2D" uid="uid://dghyr142kpsc0" path="res://art/bullet-sheet.png" id="1_urhcc"]
+[ext_resource type="Script" path="res://basic_bullet.gd" id="1_yu2q0"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_l8ln6"]
+atlas = ExtResource("1_urhcc")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wwa1p"]
+atlas = ExtResource("1_urhcc")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_uvxd4"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_l8ln6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wwa1p")
+}],
+"loop": true,
+"name": &"spin",
+"speed": 10.0
+}]
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_bgwj1"]
 particle_flag_disable_z = true
 emission_shape = 1
-emission_sphere_radius = 10.33
+emission_sphere_radius = 5.0
 angle_min = -720.0
 angle_max = 720.0
-gravity = Vector3(0, 50, 0)
+gravity = Vector3(0, 20, 0)
 
-[node name="BasicBullet" type="Node2D"]
+[sub_resource type="CircleShape2D" id="CircleShape2D_xiir1"]
+radius = 4.0
 
-[node name="GPUParticles2D" type="GPUParticles2D" parent="."]
-position = Vector2(23, -23)
+[node name="BasicBullet" type="CharacterBody2D"]
+collision_layer = 2
+collision_mask = 2
+motion_mode = 1
+slide_on_ceiling = false
+floor_stop_on_slope = false
+floor_constant_speed = true
+script = ExtResource("1_yu2q0")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_uvxd4")
+animation = &"spin"
+autoplay = "spin"
+frame_progress = 0.277457
+
+[node name="GPUParticles2D" type="GPUParticles2D" parent="AnimatedSprite2D"]
+z_index = -1
 process_material = SubResource("ParticleProcessMaterial_bgwj1")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_xiir1")
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 2.0
+one_shot = true
+autostart = true
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
