@@ -1,66 +1,158 @@
-[gd_scene load_steps=8 format=3 uid="uid://bydj0faqw6byp"]
+[gd_scene load_steps=18 format=3 uid="uid://bydj0faqw6byp"]
 
 [ext_resource type="Texture2D" uid="uid://dghyr142kpsc0" path="res://art/bullet-sheet.png" id="1_urhcc"]
 [ext_resource type="Script" path="res://basic_bullet.gd" id="1_yu2q0"]
+[ext_resource type="Shader" path="res://levels/midModulate.gdshader" id="2_6daj2"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_l8ln6"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_h1rjy"]
+shader = ExtResource("2_6daj2")
+shader_parameter/modulate = Vector4(1, 1, 1, 1)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f3r1x"]
 atlas = ExtResource("1_urhcc")
 region = Rect2(0, 0, 32, 32)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_wwa1p"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_snghp"]
 atlas = ExtResource("1_urhcc")
 region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_64uy2"]
+atlas = ExtResource("1_urhcc")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_v31mf"]
+atlas = ExtResource("1_urhcc")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bsi3u"]
+atlas = ExtResource("1_urhcc")
+region = Rect2(0, 32, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_umgv4"]
+atlas = ExtResource("1_urhcc")
+region = Rect2(32, 32, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ep31l"]
+atlas = ExtResource("1_urhcc")
+region = Rect2(64, 32, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pmsjh"]
+atlas = ExtResource("1_urhcc")
+region = Rect2(96, 32, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_72x1i"]
+atlas = ExtResource("1_urhcc")
+region = Rect2(128, 32, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_x661h"]
+atlas = ExtResource("1_urhcc")
+region = Rect2(160, 32, 32, 32)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_uvxd4"]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_l8ln6")
+"texture": SubResource("AtlasTexture_f3r1x")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_wwa1p")
+"texture": SubResource("AtlasTexture_snghp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_64uy2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_v31mf")
 }],
 "loop": true,
-"name": &"spin",
+"name": &"diamond",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bsi3u")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_umgv4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ep31l")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pmsjh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_72x1i")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_x661h")
+}],
+"loop": true,
+"name": &"oval",
 "speed": 10.0
 }]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_8bh3a"]
+size = Vector2(19.8995, 19.8995)
+
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_bgwj1"]
+lifetime_randomness = 0.75
 particle_flag_disable_z = true
 emission_shape = 1
-emission_sphere_radius = 5.0
+emission_sphere_radius = 16.0
 angle_min = -720.0
 angle_max = 720.0
+angular_velocity_min = 5.0
+angular_velocity_max = 10.0
+radial_velocity_min = 10.0
+radial_velocity_max = 15.0
 gravity = Vector3(0, 20, 0)
+scale_min = 2.0
+scale_max = 3.0
+turbulence_enabled = true
+turbulence_noise_strength = 0.5
+turbulence_noise_scale = 5.0
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_xiir1"]
-radius = 4.0
-
-[node name="BasicBullet" type="CharacterBody2D"]
-collision_layer = 2
-collision_mask = 2
-motion_mode = 1
-slide_on_ceiling = false
-floor_stop_on_slope = false
-floor_constant_speed = true
+[node name="BasicBullet" type="Area2D"]
+z_index = 2
+z_as_relative = false
+collision_layer = 0
+collision_mask = 0
 script = ExtResource("1_yu2q0")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+z_index = 2
+material = SubResource("ShaderMaterial_h1rjy")
 sprite_frames = SubResource("SpriteFrames_uvxd4")
-animation = &"spin"
-autoplay = "spin"
-frame_progress = 0.277457
-
-[node name="GPUParticles2D" type="GPUParticles2D" parent="AnimatedSprite2D"]
-z_index = -1
-process_material = SubResource("ParticleProcessMaterial_bgwj1")
+animation = &"oval"
+frame_progress = 0.0993324
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-shape = SubResource("CircleShape2D_xiir1")
+rotation = 0.785398
+shape = SubResource("RectangleShape2D_8bh3a")
 
-[node name="Timer" type="Timer" parent="."]
+[node name="LifeTimer" type="Timer" parent="."]
 wait_time = 2.0
 one_shot = true
-autostart = true
 
-[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
+[node name="Aura" type="GPUParticles2D" parent="."]
+z_index = -1
+amount = 16
+process_material = SubResource("ParticleProcessMaterial_bgwj1")
+lifetime = 2.0
+
+[node name="ExpiryTimer" type="Timer" parent="."]
+wait_time = 2.0
+one_shot = true
+
+[node name="Expiry" type="GPUParticles2D" parent="."]
+z_index = -1
+emitting = false
+amount = 32
+process_material = SubResource("ParticleProcessMaterial_bgwj1")
+lifetime = 2.0
+one_shot = true
+explosiveness = 1.0
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
+[connection signal="timeout" from="LifeTimer" to="." method="_on_timer_timeout"]
+[connection signal="timeout" from="ExpiryTimer" to="." method="_on_expiry_finished"]

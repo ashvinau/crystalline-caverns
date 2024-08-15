@@ -12,8 +12,7 @@ var geoMatrix : Array = []
 var spawnLoc: Vector2i
 
 # Called when the node enters the scene tree for the first time.
-func _init():			
-	var tile_set = self.tile_set
+func _init():	
 	seed(Globals.RAND_SEED)	
 		
 	# Initialize perlin matrix	
@@ -24,11 +23,25 @@ func _init():
 	# Copy perlin matrix for modification		
 	geoMatrix = perlinMatrix.duplicate(true)
 			
-func setGeoMatrix(clamp: int):
+func setGeoMatrix(clamp: int):	
+	var invalid: int = 0
+	
 	for x in Globals.WIDTH:
 		for y in Globals.HEIGHT:
 			if (perlinMatrix[x][y] <= clamp):
 				geoMatrix[x][y] = 1 # Solid square tile	
+				
+	# Test validity of generated geomatrix
+	var testMatrix = geoMatrix.duplicate(true)	
+	# Fill empty space starting at the spawn point		
+	flood_fill(testMatrix,pickPlayerSpawn(),0,255);
+	# Check for remaining 0 values
+	for x in Globals.WIDTH:
+		for y in Globals.HEIGHT:
+			if (testMatrix[x][y] == 0):				
+				invalid += 1
+	
+	print(invalid," invalid with clamp ", clamp, ".")	
 	
 	for x in Globals.WIDTH:
 		for y in Globals.HEIGHT:
@@ -156,20 +169,43 @@ func checkGeoIndex(index : Vector2i, target, n, ne, e, se, s, sw, w, nw) -> bool
 	
 	return true
 	
+func flood_fill(matrix, start_pos: Vector2i, target_value, replacement_value):
+	# Check if the target value is the same as the replacement value
+	if target_value == replacement_value:
+		return
+
+	# Check if start position is within the bounds of the matrix
+	if start_pos.x < 0 or start_pos.x >= matrix.size() or start_pos.y < 0 or start_pos.y >= matrix[0].size():
+		return
+
+	# Create a stack for positions to visit
+	var stack = [start_pos]
+
+	while stack.size() > 0:
+		var pos = stack.pop_back()
+				
+		# Make index positions safe
+		var adj_index: Vector2i = SafeIndex(Vector2i(pos.x, pos.y))
+		
+		# Get the current value at the position
+		var current_value = matrix[adj_index.x][adj_index.y]
+
+		# If the current value is not the target value, continue
+		if current_value != target_value:
+			continue
+
+		# Replace the value at the current position		
+		matrix[adj_index.x][adj_index.y] = replacement_value
+
+		# Push neighboring positions to the stack
+		stack.append(Vector2i(pos.x + 1, pos.y))
+		stack.append(Vector2i(pos.x - 1, pos.y))
+		stack.append(Vector2i(pos.x, pos.y + 1))
+		stack.append(Vector2i(pos.x, pos.y - 1))
 
 func SafeIndex(index : Vector2i) -> Vector2i:
-	var x = index.x
-	var y = index.y
-	
-	if (x < 0):
-		x = x + Globals.WIDTH
-	elif (x >= Globals.WIDTH):
-		x = x - Globals.WIDTH
-	elif (y < 0):
-		y = y + Globals.HEIGHT
-	elif (y >= Globals.HEIGHT):
-		y = y - Globals.HEIGHT
-		
+	var x = index.x % Globals.WIDTH
+	var y = index.y % Globals.HEIGHT
 	return Vector2i(x,y)	
 			
 func setPlayFieldMap(curMap: TileMap, source, offsetX, offsetY):
@@ -349,22 +385,39 @@ func set_rear_bg():
 	bgImage.resize(Globals.WIDTH * 16, Globals.HEIGHT * 16, Image.INTERPOLATE_LANCZOS)	
 	bgImage.adjust_bcs(1.8,1,1)
 	bgNode.texture = ImageTexture.create_from_image(bgImage)	
-	#bgNode.texture.update(bgImage)	
-
+	
+func debug_level():
+	for x in Globals.WIDTH:
+		for y in range(255, 285):
+			geoMatrix[x][y] = 1	
+	setPlayFieldMap(self, 1,0,0)
+	
 func _ready():
-	fillPerlinMatrix(perlinMatrix)	
-	setGeoMatrix(Globals.CLAMP)
-	setPlayFieldMap(self, 1, 0,0)
-	setPlayFieldMap(self, 1, Globals.WIDTH,Globals.HEIGHT)
-	setPlayFieldMap(self, 1, -Globals.WIDTH,-Globals.HEIGHT)
-	setPlayFieldMap(self, 1, Globals.WIDTH,-Globals.HEIGHT)
-	setPlayFieldMap(self, 1, -Globals.WIDTH,Globals.HEIGHT)
-	generateSpawn()	
-	displayPreview()
-	# Background layers
-	#set_background(5, 0.7, $Background/Parallax1/Layer1,get_node("../BGViewContainer/BGViewport1/BackgroundMap1"),get_node("../BGViewContainer/BGViewport1"))	
-	#set_background(10, 0.5, $Background/Parallax2/Layer2,get_node("../BGViewContainer/BGViewport2/BackgroundMap2"),get_node("../BGViewContainer/BGViewport2"))	
-	#set_rear_bg()
+	if (Globals.RAND_SEED == 42):
+		print("Debug seed mode.")
+		print("Generating perlin matrix...")
+		fillPerlinMatrix(perlinMatrix)
+		print("Generating test level...")
+		debug_level()
+		print("Generating player spawn...")
+		generateSpawn()	
+	else:	
+		print("Generating perlin matrix...")
+		fillPerlinMatrix(perlinMatrix)
+		print("Setting geo matrix...")
+		setGeoMatrix(Globals.CLAMP)
+		print("Setting PlayField TileMap...")
+		setPlayFieldMap(self, 1, 0,0)	
+		print("Generating player spawn...")
+		generateSpawn()	
+		print("Generating preview...")
+		displayPreview()
+		print("Generating background...")	
+		set_background(10, 0.7, $Background/Parallax1/Layer1,get_node("../BGViewContainer/BGViewport1/BackgroundMap1"),get_node("../BGViewContainer/BGViewport1"))	
+		set_background(20, 0.5, $Background/Parallax2/Layer2,get_node("../BGViewContainer/BGViewport2/BackgroundMap2"),get_node("../BGViewContainer/BGViewport2"))	
+	set_rear_bg()
+	
+	print("PlayField ready.")
 
 func checkPlayerLoc():
 	collisionNode.set_deferred("disabled", false)

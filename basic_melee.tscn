@@ -1,43 +1,126 @@
-[gd_scene load_steps=6 format=3 uid="uid://d2iw2iovmunta"]
+[gd_scene load_steps=16 format=3 uid="uid://d2iw2iovmunta"]
 
-[ext_resource type="Texture2D" uid="uid://dghyr142kpsc0" path="res://art/bullet-sheet.png" id="1_jqxmn"]
+[ext_resource type="Texture2D" uid="uid://buyfouljcr5rq" path="res://art/melee-sheet.png" id="1_os16s"]
+[ext_resource type="Script" path="res://basic_melee.gd" id="1_r8hgi"]
+[ext_resource type="Shader" path="res://levels/midModulate.gdshader" id="2_qm5rd"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_v3ds1"]
-atlas = ExtResource("1_jqxmn")
-region = Rect2(0, 32, 32, 32)
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_awplc"]
+shader = ExtResource("2_qm5rd")
+shader_parameter/modulate = Vector4(1, 1, 1, 1)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5do63"]
+atlas = ExtResource("1_os16s")
+region = Rect2(0, 0, 32, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vkah2"]
+atlas = ExtResource("1_os16s")
+region = Rect2(32, 0, 32, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4srek"]
+atlas = ExtResource("1_os16s")
+region = Rect2(64, 0, 32, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cx1kt"]
+atlas = ExtResource("1_os16s")
+region = Rect2(96, 0, 32, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w7j07"]
+atlas = ExtResource("1_os16s")
+region = Rect2(128, 0, 32, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jutsc"]
+atlas = ExtResource("1_os16s")
+region = Rect2(160, 0, 32, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3ayg7"]
+atlas = ExtResource("1_os16s")
+region = Rect2(192, 0, 32, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nic3e"]
+atlas = ExtResource("1_os16s")
+region = Rect2(224, 0, 32, 64)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_o6bgg"]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_v3ds1")
+"texture": SubResource("AtlasTexture_5do63")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vkah2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4srek")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cx1kt")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_w7j07")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jutsc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3ayg7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nic3e")
 }],
 "loop": false,
 "name": &"slash",
-"speed": 5.0
+"speed": 20.0
 }]
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_8dbef"]
+lifetime_randomness = 0.5
 particle_flag_disable_z = true
 emission_shape = 3
-emission_box_extents = Vector3(1, 14, 1)
-gravity = Vector3(0, 20, 0)
+emission_box_extents = Vector3(1, 25, 1)
+direction = Vector3(0, 0, 0)
+gravity = Vector3(0, 0, 0)
+scale_min = 2.0
+scale_max = 3.0
 
-[sub_resource type="SegmentShape2D" id="SegmentShape2D_giol5"]
-a = Vector2(0, -12)
-b = Vector2(0, 12)
+[sub_resource type="SegmentShape2D" id="SegmentShape2D_dwpx1"]
+a = Vector2(0, -26)
+b = Vector2(0, 26)
 
-[node name="BasicMelee" type="CharacterBody2D"]
+[node name="BasicMelee" type="Area2D"]
+z_index = 2
+z_as_relative = false
+position = Vector2(-1, 0)
+collision_layer = 0
+collision_mask = 0
+script = ExtResource("1_r8hgi")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+z_index = 2
+z_as_relative = false
+material = SubResource("ShaderMaterial_awplc")
+position = Vector2(1, 0)
 sprite_frames = SubResource("SpriteFrames_o6bgg")
 animation = &"slash"
+autoplay = "slash"
+frame = 7
 frame_progress = 1.0
 
 [node name="GPUParticles2D" type="GPUParticles2D" parent="AnimatedSprite2D"]
 z_index = -1
-amount = 12
+amount = 32
 process_material = SubResource("ParticleProcessMaterial_8dbef")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-shape = SubResource("SegmentShape2D_giol5")
+position = Vector2(1, 0)
+shape = SubResource("SegmentShape2D_dwpx1")
+
+[node name="LifeTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="ExpiryTimer" type="Timer" parent="."]
+wait_time = 0.25
+one_shot = true
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
+[connection signal="timeout" from="LifeTimer" to="." method="_on_life_timer_timeout"]
+[connection signal="timeout" from="ExpiryTimer" to="." method="_on_expiry_timer_timeout"]

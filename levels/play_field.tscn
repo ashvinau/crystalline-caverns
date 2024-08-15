@@ -96,6 +96,7 @@ sources/0 = SubResource("TileSetAtlasSource_x08et")
 
 [node name="PlayFieldMap" type="TileMap" parent="."]
 z_index = 1
+z_as_relative = false
 tile_set = SubResource("TileSet_u8d8u")
 format = 2
 layer_0/name = "Ground"
@@ -120,12 +121,14 @@ follow_viewport_scale = 0.0
 z_as_relative = false
 scale = Vector2(0.9, 0.9)
 motion_scale = Vector2(0.9, 0.9)
+motion_offset = Vector2(128, 128)
 
 [node name="Layer1" type="TextureRect" parent="PlayFieldMap/Background/Parallax1"]
 offset_left = -8192.0
 offset_top = -8192.0
 offset_right = 16384.0
 offset_bottom = 16384.0
+pivot_offset = Vector2(12288, 12288)
 texture = SubResource("ImageTexture_72gjw")
 stretch_mode = 1
 
@@ -133,6 +136,7 @@ stretch_mode = 1
 z_index = -1
 scale = Vector2(0.8, 0.8)
 motion_scale = Vector2(0.8, 0.8)
+motion_offset = Vector2(256, 256)
 
 [node name="Layer2" type="TextureRect" parent="PlayFieldMap/Background/Parallax2"]
 z_index = -1
@@ -140,6 +144,7 @@ offset_left = -8192.0
 offset_top = -8192.0
 offset_right = 16384.0
 offset_bottom = 16384.0
+pivot_offset = Vector2(12288, 12288)
 texture = SubResource("ImageTexture_72gjw")
 stretch_mode = 1
 
@@ -156,16 +161,13 @@ offset_left = -8192.0
 offset_top = -8192.0
 offset_right = 16384.0
 offset_bottom = 16384.0
+pivot_offset = Vector2(12288, 12288)
 texture = SubResource("ImageTexture_72gjw")
 stretch_mode = 1
 
 [node name="Player" parent="." instance=ExtResource("2_3ga3r")]
 position = Vector2(159, -395)
 floor_max_angle = 0.844739
-speed_cap = 700
-jump_velocity = -400.0
-double_jump_velocity = -300.0
-double_jumps = 5
 
 [node name="BGViewContainer" type="SubViewportContainer" parent="."]
 offset_right = 40.0

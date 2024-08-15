@@ -23,6 +23,7 @@ render_target_update_mode = 4
 [node name="PlayField" parent="CenterViewportContainer/CenterViewport" instance=ExtResource("1_jxcr8")]
 
 [node name="CenterCamera" type="Camera2D" parent="CenterViewportContainer/CenterViewport"]
+process_callback = 0
 
 [node name="LeftViewportContainer" type="SubViewportContainer" parent="."]
 anchors_preset = 15
@@ -39,6 +40,7 @@ size = Vector2i(1920, 1080)
 render_target_update_mode = 4
 
 [node name="LeftCamera" type="Camera2D" parent="LeftViewportContainer/LeftViewport"]
+process_callback = 0
 
 [node name="RightViewportContainer" type="SubViewportContainer" parent="."]
 anchors_preset = 15
@@ -55,6 +57,7 @@ size = Vector2i(1920, 1080)
 render_target_update_mode = 4
 
 [node name="RightCamera" type="Camera2D" parent="RightViewportContainer/RightViewport"]
+process_callback = 0
 
 [node name="TopViewportContainer" type="SubViewportContainer" parent="."]
 anchors_preset = 15
@@ -71,6 +74,7 @@ size = Vector2i(1920, 1080)
 render_target_update_mode = 4
 
 [node name="TopCamera" type="Camera2D" parent="TopViewportContainer/TopViewport"]
+process_callback = 0
 
 [node name="BottomViewportContainer" type="SubViewportContainer" parent="."]
 anchors_preset = 15
@@ -87,3 +91,72 @@ size = Vector2i(1920, 1080)
 render_target_update_mode = 4
 
 [node name="BottomCamera" type="Camera2D" parent="BottomViewportContainer/BottomViewport"]
+process_callback = 0
+
+[node name="ULViewportContainer" type="SubViewportContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+
+[node name="ULViewport" type="SubViewport" parent="ULViewportContainer"]
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(1920, 1080)
+render_target_update_mode = 4
+
+[node name="ULCamera" type="Camera2D" parent="ULViewportContainer/ULViewport"]
+process_callback = 0
+
+[node name="URViewportContainer" type="SubViewportContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+
+[node name="URViewport" type="SubViewport" parent="URViewportContainer"]
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(1920, 1080)
+render_target_update_mode = 4
+
+[node name="URCamera" type="Camera2D" parent="URViewportContainer/URViewport"]
+process_callback = 0
+
+[node name="LLViewportContainer" type="SubViewportContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+
+[node name="LLViewport" type="SubViewport" parent="LLViewportContainer"]
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(1920, 1080)
+render_target_update_mode = 4
+
+[node name="LLCamera" type="Camera2D" parent="LLViewportContainer/LLViewport"]
+process_callback = 0
+
+[node name="LRViewportContainer" type="SubViewportContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+
+[node name="LRViewport" type="SubViewport" parent="LRViewportContainer"]
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(1920, 1080)
+render_target_update_mode = 4
+
+[node name="LRCamera" type="Camera2D" parent="LRViewportContainer/LRViewport"]
+process_callback = 0

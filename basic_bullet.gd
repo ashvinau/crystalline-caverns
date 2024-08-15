@@ -1,21 +1,47 @@
-extends CharacterBody2D
+extends Area2D
 
 # Get the gravity from the project settings to be synced with RigidBody nodes.
-var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
+var expiring: bool = false
+var velocity: Vector2
 
-func _physics_process(delta):	
+func set_bullet(life_time: float, coll_mask: int, color: Color, weight: float, shape: String):
+	$LifeTimer.wait_time = life_time
+	$LifeTimer.start()
+	set_collision_mask_value(coll_mask, true)
+	self.scale.x *= weight 
+	self.scale.y *= weight	
+	$AnimatedSprite2D.material.set_shader_parameter("modulate",Globals.color_to_vector(color))
+	modulate = color
+	$AnimatedSprite2D.play(shape)
+
+func _physics_process(delta):
+	position.x += velocity.x * delta
+	position.y += velocity.y * delta	
+	velocity.y += (Globals.GRAVITY * delta) * Globals.shot_weight # effect of gravity
+	rotation_degrees += 100 * delta
 	checkBulletLoc()
-	move_and_slide()
-	for i in get_slide_collision_count():
-		var collision = get_slide_collision(i)
-		#print("Bullet Debug- collision with ", collision.get_collider().name)
-		if collision.get_collider():
-			if collision.get_collider().name=="PlayFieldMap":
-				queue_free()
+
+func expire():
+	expiring = true	
+	$AnimatedSprite2D.visible = false
+	$CollisionShape2D.set_deferred("disabled", true)
+	$ExpiryTimer.start()
+	$Aura.emitting = false
+	$Expiry.emitting = false
+	$Expiry.one_shot = true
+	$Expiry.emitting = true		
+
+func _on_body_entered(body):
+	if not expiring:
+		expire()
 
 func _on_timer_timeout():
+	if not expiring:
+		expire()		
+	
+func _on_expiry_finished():	
 	queue_free()
-
+	
 func checkBulletLoc():
 	$CollisionShape2D.set_deferred("disabled", false)
 	var locX = self.position.x
