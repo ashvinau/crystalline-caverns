@@ -1,7 +1,7 @@
 extends Area2D
 
 # Get the gravity from the project settings to be synced with RigidBody nodes.
-@onready var player = get_node("../Player")
+var player_node: CharacterBody2D
 var expiring: bool = false
 var slash_color: Color
 var transparency: float = 1
@@ -9,7 +9,7 @@ var slash_direction: Vector2
 var knockback: bool = false
 var velocity: Vector2
 
-func set_slash(life_time: float, coll_mask: int, color: Color, weight: float, direction: Vector2):
+func set_slash(life_time: float, coll_mask: int, color: Color, weight: float, direction: Vector2, player: CharacterBody2D):
 	$LifeTimer.wait_time = life_time
 	$LifeTimer.start()
 	set_collision_mask_value(coll_mask, true)
@@ -19,6 +19,7 @@ func set_slash(life_time: float, coll_mask: int, color: Color, weight: float, di
 	slash_direction = direction
 	$AnimatedSprite2D.material.set_shader_parameter("modulate",Globals.color_to_vector(color))
 	modulate = color	
+	player_node = player
 	
 func _physics_process(delta):	
 	position.x += velocity.x * delta
@@ -33,9 +34,9 @@ func _on_body_entered(body):
 	if (not knockback):
 		knockback = true
 		var melee_force = (Globals.melee_velocity * Globals.melee_weight) * 6
-		player.velocity -= slash_direction * ((melee_force * Globals.melee_life) / Globals.inertia)
-		if player.cur_double_jumps > 0:
-			player.cur_double_jumps -= 1
+		player_node.velocity -= slash_direction * ((melee_force * Globals.melee_life) / Globals.inertia)
+		if player_node.cur_double_jumps > 0:
+			player_node.cur_double_jumps -= 1
 		_on_life_timer_timeout()
 
 func checkSlashLoc():

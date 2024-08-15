@@ -7,6 +7,7 @@ var shot_lock : bool = false
 var melee_lock : bool = false
 var direction : Vector2 = Vector2.ZERO
 var was_in_air : bool = false
+var crouched : bool = false
 
 @onready var animated_sprite : AnimatedSprite2D = $AnimatedSprite2D
 @onready var centerCam = get_node("../../CenterCamera")
@@ -18,20 +19,19 @@ var was_in_air : bool = false
 @onready var URCam = get_node("../../../../URViewportContainer/URViewport/URCamera")
 @onready var LLCam = get_node("../../../../LLViewportContainer/LLViewport/LLCamera")
 @onready var LRCam = get_node("../../../../LRViewportContainer/LRViewport/LRCamera")
-
 @onready var play_field: Node2D = get_node("..") # parent node: PlayField
 
-var basic_bullet = preload("res://basic_bullet.tscn")
-var basic_melee = preload("res://basic_melee.tscn")
+var basic_bullet = preload("res://attacks/basic_bullet.tscn")
+var basic_melee = preload("res://attacks/basic_melee.tscn")
 
-func set_player():
-	$AnimatedSprite2D.material.set_shader_parameter("modulate",Vector4(1.5,0.5,0.5,1))
-	# modulate = Globals.player_color
+func set_player(color: Color):
+	$AnimatedSprite2D.material.set_shader_parameter("modulate",Globals.color_to_vector(color))
+	modulate = color
 	$RangeCDTimer.wait_time = Globals.shot_gcd
 	$MeleeCDTimer.wait_time = Globals.melee_gcd
 
 func _ready():
-	set_player()
+	pass	
 
 func _physics_process(delta):
 	# Speed caps
@@ -45,7 +45,7 @@ func _physics_process(delta):
 		self.velocity.y = -Globals.speed_cap	
 	
 	# Update cameras
-	global_position = global_position#.round()
+	#global_position = global_position.round()
 	centerCam.global_position = global_position	
 	
 	leftCam.global_position.x = global_position.x - (Globals.WIDTH * 16)
@@ -94,9 +94,18 @@ func _physics_process(delta):
 			unjump()
 			
 	if Input.is_action_pressed("down"):
-		if is_on_floor():
+		if is_on_floor():				
+			if not crouched:
+				animated_sprite.play("crouch")
+				animation_locked = true				
+				crouched = true
 			velocity.x = 0
 			velocity.y += 200
+	
+	if Input.is_action_just_released("down"):
+		orientation_locked = false
+		animation_locked = false
+		crouched = false
 			
 	if Input.is_action_pressed("attack up") && Input.is_action_pressed("attack left"):
 		if Input.is_action_pressed("alternate attack"):
@@ -198,7 +207,7 @@ func melee_attack(offset: Vector2i, direction: Vector2):
 		play_field.add_child(slash_inst)
 		slash_inst.look_at(Vector2(self.position.x + direction.x * 50, self.position.y + direction.y * 50))
 		
-		slash_inst.set_slash(Globals.melee_life,2,Globals.melee_color,Globals.melee_weight, direction)
+		slash_inst.set_slash(Globals.melee_life,2,Globals.melee_color,Globals.melee_weight, direction, self)
 		slash_inst.velocity.x = (direction.x * Globals.melee_velocity) # + velocity.x <- inherit velocity
 		slash_inst.velocity.y = (direction.y * Globals.melee_velocity) # + velocity.y	
 		melee_lock = true
@@ -261,7 +270,8 @@ func update_animation():
 func _on_animated_sprite_2d_animation_finished():
 	if (["jump_end", "jump_start", "jump_double","atk_down","atk_up","atk_h"].has(animated_sprite.animation)):
 		animation_locked = false
-		orientation_locked = false			
+		orientation_locked = false
+		crouched = false
 
 func _on_animated_sprite_2d_animation_changed():
 	pass
@@ -289,7 +299,4 @@ func checkPlayerLoc():
 	elif (locY < 0):
 		$CollisionShape2D.set_deferred("disabled", true)
 		self.position.y = Globals.HEIGHT * 16
-
-
-
-
+		

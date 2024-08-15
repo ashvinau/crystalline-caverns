@@ -1,43 +1,43 @@
 [gd_scene load_steps=16 format=3 uid="uid://d2iw2iovmunta"]
 
-[ext_resource type="Texture2D" uid="uid://buyfouljcr5rq" path="res://art/melee-sheet.png" id="1_os16s"]
-[ext_resource type="Script" path="res://basic_melee.gd" id="1_r8hgi"]
-[ext_resource type="Shader" path="res://levels/midModulate.gdshader" id="2_qm5rd"]
+[ext_resource type="Script" path="res://attacks/basic_melee.gd" id="1_exdix"]
+[ext_resource type="Shader" path="res://levels/midModulate.gdshader" id="2_7a3us"]
+[ext_resource type="Texture2D" uid="uid://buyfouljcr5rq" path="res://art/melee-sheet.png" id="3_o8x58"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_awplc"]
-shader = ExtResource("2_qm5rd")
+shader = ExtResource("2_7a3us")
 shader_parameter/modulate = Vector4(1, 1, 1, 1)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_5do63"]
-atlas = ExtResource("1_os16s")
+atlas = ExtResource("3_o8x58")
 region = Rect2(0, 0, 32, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_vkah2"]
-atlas = ExtResource("1_os16s")
+atlas = ExtResource("3_o8x58")
 region = Rect2(32, 0, 32, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_4srek"]
-atlas = ExtResource("1_os16s")
+atlas = ExtResource("3_o8x58")
 region = Rect2(64, 0, 32, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_cx1kt"]
-atlas = ExtResource("1_os16s")
+atlas = ExtResource("3_o8x58")
 region = Rect2(96, 0, 32, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_w7j07"]
-atlas = ExtResource("1_os16s")
+atlas = ExtResource("3_o8x58")
 region = Rect2(128, 0, 32, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_jutsc"]
-atlas = ExtResource("1_os16s")
+atlas = ExtResource("3_o8x58")
 region = Rect2(160, 0, 32, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_3ayg7"]
-atlas = ExtResource("1_os16s")
+atlas = ExtResource("3_o8x58")
 region = Rect2(192, 0, 32, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_nic3e"]
-atlas = ExtResource("1_os16s")
+atlas = ExtResource("3_o8x58")
 region = Rect2(224, 0, 32, 64)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_o6bgg"]
@@ -92,7 +92,7 @@ z_as_relative = false
 position = Vector2(-1, 0)
 collision_layer = 0
 collision_mask = 0
-script = ExtResource("1_r8hgi")
+script = ExtResource("1_exdix")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 z_index = 2

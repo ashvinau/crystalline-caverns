@@ -1,0 +1,98 @@
+[gd_scene load_steps=12 format=3 uid="uid://bvot2j11ciqix"]
+
+[ext_resource type="Texture2D" uid="uid://c0satayco5xgm" path="res://art/mob-sheet.png" id="1_qdm8h"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7t1jj"]
+atlas = ExtResource("1_qdm8h")
+region = Rect2(128, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ntyjw"]
+atlas = ExtResource("1_qdm8h")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lrs8m"]
+atlas = ExtResource("1_qdm8h")
+region = Rect2(160, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_l7ymy"]
+atlas = ExtResource("1_qdm8h")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_d186j"]
+atlas = ExtResource("1_qdm8h")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ikc0p"]
+atlas = ExtResource("1_qdm8h")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2gq8o"]
+atlas = ExtResource("1_qdm8h")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_01xb5"]
+atlas = ExtResource("1_qdm8h")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_pepir"]
+animations = [{
+"frames": [{
+"duration": 2.0,
+"texture": SubResource("AtlasTexture_7t1jj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ntyjw")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 2.0,
+"texture": SubResource("AtlasTexture_lrs8m")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_l7ymy")
+}],
+"loop": false,
+"name": &"hit",
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_d186j")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ikc0p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2gq8o")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_01xb5")
+}],
+"loop": false,
+"name": &"walking",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_d74yh"]
+height = 28.0
+
+[node name="FormlessCrawler" type="CharacterBody2D"]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_pepir")
+animation = &"attack"
+frame = 1
+frame_progress = 1.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 2)
+shape = SubResource("CapsuleShape2D_d74yh")
+
+[node name="MoveTimer" type="Timer" parent="."]
+
+[node name="RangeTimer" type="Timer" parent="."]
+
+[node name="MeleeTimer" type="Timer" parent="."]

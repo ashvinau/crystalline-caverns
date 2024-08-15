@@ -1,7 +1,6 @@
-[gd_scene load_steps=13 format=3 uid="uid://b67ooeti8v4je"]
+[gd_scene load_steps=12 format=3 uid="uid://b67ooeti8v4je"]
 
 [ext_resource type="Texture2D" uid="uid://dg3hfo34h47oh" path="res://art/tileset.png" id="1_neqad"]
-[ext_resource type="PackedScene" uid="uid://ccvooj6vv68fb" path="res://Character/player.tscn" id="2_3ga3r"]
 [ext_resource type="Script" path="res://levels/PlayFieldMap.gd" id="3_iq378"]
 [ext_resource type="Script" path="res://PerlinGraph.cs" id="3_y3bka"]
 [ext_resource type="Shader" path="res://levels/midModulate.gdshader" id="4_sdtnt"]
@@ -164,10 +163,6 @@ offset_bottom = 16384.0
 pivot_offset = Vector2(12288, 12288)
 texture = SubResource("ImageTexture_72gjw")
 stretch_mode = 1
-
-[node name="Player" parent="." instance=ExtResource("2_3ga3r")]
-position = Vector2(159, -395)
-floor_max_angle = 0.844739
 
 [node name="BGViewContainer" type="SubViewportContainer" parent="."]
 offset_right = 40.0

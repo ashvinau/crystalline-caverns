@@ -1,51 +1,51 @@
 [gd_scene load_steps=18 format=3 uid="uid://bydj0faqw6byp"]
 
-[ext_resource type="Texture2D" uid="uid://dghyr142kpsc0" path="res://art/bullet-sheet.png" id="1_urhcc"]
-[ext_resource type="Script" path="res://basic_bullet.gd" id="1_yu2q0"]
-[ext_resource type="Shader" path="res://levels/midModulate.gdshader" id="2_6daj2"]
+[ext_resource type="Script" path="res://attacks/basic_bullet.gd" id="1_mn4mn"]
+[ext_resource type="Shader" path="res://levels/midModulate.gdshader" id="2_gxytf"]
+[ext_resource type="Texture2D" uid="uid://dghyr142kpsc0" path="res://art/bullet-sheet.png" id="3_kx15w"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_h1rjy"]
-shader = ExtResource("2_6daj2")
+shader = ExtResource("2_gxytf")
 shader_parameter/modulate = Vector4(1, 1, 1, 1)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_f3r1x"]
-atlas = ExtResource("1_urhcc")
+atlas = ExtResource("3_kx15w")
 region = Rect2(0, 0, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_snghp"]
-atlas = ExtResource("1_urhcc")
+atlas = ExtResource("3_kx15w")
 region = Rect2(32, 0, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_64uy2"]
-atlas = ExtResource("1_urhcc")
+atlas = ExtResource("3_kx15w")
 region = Rect2(64, 0, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_v31mf"]
-atlas = ExtResource("1_urhcc")
+atlas = ExtResource("3_kx15w")
 region = Rect2(96, 0, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_bsi3u"]
-atlas = ExtResource("1_urhcc")
+atlas = ExtResource("3_kx15w")
 region = Rect2(0, 32, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_umgv4"]
-atlas = ExtResource("1_urhcc")
+atlas = ExtResource("3_kx15w")
 region = Rect2(32, 32, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ep31l"]
-atlas = ExtResource("1_urhcc")
+atlas = ExtResource("3_kx15w")
 region = Rect2(64, 32, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_pmsjh"]
-atlas = ExtResource("1_urhcc")
+atlas = ExtResource("3_kx15w")
 region = Rect2(96, 32, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_72x1i"]
-atlas = ExtResource("1_urhcc")
+atlas = ExtResource("3_kx15w")
 region = Rect2(128, 32, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_x661h"]
-atlas = ExtResource("1_urhcc")
+atlas = ExtResource("3_kx15w")
 region = Rect2(160, 32, 32, 32)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_uvxd4"]
@@ -117,7 +117,7 @@ z_index = 2
 z_as_relative = false
 collision_layer = 0
 collision_mask = 0
-script = ExtResource("1_yu2q0")
+script = ExtResource("1_mn4mn")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 z_index = 2

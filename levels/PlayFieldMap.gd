@@ -4,8 +4,10 @@ const IV = 999 # Ignore value for processing geomatrix
 const AV = 998 # Match any value other than 0 for processing geomatrix
 
 @onready var perlinNode = $PerlinGraph
-@onready var playerNode = get_node("../Player")
-@onready var collisionNode = get_node("../Player/CollisionShape2D")
+@onready var play_field = get_node("..")
+var playerNode: CharacterBody2D
+
+var player_scene = preload("res://character/player.tscn")
 
 var perlinMatrix : Array = []
 var geoMatrix : Array = []
@@ -34,7 +36,7 @@ func setGeoMatrix(clamp: int):
 	# Test validity of generated geomatrix
 	var testMatrix = geoMatrix.duplicate(true)	
 	# Fill empty space starting at the spawn point		
-	flood_fill(testMatrix,pickPlayerSpawn(),0,255);
+	Globals.flood_fill(testMatrix,Globals.pickPlayerSpawn(geoMatrix),0,255);
 	# Check for remaining 0 values
 	for x in Globals.WIDTH:
 		for y in Globals.HEIGHT:
@@ -127,87 +129,48 @@ func checkGeoIndex(index : Vector2i, target, n, ne, e, se, s, sw, w, nw) -> bool
 	if geoMatrix[x][y] != target:
 		return false
 		
-	if (n == AV && geoMatrix[x][SafeIndex(Vector2i(x,y-1)).y] != 0):
+	if (n == AV && geoMatrix[x][Globals.SafeIndex(Vector2i(x,y-1)).y] != 0):
 		pass	
-	elif (n != IV && geoMatrix[x][SafeIndex(Vector2i(x,y-1)).y] != n):
+	elif (n != IV && geoMatrix[x][Globals.SafeIndex(Vector2i(x,y-1)).y] != n):
 		return false
 	
-	if (ne == AV && geoMatrix[SafeIndex(Vector2i(x+1,y-1)).x][SafeIndex(Vector2i(x+1,y-1)).y] != 0):
+	if (ne == AV && geoMatrix[Globals.SafeIndex(Vector2i(x+1,y-1)).x][Globals.SafeIndex(Vector2i(x+1,y-1)).y] != 0):
 		pass
-	elif (ne != IV && geoMatrix[SafeIndex(Vector2i(x+1,y-1)).x][SafeIndex(Vector2i(x+1,y-1)).y] != ne):
+	elif (ne != IV && geoMatrix[Globals.SafeIndex(Vector2i(x+1,y-1)).x][Globals.SafeIndex(Vector2i(x+1,y-1)).y] != ne):
 		return false
 	
-	if (e == AV && geoMatrix[SafeIndex(Vector2i(x+1,y)).x][y] != 0):
+	if (e == AV && geoMatrix[Globals.SafeIndex(Vector2i(x+1,y)).x][y] != 0):
 		pass
-	elif (e != IV && geoMatrix[SafeIndex(Vector2i(x+1,y)).x][y] != e):
+	elif (e != IV && geoMatrix[Globals.SafeIndex(Vector2i(x+1,y)).x][y] != e):
 		return false
 	
-	if (se == AV && geoMatrix[SafeIndex(Vector2i(x+1,y+1)).x][SafeIndex(Vector2i(x+1,y+1)).y] != 0):
+	if (se == AV && geoMatrix[Globals.SafeIndex(Vector2i(x+1,y+1)).x][Globals.SafeIndex(Vector2i(x+1,y+1)).y] != 0):
 		pass
-	elif (se != IV && geoMatrix[SafeIndex(Vector2i(x+1,y+1)).x][SafeIndex(Vector2i(x+1,y+1)).y] != se):
+	elif (se != IV && geoMatrix[Globals.SafeIndex(Vector2i(x+1,y+1)).x][Globals.SafeIndex(Vector2i(x+1,y+1)).y] != se):
 		return false
 	
-	if (s == AV && geoMatrix[x][SafeIndex(Vector2i(x,y+1)).y] != 0):
+	if (s == AV && geoMatrix[x][Globals.SafeIndex(Vector2i(x,y+1)).y] != 0):
 		pass
-	elif (s != IV && geoMatrix[x][SafeIndex(Vector2i(x,y+1)).y] != s):
+	elif (s != IV && geoMatrix[x][Globals.SafeIndex(Vector2i(x,y+1)).y] != s):
 		return false
 	
-	if (sw == AV && geoMatrix[SafeIndex(Vector2i(x-1,y+1)).x][SafeIndex(Vector2i(x-1,y+1)).y] != 0):
+	if (sw == AV && geoMatrix[Globals.SafeIndex(Vector2i(x-1,y+1)).x][Globals.SafeIndex(Vector2i(x-1,y+1)).y] != 0):
 		pass
-	elif (sw != IV && geoMatrix[SafeIndex(Vector2i(x-1,y+1)).x][SafeIndex(Vector2i(x-1,y+1)).y] != sw):
+	elif (sw != IV && geoMatrix[Globals.SafeIndex(Vector2i(x-1,y+1)).x][Globals.SafeIndex(Vector2i(x-1,y+1)).y] != sw):
 		return false
 	
-	if (w == AV && geoMatrix[SafeIndex(Vector2i(x-1,y)).x][y] != 0):
+	if (w == AV && geoMatrix[Globals.SafeIndex(Vector2i(x-1,y)).x][y] != 0):
 		pass
-	elif (w != IV && geoMatrix[SafeIndex(Vector2i(x-1,y)).x][y] != w):
+	elif (w != IV && geoMatrix[Globals.SafeIndex(Vector2i(x-1,y)).x][y] != w):
 		return false
 	
-	if (nw == AV && geoMatrix[SafeIndex(Vector2i(x-1,y-1)).x][SafeIndex(Vector2i(x-1,y-1)).y] != 0):
+	if (nw == AV && geoMatrix[Globals.SafeIndex(Vector2i(x-1,y-1)).x][Globals.SafeIndex(Vector2i(x-1,y-1)).y] != 0):
 		pass
-	elif (nw != IV && geoMatrix[SafeIndex(Vector2i(x-1,y-1)).x][SafeIndex(Vector2i(x-1,y-1)).y] != nw):
+	elif (nw != IV && geoMatrix[Globals.SafeIndex(Vector2i(x-1,y-1)).x][Globals.SafeIndex(Vector2i(x-1,y-1)).y] != nw):
 		return false	
 	
 	return true
 	
-func flood_fill(matrix, start_pos: Vector2i, target_value, replacement_value):
-	# Check if the target value is the same as the replacement value
-	if target_value == replacement_value:
-		return
-
-	# Check if start position is within the bounds of the matrix
-	if start_pos.x < 0 or start_pos.x >= matrix.size() or start_pos.y < 0 or start_pos.y >= matrix[0].size():
-		return
-
-	# Create a stack for positions to visit
-	var stack = [start_pos]
-
-	while stack.size() > 0:
-		var pos = stack.pop_back()
-				
-		# Make index positions safe
-		var adj_index: Vector2i = SafeIndex(Vector2i(pos.x, pos.y))
-		
-		# Get the current value at the position
-		var current_value = matrix[adj_index.x][adj_index.y]
-
-		# If the current value is not the target value, continue
-		if current_value != target_value:
-			continue
-
-		# Replace the value at the current position		
-		matrix[adj_index.x][adj_index.y] = replacement_value
-
-		# Push neighboring positions to the stack
-		stack.append(Vector2i(pos.x + 1, pos.y))
-		stack.append(Vector2i(pos.x - 1, pos.y))
-		stack.append(Vector2i(pos.x, pos.y + 1))
-		stack.append(Vector2i(pos.x, pos.y - 1))
-
-func SafeIndex(index : Vector2i) -> Vector2i:
-	var x = index.x % Globals.WIDTH
-	var y = index.y % Globals.HEIGHT
-	return Vector2i(x,y)	
-			
 func setPlayFieldMap(curMap: TileMap, source, offsetX, offsetY):
 		for x in Globals.WIDTH:
 			for y in Globals.HEIGHT:
@@ -274,89 +237,30 @@ func displayPreview():
 	
 	for x in range(pX-R, pX+R):
 		for y in range(pY-R, pY+R):
-			perlinImage.set_pixel(x, y, Color.RED)	
+			var coordVec: Vector2i = Globals.SafeIndex(Vector2i(x,y))
+			perlinImage.set_pixel(coordVec.x, coordVec.y, Color.RED)				
 	
 	previewNode.texture.update(perlinImage)
 	
-func I82F(intNum : int) -> float:
-	return intNum / 255.0
-	
-func pickPlayerSpawn() -> Vector2i:
-	var found: bool = false
-	var spawnDist = 40
-	var curX: int
-	var curY: int
-	
-	while !found:
-		curX = randi_range(0,Globals.WIDTH)
-		curY = randi_range(0,Globals.HEIGHT)
-		found = raycastCardinal(curX, curY, spawnDist)		
-	
-	return Vector2i(curX, curY)	
-
-func raycastCardinal(x: int, y: int, minDist: int) -> bool:
-	return raycastUp(x, y, minDist) && raycastDown(x, y, minDist) && raycastLeft(x, y, minDist) && raycastRight(x, y, minDist)
-		
-func raycastUp(x: int, y: int, minDist: int) -> bool:
-	for yi in range(y-1, y-minDist, -1):
-		var xs = SafeIndex(Vector2i(x,yi)).x
-		var yis = SafeIndex(Vector2i(x,yi)).y
-		if (geoMatrix[xs][yis] == 1):
-			return false
-	return true	
-	
-func raycastDown(x: int, y: int, minDist: int) -> bool:
-	for yi in range(y+1, y+minDist, 1):
-		var xs = SafeIndex(Vector2i(x,yi)).x
-		var yis = SafeIndex(Vector2i(x,yi)).y
-		if (geoMatrix[xs][yis] == 1):
-			return false
-	return true	
-	
-func raycastLeft(x: int, y: int, minDist: int) -> bool:
-	for xi in range(x-1, x-minDist, -1):
-		var xis = SafeIndex(Vector2i(xi,y)).x
-		var ys = SafeIndex(Vector2i(xi,y)).y
-		if (geoMatrix[xis][ys] == 1):
-			return false
-	return true	
-	
-func raycastRight(x: int, y: int, minDist: int) -> bool:
-	for xi in range(x+1, x+minDist, 1):
-		var xis = SafeIndex(Vector2i(xi,y)).x
-		var ys = SafeIndex(Vector2i(xi,y)).y
-		if (geoMatrix[xis][ys] == 1):
-			return false
-	return true	
-	
 func respawn():
-	collisionNode.set_deferred("disabled", true)
+	#collisionNode.set_deferred("disabled", true)
 	playerNode.position = spawnLoc * 16	
 	
 func generateSpawn():	
+	print("Building Spawn Point...")
 	var previewNode = $levelPreview
-	spawnLoc = pickPlayerSpawn()
+	spawnLoc = Globals.pickPlayerSpawn(geoMatrix)
 	print("Spawn Location: ", spawnLoc)	
 	var adjSpawnLoc = spawnLoc * 16
 	print("Adjusted Spawn: ", adjSpawnLoc)
 		
-	collisionNode.set_deferred("disabled", true)
-	playerNode.position = adjSpawnLoc
-	
+	spawn_character(adjSpawnLoc, Globals.player_color)
 	previewNode.position = adjSpawnLoc
-	previewNode.position.x -= 150	
+	previewNode.position.x -= 150
 	
 	for xi in range(spawnLoc.x-5, spawnLoc.x+5):
-		set_cell(0, Vector2i(xi, spawnLoc.y+22), 1, Vector2i(0,0), 0)	
+		set_cell(0, Globals.SafeIndex(Vector2i(xi, spawnLoc.y+22)), 1, Vector2i(0,0), 0)	
 
-func tileMapToImage(tilemap: TileMap) -> ViewportTexture:
-	var viewport = SubViewport.new()
-	viewport.size = Vector2i(Globals.WIDTH * 16, Globals.HEIGHT * 16)
-	var holder = Node2D.new()
-	holder.position = tilemap.position
-	viewport.add_child(tilemap)		
-	return viewport.get_texture()	
-	
 func set_background(pOffset: int, darken: float, layerNode: TextureRect, bgMap: TileMap, bgViewport: SubViewport):
 	setGeoMatrix(Globals.CLAMP + pOffset)		
 	var bgImage: Image = Image.create(Globals.WIDTH * 16, Globals.HEIGHT * 16, false, Image.FORMAT_RGBA8)	
@@ -368,10 +272,6 @@ func set_background(pOffset: int, darken: float, layerNode: TextureRect, bgMap: 
 	bgMap.visible = false
 	bgMap.set_deferred("disabled", true)	
 	
-func invertMonoColor(value: int) -> Color:
-	value = 255 - value
-	return Color8(value, value, value)
-		
 func set_rear_bg():	
 	var bgImage: Image = Image.create(Globals.WIDTH, Globals.HEIGHT, false, Image.FORMAT_RGBA8)	
 	var bgNode: TextureRect = $Background/Parallax3/Layer3		
@@ -379,7 +279,7 @@ func set_rear_bg():
 	for x in Globals.WIDTH:
 		for y in Globals.HEIGHT:
 			var pValue: int = perlinMatrix[x][y]
-			var curColor: Color = invertMonoColor(pValue)
+			var curColor: Color = Globals.invertMonoColor(pValue)
 			bgImage.set_pixel(x,y,curColor)	
 			
 	bgImage.resize(Globals.WIDTH * 16, Globals.HEIGHT * 16, Image.INTERPOLATE_LANCZOS)	
@@ -391,6 +291,13 @@ func debug_level():
 		for y in range(255, 285):
 			geoMatrix[x][y] = 1	
 	setPlayFieldMap(self, 1,0,0)
+	
+func spawn_character(position: Vector2i, color: Color):
+	print("Spawning player...")
+	playerNode = player_scene.instantiate()
+	playerNode.position = position	
+	play_field.add_child.call_deferred(playerNode)
+	playerNode.set_player(color)	
 	
 func _ready():
 	if (Globals.RAND_SEED == 42):
@@ -412,26 +319,12 @@ func _ready():
 		generateSpawn()	
 		print("Generating preview...")
 		displayPreview()
-		print("Generating background...")	
+		print("Generating backgrounds...")	
 		set_background(10, 0.7, $Background/Parallax1/Layer1,get_node("../BGViewContainer/BGViewport1/BackgroundMap1"),get_node("../BGViewContainer/BGViewport1"))	
 		set_background(20, 0.5, $Background/Parallax2/Layer2,get_node("../BGViewContainer/BGViewport2/BackgroundMap2"),get_node("../BGViewContainer/BGViewport2"))	
 	set_rear_bg()
 	
 	print("PlayField ready.")
-
-func checkPlayerLoc():
-	collisionNode.set_deferred("disabled", false)
-	var locX = playerNode.position.x
-	var locY = playerNode.position.y	
-	# Wrap around teleports
-	if (locX > Globals.WIDTH * 16):
-		playerNode.position.x = 0
-	elif (locX < 0):
-		playerNode.position.x = Globals.WIDTH * 16
-	elif (locY > Globals.HEIGHT * 16):
-		playerNode.position.y = 0
-	elif (locY < 0):
-		playerNode.position.y = Globals.HEIGHT * 16
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):	
