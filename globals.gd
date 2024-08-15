@@ -1,7 +1,7 @@
 extends Node
 
 # World Constants
-const RAND_SEED = 16253 # 42 for fast-loading debug level
+const RAND_SEED = 42 # 42 for fast-loading debug level
 const WIDTH = 512
 const HEIGHT = 512
 const CLAMP = 120

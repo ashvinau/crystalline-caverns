@@ -243,8 +243,8 @@ func displayPreview():
 	previewNode.texture.update(perlinImage)
 	
 func respawn():
-	#collisionNode.set_deferred("disabled", true)
-	playerNode.position = spawnLoc * 16	
+	playerNode.queue_free()
+	spawn_character(spawnLoc * 16, Globals.player_color)
 	
 func generateSpawn():	
 	print("Building Spawn Point...")

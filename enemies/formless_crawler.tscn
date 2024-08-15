@@ -1,5 +1,6 @@
-[gd_scene load_steps=12 format=3 uid="uid://bvot2j11ciqix"]
+[gd_scene load_steps=13 format=3 uid="uid://bvot2j11ciqix"]
 
+[ext_resource type="Script" path="res://enemies/formless_crawler.gd" id="1_871so"]
 [ext_resource type="Texture2D" uid="uid://c0satayco5xgm" path="res://art/mob-sheet.png" id="1_qdm8h"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_7t1jj"]
@@ -80,6 +81,7 @@ animations = [{
 height = 28.0
 
 [node name="FormlessCrawler" type="CharacterBody2D"]
+script = ExtResource("1_871so")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_pepir")
