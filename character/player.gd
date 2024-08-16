@@ -45,7 +45,7 @@ func _physics_process(delta):
 		self.velocity.y = -Globals.speed_cap	
 	
 	# Update cameras
-	#global_position = global_position.round()
+	#global_position = global_position.round() # Trying to fix scaling jitter
 	centerCam.global_position = global_position	
 	
 	leftCam.global_position.x = global_position.x - (Globals.WIDTH * 16)

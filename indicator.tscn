@@ -1,0 +1,70 @@
+[gd_scene load_steps=8 format=3 uid="uid://dwkkk33hda8lh"]
+
+[ext_resource type="Texture2D" uid="uid://b6o4oajku6uvw" path="res://art/indicator-sheet.png" id="1_8mqub"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_20k7h"]
+atlas = ExtResource("1_8mqub")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yqh58"]
+atlas = ExtResource("1_8mqub")
+region = Rect2(64, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4r0y0"]
+atlas = ExtResource("1_8mqub")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_x8hd6"]
+atlas = ExtResource("1_8mqub")
+region = Rect2(48, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_x3k7f"]
+atlas = ExtResource("1_8mqub")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ptkap"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_20k7h")
+}],
+"loop": false,
+"name": &"boss",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yqh58")
+}],
+"loop": false,
+"name": &"down",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4r0y0")
+}],
+"loop": false,
+"name": &"player",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_x8hd6")
+}],
+"loop": false,
+"name": &"relic",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_x3k7f")
+}],
+"loop": false,
+"name": &"spawn",
+"speed": 0.0
+}]
+
+[node name="Indicator" type="AnimatedSprite2D"]
+sprite_frames = SubResource("SpriteFrames_ptkap")
+animation = &"boss"

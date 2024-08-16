@@ -1,11 +1,11 @@
 [gd_scene load_steps=18 format=3 uid="uid://bydj0faqw6byp"]
 
 [ext_resource type="Script" path="res://attacks/basic_bullet.gd" id="1_mn4mn"]
-[ext_resource type="Shader" path="res://levels/midModulate.gdshader" id="2_gxytf"]
+[ext_resource type="Shader" path="res://art/midModulate.gdshader" id="2_jt44n"]
 [ext_resource type="Texture2D" uid="uid://dghyr142kpsc0" path="res://art/bullet-sheet.png" id="3_kx15w"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_h1rjy"]
-shader = ExtResource("2_gxytf")
+shader = ExtResource("2_jt44n")
 shader_parameter/modulate = Vector4(1, 1, 1, 1)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_f3r1x"]

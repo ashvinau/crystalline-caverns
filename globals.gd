@@ -1,13 +1,15 @@
 extends Node
 
 # World Constants
-const RAND_SEED = 42 # 42 for fast-loading debug level
+const RAND_SEED = 420 # 42 for fast-loading debug level
 const WIDTH = 512
 const HEIGHT = 512
 const CLAMP = 120
 const GRAVITY = 490
 
 # Player Stat Constants
+const PLAYER_MAX_HEALTH = 420
+const PLAYER_HEALTH = 420
 const PLAYER_COLOR: Color = Color.LIGHT_CORAL
 const MOVE_SPEED: float = 500.0
 const SPEED_CAP: int = 800
@@ -30,6 +32,8 @@ const MELEE_LIFE: float = 0.15
 const MELEE_GCD: float = 1
 
 # Player Stat Variables
+var player_max_health: int
+var player_health: int
 var player_color: Color
 var move_speed : float
 var speed_cap: int
@@ -52,6 +56,8 @@ var melee_life: float
 var melee_gcd: float
 
 func init_player():
+	player_max_health = PLAYER_MAX_HEALTH
+	player_health = PLAYER_HEALTH
 	player_color = PLAYER_COLOR
 	move_speed = MOVE_SPEED
 	speed_cap = SPEED_CAP

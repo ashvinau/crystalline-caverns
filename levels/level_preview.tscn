@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3 uid="uid://cyeb5tk8q6j2n"]
+
+[sub_resource type="ImageTexture" id="ImageTexture_oeq1x"]
+
+[node name="levelPreview" type="TextureRect"]
+z_index = -1
+offset_left = 41.0
+offset_top = -698.0
+offset_right = 339.0
+offset_bottom = -400.0
+texture = SubResource("ImageTexture_oeq1x")
+expand_mode = 1

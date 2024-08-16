@@ -33,8 +33,12 @@ func _physics_process(delta):
 func _on_body_entered(body):
 	if (not knockback):
 		knockback = true
-		var melee_force = (Globals.melee_velocity * Globals.melee_weight) * 6
-		player_node.velocity -= slash_direction * ((melee_force * Globals.melee_life) / Globals.inertia)
+		var melee_force = (Globals.melee_velocity * Globals.melee_weight) / Globals.inertia
+		if abs(slash_direction.x) > abs(slash_direction.y):
+			player_node.velocity.x = -(slash_direction.x * melee_force)	
+		else:
+			player_node.velocity.y = -(slash_direction.y * melee_force)
+		
 		if player_node.cur_double_jumps > 0:
 			player_node.cur_double_jumps -= 1
 		_on_life_timer_timeout()

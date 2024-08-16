@@ -1,11 +1,11 @@
 [gd_scene load_steps=36 format=3 uid="uid://ccvooj6vv68fb"]
 
 [ext_resource type="Script" path="res://character/player.gd" id="1_gyk1h"]
-[ext_resource type="Shader" path="res://levels/midModulate.gdshader" id="2_stky2"]
+[ext_resource type="Shader" path="res://art/midModulate.gdshader" id="2_mg3uh"]
 [ext_resource type="Texture2D" uid="uid://bwe0riocsdbjg" path="res://art/character-sheet.png" id="3_bxiry"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_w4u0b"]
-shader = ExtResource("2_stky2")
+shader = ExtResource("2_mg3uh")
 shader_parameter/modulate = Vector4(1, 1, 1, 1)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_phxom"]

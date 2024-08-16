@@ -1,10 +1,14 @@
-[gd_scene load_steps=3 format=3 uid="uid://c64heveel8h73"]
+[gd_scene load_steps=4 format=3 uid="uid://c64heveel8h73"]
 
 [ext_resource type="Script" path="res://game_canvas.gd" id="1_esfqn"]
 [ext_resource type="PackedScene" uid="uid://b67ooeti8v4je" path="res://levels/play_field.tscn" id="1_jxcr8"]
+[ext_resource type="PackedScene" uid="uid://bysha1ko78mab" path="res://hud.tscn" id="2_dxj87"]
 
 [node name="GameCanvas" type="CanvasLayer"]
 script = ExtResource("1_esfqn")
+
+[node name="HUD" parent="." instance=ExtResource("2_dxj87")]
+layer = 3
 
 [node name="CenterViewportContainer" type="SubViewportContainer" parent="."]
 anchors_preset = 15

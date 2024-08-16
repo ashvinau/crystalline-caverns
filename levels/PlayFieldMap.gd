@@ -5,9 +5,11 @@ const AV = 998 # Match any value other than 0 for processing geomatrix
 
 @onready var perlinNode = $PerlinGraph
 @onready var play_field = get_node("..")
+@onready var hud = get_node("../../../../HUD")
 var playerNode: CharacterBody2D
 
 var player_scene = preload("res://character/player.tscn")
+var hud_scene = preload("res://hud.tscn")
 
 var perlinMatrix : Array = []
 var geoMatrix : Array = []
@@ -212,54 +214,21 @@ func fillPerlinMatrix(matrix):
 			curIndex += 1
 	print("Debug indexes: ", curIndex)
 	
-func displayPreview():
-	var perlinImage: Image = Image.create(Globals.WIDTH, Globals.HEIGHT, false, Image.FORMAT_RGBA8)
-	var previewNode = $levelPreview
-	previewNode.texture = ImageTexture.create_from_image(perlinImage)	
-		
-	for x in Globals.WIDTH:
-		for y in Globals.HEIGHT:
-			var gValue = geoMatrix[x][y]
-			# Values
-			if (gValue == 1):
-				gValue = 255
-			elif (gValue == 2 || gValue == 3 || gValue == 4 || gValue == 5):
-				gValue = 128
-			else:
-				gValue = 0
-			
-			var curColor = Color(gValue, gValue, gValue, 1)
-			perlinImage.set_pixel(x,y,curColor)	
-			
-	var pX = spawnLoc.x
-	var pY = spawnLoc.y
-	var R = 5
-	
-	for x in range(pX-R, pX+R):
-		for y in range(pY-R, pY+R):
-			var coordVec: Vector2i = Globals.SafeIndex(Vector2i(x,y))
-			perlinImage.set_pixel(coordVec.x, coordVec.y, Color.RED)				
-	
-	previewNode.texture.update(perlinImage)
-	
 func respawn():
 	playerNode.queue_free()
 	spawn_character(spawnLoc * 16, Globals.player_color)
 	
 func generateSpawn():	
-	print("Building Spawn Point...")
-	var previewNode = $levelPreview
+	print("Building Spawn Point...")	
 	spawnLoc = Globals.pickPlayerSpawn(geoMatrix)
 	print("Spawn Location: ", spawnLoc)	
 	var adjSpawnLoc = spawnLoc * 16
 	print("Adjusted Spawn: ", adjSpawnLoc)
-		
-	spawn_character(adjSpawnLoc, Globals.player_color)
-	previewNode.position = adjSpawnLoc
-	previewNode.position.x -= 150
-	
+	#Build spawn
 	for xi in range(spawnLoc.x-5, spawnLoc.x+5):
 		set_cell(0, Globals.SafeIndex(Vector2i(xi, spawnLoc.y+22)), 1, Vector2i(0,0), 0)	
+	
+	spawn_character(adjSpawnLoc, Globals.player_color)	
 
 func set_background(pOffset: int, darken: float, layerNode: TextureRect, bgMap: TileMap, bgViewport: SubViewport):
 	setGeoMatrix(Globals.CLAMP + pOffset)		
@@ -292,8 +261,7 @@ func debug_level():
 			geoMatrix[x][y] = 1	
 	setPlayFieldMap(self, 1,0,0)
 	
-func spawn_character(position: Vector2i, color: Color):
-	print("Spawning player...")
+func spawn_character(position: Vector2i, color: Color):	
 	playerNode = player_scene.instantiate()
 	playerNode.position = position	
 	play_field.add_child.call_deferred(playerNode)
@@ -317,8 +285,8 @@ func _ready():
 		setPlayFieldMap(self, 1, 0,0)	
 		print("Generating player spawn...")
 		generateSpawn()	
-		print("Generating preview...")
-		displayPreview()
+		print("Generating preview...")		
+		hud.displayPreview(geoMatrix, spawnLoc)
 		print("Generating backgrounds...")	
 		set_background(10, 0.7, $Background/Parallax1/Layer1,get_node("../BGViewContainer/BGViewport1/BackgroundMap1"),get_node("../BGViewContainer/BGViewport1"))	
 		set_background(20, 0.5, $Background/Parallax2/Layer2,get_node("../BGViewContainer/BGViewport2/BackgroundMap2"),get_node("../BGViewContainer/BGViewport2"))	

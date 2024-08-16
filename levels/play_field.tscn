@@ -1,9 +1,9 @@
-[gd_scene load_steps=12 format=3 uid="uid://b67ooeti8v4je"]
+[gd_scene load_steps=11 format=3 uid="uid://b67ooeti8v4je"]
 
 [ext_resource type="Texture2D" uid="uid://dg3hfo34h47oh" path="res://art/tileset.png" id="1_neqad"]
 [ext_resource type="Script" path="res://levels/PlayFieldMap.gd" id="3_iq378"]
 [ext_resource type="Script" path="res://PerlinGraph.cs" id="3_y3bka"]
-[ext_resource type="Shader" path="res://levels/midModulate.gdshader" id="4_sdtnt"]
+[ext_resource type="Shader" path="res://art/midModulate.gdshader" id="4_dp156"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_vvbw8"]
 texture = ExtResource("1_neqad")
@@ -63,12 +63,10 @@ physics_layer_0/collision_layer = 3
 physics_layer_0/collision_mask = 3
 sources/1 = SubResource("TileSetAtlasSource_vvbw8")
 
-[sub_resource type="ImageTexture" id="ImageTexture_oeq1x"]
-
 [sub_resource type="ImageTexture" id="ImageTexture_72gjw"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ckru7"]
-shader = ExtResource("4_sdtnt")
+shader = ExtResource("4_dp156")
 shader_parameter/modulate = Vector4(1, 1, 1.5, 1)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_x08et"]
@@ -103,15 +101,6 @@ script = ExtResource("3_iq378")
 
 [node name="PerlinGraph" type="Node" parent="PlayFieldMap"]
 script = ExtResource("3_y3bka")
-
-[node name="levelPreview" type="TextureRect" parent="PlayFieldMap"]
-z_index = -1
-offset_left = 41.0
-offset_top = -698.0
-offset_right = 339.0
-offset_bottom = -400.0
-texture = SubResource("ImageTexture_oeq1x")
-expand_mode = 1
 
 [node name="Background" type="ParallaxBackground" parent="PlayFieldMap"]
 follow_viewport_scale = 0.0

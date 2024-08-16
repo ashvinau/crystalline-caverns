@@ -1,0 +1,38 @@
+[gd_scene load_steps=5 format=3 uid="uid://bysha1ko78mab"]
+
+[ext_resource type="Script" path="res://hud.gd" id="1_3x2kj"]
+[ext_resource type="FontFile" uid="uid://dlyb44rrcjsdl" path="res://art/Layn.otf" id="2_xia0y"]
+[ext_resource type="PackedScene" uid="uid://cyeb5tk8q6j2n" path="res://levels/level_preview.tscn" id="3_pxia0"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_b5htj"]
+font = ExtResource("2_xia0y")
+font_size = 24
+outline_size = 5
+outline_color = Color(0, 0, 0, 1)
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_3x2kj")
+
+[node name="LifeBar" type="TextureRect" parent="."]
+offset_left = 48.0
+offset_top = 98.0
+offset_right = 648.0
+offset_bottom = 128.0
+
+[node name="Health" type="Label" parent="."]
+offset_left = 48.0
+offset_top = 48.0
+offset_right = 648.0
+offset_bottom = 78.0
+label_settings = SubResource("LabelSettings_b5htj")
+
+[node name="levelPreview" parent="." instance=ExtResource("3_pxia0")]
+z_index = 2
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -307.0
+offset_top = 57.0
+offset_right = -51.0
+offset_bottom = 313.0
+grow_horizontal = 0
