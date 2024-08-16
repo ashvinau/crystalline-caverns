@@ -1,7 +1,7 @@
 extends CharacterBody2D
 
 const LOOKAHEAD_LIMIT: int = 300
-const LOOKAHEAD_SPEED: float = 0.15 # proportion
+const LOOKAHEAD_SPEED: float = 0.17 # proportion
 
 var cur_double_jumps: int = 0
 var animation_locked: bool = false
@@ -13,6 +13,7 @@ var was_in_air: bool = false
 var crouched: bool = false
 var camera_offset_x: int = 0
 var lookahead_adjust: float = 0
+var attack_direction: Vector2 = Vector2.ZERO
 
 @onready var animated_sprite : AnimatedSprite2D = $AnimatedSprite2D
 @onready var centerCam = get_node("../../CenterCamera")
@@ -49,14 +50,26 @@ func _physics_process(delta):
 	elif (self.velocity.y < -Globals.speed_cap):
 		self.velocity.y = -Globals.speed_cap	
 	
-	# Update offset	
-	if direction.x == 0:
+	# Update offset	- this can probably be refactored - resets to lookahead adjust on keypress/release below
+	if direction.x == 0 && attack_direction.x == 0:
 		camera_offset_x = move_toward(camera_offset_x, 0, delta)
-		lookahead_adjust = 0
-	elif abs(camera_offset_x) <= LOOKAHEAD_LIMIT:
-		var distance: float = (abs(camera_offset_x) / LOOKAHEAD_LIMIT)
-		camera_offset_x += direction.x + lookahead_adjust
-		lookahead_adjust += (direction.x * LOOKAHEAD_SPEED) 		
+		lookahead_adjust = 0	
+	elif (attack_direction.x > 0): 		
+		if (camera_offset_x < LOOKAHEAD_LIMIT):
+			camera_offset_x += lookahead_adjust
+			lookahead_adjust += delta + LOOKAHEAD_SPEED
+	elif (attack_direction.x < 0):
+		if (camera_offset_x > -LOOKAHEAD_LIMIT):
+			camera_offset_x -= lookahead_adjust
+			lookahead_adjust += delta + LOOKAHEAD_SPEED	
+	elif (direction.x > 0): 
+		if (camera_offset_x < LOOKAHEAD_LIMIT):
+			camera_offset_x += lookahead_adjust
+			lookahead_adjust += delta + LOOKAHEAD_SPEED
+	elif (direction.x < 0):
+		if (camera_offset_x > -LOOKAHEAD_LIMIT):
+			camera_offset_x -= lookahead_adjust
+			lookahead_adjust += delta + LOOKAHEAD_SPEED		
 	
 	# Update cameras	
 	var offset_position: Vector2i = global_position #.round() # Trying to fix scaling jitter
@@ -123,64 +136,83 @@ func _physics_process(delta):
 		orientation_locked = false
 		animation_locked = false
 		crouched = false
+		
+	if Input.is_action_just_pressed("attack left"):
+		lookahead_adjust = 0
+		
+	if Input.is_action_just_pressed("attack right"):
+		lookahead_adjust = 0	
 			
 	if Input.is_action_pressed("attack up") && Input.is_action_pressed("attack left"):
+		attack_direction = Vector2(-1,-1)
 		if Input.is_action_pressed("alternate attack"):
 			melee_attack(Vector2i(-20,-20), Vector2(-1,-1).normalized())
 		else:
 			range_attack(Vector2i(-20,-20), Vector2(-1,-1).normalized())	
 		
 	elif Input.is_action_pressed("attack up") && Input.is_action_pressed("attack right"):
+		attack_direction = Vector2(1,-1)
 		if Input.is_action_pressed("alternate attack"):
 			melee_attack(Vector2i(20,-20),Vector2(1,-1).normalized())	
 		else:
 			range_attack(Vector2i(20,-20),Vector2(1,-1).normalized())		
 	
 	elif Input.is_action_pressed("attack down") && Input.is_action_pressed("attack left"):
+		attack_direction = Vector2(-1,1)
 		if Input.is_action_pressed("alternate attack"):
 			melee_attack(Vector2i(-20,20),Vector2(-1,1).normalized())	
 		else:
 			range_attack(Vector2i(-20,20),Vector2(-1,1).normalized())	
 		
 	elif Input.is_action_pressed("attack down") && Input.is_action_pressed("attack right"):
+		attack_direction = Vector2(1,1)
 		if Input.is_action_pressed("alternate attack"):
 			melee_attack(Vector2i(20,20),Vector2(1,1).normalized())
 		else:
 			range_attack(Vector2i(20,20),Vector2(1,1).normalized())		
 			
 	elif Input.is_action_pressed("attack up"):
+		attack_direction = Vector2(0,-1)
 		if Input.is_action_pressed("alternate attack"):
 			melee_attack(Vector2i(0,-20), Vector2(0,-1))
 		else:
 			range_attack(Vector2i(0,-20), Vector2(0,-1))	
 		
 	elif Input.is_action_pressed("attack down"):
+		attack_direction = Vector2(0,1)
 		if Input.is_action_pressed("alternate attack"):
 			melee_attack(Vector2i(0,20),Vector2(0,1))	
 		else:
 			range_attack(Vector2i(0,20),Vector2(0,1))	
 		
 	elif Input.is_action_pressed("attack left"):
+		attack_direction = Vector2(-1,0)
 		if Input.is_action_pressed("alternate attack"):
 			melee_attack(Vector2i(-20,0),Vector2(-1,0))	
 		else:
 			range_attack(Vector2i(-20,0),Vector2(-1,0))	
 		
 	elif Input.is_action_pressed("attack right"):
+		attack_direction = Vector2(1,0)
 		if Input.is_action_pressed("alternate attack"):
 			melee_attack(Vector2i(20,0),Vector2(1,0))	
 		else:
 			range_attack(Vector2i(20,0),Vector2(1,0))		
 		
 	if Input.is_action_just_released("attack up"):
-		pass
-	if Input.is_action_just_released("attack down"):
-		pass	
-	if Input.is_action_just_released("attack left"):			
-		pass	
-	if Input.is_action_just_released("attack right"):		
-		pass
+		attack_direction = Vector2.ZERO		
 		
+	if Input.is_action_just_released("attack down"):
+		attack_direction = Vector2.ZERO
+			
+	if Input.is_action_just_released("attack left"):			
+		attack_direction = Vector2.ZERO
+		lookahead_adjust = 0
+		
+	if Input.is_action_just_released("attack right"):		
+		attack_direction = Vector2.ZERO
+		lookahead_adjust = 0
+
 	# Get the input direction and handle the movement/deceleration.	
 	direction = Input.get_vector("left", "right", "up", "down")	
 	# Temporary undo vector normalization for now.			

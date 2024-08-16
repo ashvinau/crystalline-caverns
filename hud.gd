@@ -10,7 +10,7 @@ var bar_color = Color.DARK_RED
 var bar_negative = Color.BLACK
 #var bar_negative = Color(1,1,1,0) # Transparent
 
-var  indicator_scene = preload("res://indicator.tscn")
+var indicator_scene = preload("res://indicator.tscn")
 
 func update_hud():
 	health_text.text =  str(Globals.player_health,"/",Globals.player_max_health)

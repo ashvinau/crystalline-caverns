@@ -1,11 +1,11 @@
 extends Node
 
 # World Constants
-const RAND_SEED = 420 # 42 for fast-loading debug level
-const WIDTH = 512
-const HEIGHT = 512
-const CLAMP = 120
-const GRAVITY = 490
+const RAND_SEED: int = 42 # 42 for fast-loading debug level
+const WIDTH: int = 512
+const HEIGHT: int = 512
+const CLAMP: int = 120
+const GRAVITY: int = 490
 
 # Player Stat Constants
 const PLAYER_MAX_HEALTH = 420

@@ -285,13 +285,12 @@ func _ready():
 		setPlayFieldMap(self, 1, 0,0)	
 		print("Generating player spawn...")
 		generateSpawn()	
-		print("Generating preview...")		
-		hud.displayPreview(geoMatrix, spawnLoc)
 		print("Generating backgrounds...")	
 		set_background(10, 0.7, $Background/Parallax1/Layer1,get_node("../BGViewContainer/BGViewport1/BackgroundMap1"),get_node("../BGViewContainer/BGViewport1"))	
 		set_background(20, 0.5, $Background/Parallax2/Layer2,get_node("../BGViewContainer/BGViewport2/BackgroundMap2"),get_node("../BGViewContainer/BGViewport2"))	
 	set_rear_bg()
-	
+	print("Generating preview...")		
+	hud.displayPreview(geoMatrix, spawnLoc)
 	print("PlayField ready.")
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
