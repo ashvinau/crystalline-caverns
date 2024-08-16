@@ -1,13 +1,18 @@
 extends CharacterBody2D
 
-var cur_double_jumps : int = 0
-var animation_locked : bool = false
-var orientation_locked : bool = false
-var shot_lock : bool = false
-var melee_lock : bool = false
-var direction : Vector2 = Vector2.ZERO
-var was_in_air : bool = false
-var crouched : bool = false
+const LOOKAHEAD_LIMIT: int = 300
+const LOOKAHEAD_SPEED: float = 0.15 # proportion
+
+var cur_double_jumps: int = 0
+var animation_locked: bool = false
+var orientation_locked: bool = false
+var shot_lock: bool = false
+var melee_lock: bool = false
+var direction: Vector2 = Vector2.ZERO
+var was_in_air: bool = false
+var crouched: bool = false
+var camera_offset_x: int = 0
+var lookahead_adjust: float = 0
 
 @onready var animated_sprite : AnimatedSprite2D = $AnimatedSprite2D
 @onready var centerCam = get_node("../../CenterCamera")
@@ -32,7 +37,7 @@ func set_player(color: Color):
 
 func _ready():
 	pass	
-
+	
 func _physics_process(delta):
 	# Speed caps
 	if (self.velocity.x > Globals.speed_cap):
@@ -44,29 +49,41 @@ func _physics_process(delta):
 	elif (self.velocity.y < -Globals.speed_cap):
 		self.velocity.y = -Globals.speed_cap	
 	
-	# Update cameras
-	#global_position = global_position.round() # Trying to fix scaling jitter
-	centerCam.global_position = global_position	
+	# Update offset	
+	if direction.x == 0:
+		camera_offset_x = move_toward(camera_offset_x, 0, delta)
+		lookahead_adjust = 0
+	elif abs(camera_offset_x) <= LOOKAHEAD_LIMIT:
+		var distance: float = (abs(camera_offset_x) / LOOKAHEAD_LIMIT)
+		camera_offset_x += direction.x + lookahead_adjust
+		lookahead_adjust += (direction.x * LOOKAHEAD_SPEED) 		
 	
-	leftCam.global_position.x = global_position.x - (Globals.WIDTH * 16)
-	leftCam.global_position.y = global_position.y
-	rightCam.global_position.x = global_position.x + (Globals.WIDTH * 16) 
-	rightCam.global_position.y = global_position.y
+	# Update cameras	
+	var offset_position: Vector2i = global_position #.round() # Trying to fix scaling jitter
+	offset_position.x = global_position.x + camera_offset_x
+	offset_position.y = global_position.y	
 	
-	topCam.global_position.x = global_position.x
-	topCam.global_position.y = global_position.y - (Globals.HEIGHT * 16)
-	bottomCam.global_position.x = global_position.x
-	bottomCam.global_position.y = global_position.y + (Globals.HEIGHT * 16)	
+	centerCam.global_position = offset_position	
 	
-	ULCam.global_position.x = global_position.x - (Globals.WIDTH * 16)
-	ULCam.global_position.y = global_position.y - (Globals.HEIGHT * 16)
-	URCam.global_position.x = global_position.x + (Globals.WIDTH * 16) 
-	URCam.global_position.y = global_position.y - (Globals.HEIGHT * 16)
+	leftCam.global_position.x = offset_position.x - (Globals.WIDTH * 16)
+	leftCam.global_position.y = offset_position.y
+	rightCam.global_position.x = offset_position.x + (Globals.WIDTH * 16) 
+	rightCam.global_position.y = offset_position.y
 	
-	LLCam.global_position.x = global_position.x - (Globals.WIDTH * 16)
-	LLCam.global_position.y = global_position.y + (Globals.HEIGHT * 16)
-	LRCam.global_position.x = global_position.x + (Globals.WIDTH * 16)
-	LRCam.global_position.y = global_position.y + (Globals.HEIGHT * 16)	
+	topCam.global_position.x = offset_position.x
+	topCam.global_position.y = offset_position.y - (Globals.HEIGHT * 16)
+	bottomCam.global_position.x = offset_position.x
+	bottomCam.global_position.y = offset_position.y + (Globals.HEIGHT * 16)	
+	
+	ULCam.global_position.x = offset_position.x - (Globals.WIDTH * 16)
+	ULCam.global_position.y = offset_position.y - (Globals.HEIGHT * 16)
+	URCam.global_position.x = offset_position.x + (Globals.WIDTH * 16) 
+	URCam.global_position.y = offset_position.y - (Globals.HEIGHT * 16)
+	
+	LLCam.global_position.x = offset_position.x - (Globals.WIDTH * 16)
+	LLCam.global_position.y = offset_position.y + (Globals.HEIGHT * 16)
+	LRCam.global_position.x = offset_position.x + (Globals.WIDTH * 16)
+	LRCam.global_position.y = offset_position.y + (Globals.HEIGHT * 16)	
 	
 	# Add the gravity.
 	if not is_on_floor():		

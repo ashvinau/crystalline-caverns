@@ -6,8 +6,8 @@ var bar_image: Image = Image.create(HEALTH_BAR_SIZE.x,HEALTH_BAR_SIZE.y,false, I
 var player_indicator: AnimatedSprite2D
 @onready var health_text = $Health
 
-var bar_color = Color.RED
-var bar_negative = Color.BLUE
+var bar_color = Color.DARK_RED
+var bar_negative = Color.BLACK
 #var bar_negative = Color(1,1,1,0) # Transparent
 
 var  indicator_scene = preload("res://indicator.tscn")

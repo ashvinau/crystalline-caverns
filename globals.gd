@@ -104,6 +104,9 @@ func SafeIndex(index : Vector2i) -> Vector2i:
 	var y = index.y % Globals.HEIGHT
 	return Vector2i(x,y)
 	
+func fade(x: float) -> float:
+	return x * x * x * (x * (x * 6 - 15) + 10) # y = 6x^5 - 15x^4 + 10x^3
+	
 func invertMonoColor(value: int) -> Color:
 	value = 255 - value
 	return Color8(value, value, value)
