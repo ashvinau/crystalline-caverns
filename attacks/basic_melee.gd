@@ -25,7 +25,7 @@ func set_slash(life_time: float, coll_mask: int, color: Color, weight: float, di
 func _physics_process(delta):	
 	position.x += velocity.x * delta
 	position.y += velocity.y * delta
-	checkSlashLoc()	
+	check_slash_loc()	
 	if expiring:
 		transparency -= delta * 4		
 		modulate = Color(slash_color.r, slash_color.g, slash_color.b, transparency)		
@@ -50,7 +50,7 @@ func apply_melee_force(target_node):
 		target_node.velocity.y = (slash_direction.y * melee_force)
 		target_node.velocity.x = (slash_direction.x * melee_force)
 
-func checkSlashLoc():
+func check_slash_loc():
 	$CollisionShape2D.set_deferred("disabled", false)
 	var locX = self.position.x
 	var locY = self.position.y	

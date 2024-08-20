@@ -91,7 +91,7 @@ func color_to_vector(inColor: Color) -> Vector4:
 func I82F(intNum : int) -> float:
 	return intNum / 255.0
 	
-func tileMapToImage(tilemap: TileMap) -> ViewportTexture:
+func tilemap_to_image(tilemap: TileMap) -> ViewportTexture:
 	var viewport = SubViewport.new()
 	viewport.size = Vector2i(Globals.WIDTH * 16, Globals.HEIGHT * 16)
 	var holder = Node2D.new()
@@ -99,7 +99,7 @@ func tileMapToImage(tilemap: TileMap) -> ViewportTexture:
 	viewport.add_child(tilemap)		
 	return viewport.get_texture()	
 	
-func SafeIndex(index : Vector2i) -> Vector2i:
+func safe_index(index : Vector2i) -> Vector2i:
 	var x = index.x % Globals.WIDTH
 	var y = index.y % Globals.HEIGHT
 	return Vector2i(x,y)
@@ -107,7 +107,7 @@ func SafeIndex(index : Vector2i) -> Vector2i:
 func fade(x: float) -> float:
 	return x * x * x * (x * (x * 6 - 15) + 10) # y = 6x^5 - 15x^4 + 10x^3
 	
-func invertMonoColor(value: int) -> Color:
+func invert_mono_color(value: int) -> Color:
 	value = 255 - value
 	return Color8(value, value, value)
 	
@@ -127,7 +127,7 @@ func flood_fill(matrix, start_pos: Vector2i, target_value, replacement_value):
 		var pos = stack.pop_back()
 				
 		# Make index positions safe
-		var adj_index: Vector2i = Globals.SafeIndex(Vector2i(pos.x, pos.y))
+		var adj_index: Vector2i = Globals.safe_index(Vector2i(pos.x, pos.y))
 		
 		# Get the current value at the position
 		var current_value = matrix[adj_index.x][adj_index.y]
@@ -145,7 +145,7 @@ func flood_fill(matrix, start_pos: Vector2i, target_value, replacement_value):
 		stack.append(Vector2i(pos.x, pos.y + 1))
 		stack.append(Vector2i(pos.x, pos.y - 1))
 		
-func pickSpawn(matrix, dist: int) -> Vector2i:
+func pick_spawn(matrix, dist: int) -> Vector2i:
 	var found: bool = false	
 	var curX: int
 	var curY: int
@@ -155,22 +155,46 @@ func pickSpawn(matrix, dist: int) -> Vector2i:
 		tried += 1
 		curX = randi_range(0,Globals.WIDTH)
 		curY = randi_range(0,Globals.HEIGHT)
-		found = raycastCardinal(matrix, curX, curY, dist)
+		found = raycast_cardinal(matrix, curX, curY, dist)
 	
-	print("Spawn found in ", tried, " attempts")
+	print("Spawn found in ", tried, " attempts.")
 	return Vector2i(curX, curY)	
 	
-func raycastCardinal(matrix, x: int, y: int, minDist: int) -> bool:
+func raycast_cardinal(matrix, x: int, y: int, minDist: int) -> bool:
 	return raycast(matrix,Vector2(0,-1),x,y,minDist) && raycast(matrix,Vector2(0,1),x,y,minDist) && raycast(matrix,Vector2(1,0),x,y,minDist) && raycast(matrix,Vector2(0,-1),x, y,minDist) && raycast(matrix,Vector2(1,-1),x,y,minDist) && raycast(matrix,Vector2(1,1),x,y,minDist) && raycast(matrix,Vector2(-1,1),x,y,minDist) && raycast(matrix,Vector2(-1,-1),x, y,minDist)
 	
 func raycast(matrix, direction: Vector2, x: float, y: float, minDist: int) -> bool:
 	for cur_dist in range(0, minDist):
-		var safeCoords: Vector2i = SafeIndex(Vector2i(x,y))
+		var safeCoords: Vector2i = safe_index(Vector2i(x,y))
 		if (matrix[safeCoords.x][safeCoords.y] == 1):
 			return false
 		x += direction.x
 		y += direction.y
 	return true
+	
+func toroidal_matrix_dist(width: int, height: int, p1: Vector2i, p2: Vector2i) -> float:
+	if ((p1.x > width) || (p1.x < 0) || (p1.y > height) || (p1.y < 0) || (p2.x > width) || (p2.x < 0) || (p2.y > height) || (p2.y < 0)):
+		return -1
+
+	var x1: float = float(p1.x) / float(width)
+	var y1: float = float(p1.y) / float(height)
+	var x2: float = float(p2.x) / float(width)
+	var y2: float = float(p2.y) / float(height)
+
+	var large_dimension: int = max(width, height) 
+	return toroidal_distance(x1,y1,x2,y2) * large_dimension
+
+func toroidal_distance(x1: float, y1: float, x2: float, y2: float) -> float:
+	var dx: float = abs(x2 - x1)
+	var dy: float = abs(y2 - y1)
+	
+	if (dx > 0.5):
+		dx = 1.0 - dx
+	
+	if (dy > 0.5):
+		dy = 1.0 - dy
+		
+	return sqrt(dx*dx + dy*dy)	
 
 # Called when the node enters the scene tree for the first time.
 func _ready():	

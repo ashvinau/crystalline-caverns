@@ -22,7 +22,7 @@ func _physics_process(delta):
 	position.y += velocity.y * delta	
 	velocity.y += (Globals.GRAVITY * delta) * Globals.shot_weight # effect of gravity
 	rotation_degrees += 100 * delta
-	checkBulletLoc()
+	check_bullet_loc()
 
 func expire():
 	expiring = true	
@@ -52,7 +52,7 @@ func _on_timer_timeout():
 func _on_expiry_finished():	
 	queue_free()
 	
-func checkBulletLoc():
+func check_bullet_loc():
 	$CollisionShape2D.set_deferred("disabled", false)
 	var locX = self.position.x
 	var locY = self.position.y	

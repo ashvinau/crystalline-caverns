@@ -13,7 +13,7 @@ func _ready():
 	get_node("/root/GameCanvas/URViewportContainer/URViewport").world_2d = centerViewport.world_2d
 	get_node("/root/GameCanvas/LLViewportContainer/LLViewport").world_2d = centerViewport.world_2d
 	get_node("/root/GameCanvas/LRViewportContainer/LRViewport").world_2d = centerViewport.world_2d
-
+		
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	pass

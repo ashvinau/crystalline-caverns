@@ -27,7 +27,7 @@ func update_hud():
 				
 	$LifeBar.texture.update(bar_image)
 	
-func displayPreview(geoMatrix, spawnLoc: Vector2i):
+func display_preview(geoMatrix, spawnLoc: Vector2i):
 	var perlinImage: Image = Image.create(Globals.WIDTH, Globals.HEIGHT, false, Image.FORMAT_RGBA8)
 	var previewNode = $levelPreview
 	previewNode.texture = ImageTexture.create_from_image(perlinImage)	

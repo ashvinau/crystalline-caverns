@@ -254,7 +254,7 @@ func _physics_process(delta):
 	update_animation()
 	if !orientation_locked:
 		update_facing_direction()
-	checkPlayerLoc()
+	check_player_loc()
 	
 func align_attack(direction: Vector2):
 	if (direction.x > 0):
@@ -355,7 +355,7 @@ func _on_range_cd_timer_timeout():
 func _on_melee_cd_timer_timeout():
 	melee_lock = false
 		
-func checkPlayerLoc():
+func check_player_loc():
 	$CollisionShape2D.set_deferred("disabled", false)
 	var locX = self.position.x
 	var locY = self.position.y	
