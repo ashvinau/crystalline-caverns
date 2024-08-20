@@ -145,53 +145,32 @@ func flood_fill(matrix, start_pos: Vector2i, target_value, replacement_value):
 		stack.append(Vector2i(pos.x, pos.y + 1))
 		stack.append(Vector2i(pos.x, pos.y - 1))
 		
-func pickPlayerSpawn(matrix) -> Vector2i:
-	var found: bool = false
-	var spawnDist = 40
+func pickSpawn(matrix, dist: int) -> Vector2i:
+	var found: bool = false	
 	var curX: int
 	var curY: int
+	var tried: int = 0
 	
 	while !found:
+		tried += 1
 		curX = randi_range(0,Globals.WIDTH)
 		curY = randi_range(0,Globals.HEIGHT)
-		found = raycastCardinal(matrix, curX, curY, spawnDist)		
+		found = raycastCardinal(matrix, curX, curY, dist)
 	
+	print("Spawn found in ", tried, " attempts")
 	return Vector2i(curX, curY)	
 	
 func raycastCardinal(matrix, x: int, y: int, minDist: int) -> bool:
-	return raycastUp(matrix, x, y, minDist) && raycastDown(matrix, x, y, minDist) && raycastLeft(matrix, x, y, minDist) && raycastRight(matrix, x, y, minDist)
-		
-func raycastUp(matrix, x: int, y: int, minDist: int) -> bool:
-	for yi in range(y-1, y-minDist, -1):
-		var xs = Globals.SafeIndex(Vector2i(x,yi)).x
-		var yis = Globals.SafeIndex(Vector2i(x,yi)).y
-		if (matrix[xs][yis] == 1):
-			return false
-	return true	
+	return raycast(matrix,Vector2(0,-1),x,y,minDist) && raycast(matrix,Vector2(0,1),x,y,minDist) && raycast(matrix,Vector2(1,0),x,y,minDist) && raycast(matrix,Vector2(0,-1),x, y,minDist) && raycast(matrix,Vector2(1,-1),x,y,minDist) && raycast(matrix,Vector2(1,1),x,y,minDist) && raycast(matrix,Vector2(-1,1),x,y,minDist) && raycast(matrix,Vector2(-1,-1),x, y,minDist)
 	
-func raycastDown(matrix, x: int, y: int, minDist: int) -> bool:
-	for yi in range(y+1, y+minDist, 1):
-		var xs = Globals.SafeIndex(Vector2i(x,yi)).x
-		var yis = Globals.SafeIndex(Vector2i(x,yi)).y
-		if (matrix[xs][yis] == 1):
+func raycast(matrix, direction: Vector2, x: float, y: float, minDist: int) -> bool:
+	for cur_dist in range(0, minDist):
+		var safeCoords: Vector2i = SafeIndex(Vector2i(x,y))
+		if (matrix[safeCoords.x][safeCoords.y] == 1):
 			return false
-	return true	
-	
-func raycastLeft(matrix, x: int, y: int, minDist: int) -> bool:
-	for xi in range(x-1, x-minDist, -1):
-		var xis = Globals.SafeIndex(Vector2i(xi,y)).x
-		var ys = Globals.SafeIndex(Vector2i(xi,y)).y
-		if (matrix[xis][ys] == 1):
-			return false
-	return true	
-	
-func raycastRight(matrix, x: int, y: int, minDist: int) -> bool:
-	for xi in range(x+1, x+minDist, 1):
-		var xis = Globals.SafeIndex(Vector2i(xi,y)).x
-		var ys = Globals.SafeIndex(Vector2i(xi,y)).y
-		if (matrix[xis][ys] == 1):
-			return false
-	return true	
+		x += direction.x
+		y += direction.y
+	return true
 
 # Called when the node enters the scene tree for the first time.
 func _ready():	

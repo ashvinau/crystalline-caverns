@@ -8,6 +8,7 @@ var transparency: float = 1
 var slash_direction: Vector2
 var knockback: bool = false
 var velocity: Vector2
+var melee_force = (Globals.melee_velocity * Globals.melee_weight) / Globals.inertia
 
 func set_slash(life_time: float, coll_mask: int, color: Color, weight: float, direction: Vector2, player: CharacterBody2D):
 	$LifeTimer.wait_time = life_time
@@ -30,10 +31,8 @@ func _physics_process(delta):
 		modulate = Color(slash_color.r, slash_color.g, slash_color.b, transparency)		
 		$AnimatedSprite2D.material.set_shader_parameter("modulate",Globals.color_to_vector(modulate))				
 				
-func _on_body_entered(body):
-	if (not knockback):
-		knockback = true
-		var melee_force = (Globals.melee_velocity * Globals.melee_weight) / Globals.inertia
+func _on_body_entered(body):		
+	if (not knockback):	
 		if abs(slash_direction.x) > abs(slash_direction.y):
 			player_node.velocity.x = -(slash_direction.x * melee_force)	
 		else:
@@ -41,7 +40,15 @@ func _on_body_entered(body):
 		
 		if player_node.cur_double_jumps > 0:
 			player_node.cur_double_jumps -= 1
-		_on_life_timer_timeout()
+		_on_life_timer_timeout()		
+	
+	knockback = true	
+	if body.name == "FormlessCrawler":
+		apply_melee_force(body)		
+	
+func apply_melee_force(target_node):		
+		target_node.velocity.y = (slash_direction.y * melee_force)
+		target_node.velocity.x = (slash_direction.x * melee_force)
 
 func checkSlashLoc():
 	$CollisionShape2D.set_deferred("disabled", false)

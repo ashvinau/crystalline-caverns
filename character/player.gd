@@ -12,7 +12,7 @@ var direction: Vector2 = Vector2.ZERO
 var was_in_air: bool = false
 var crouched: bool = false
 var camera_offset_x: int = 0
-var lookahead_adjust: float = 0
+var lookahead_adjust: float = 1
 var attack_direction: Vector2 = Vector2.ZERO
 
 @onready var animated_sprite : AnimatedSprite2D = $AnimatedSprite2D
@@ -51,25 +51,49 @@ func _physics_process(delta):
 		self.velocity.y = -Globals.speed_cap	
 	
 	# Update offset	- this can probably be refactored - resets to lookahead adjust on keypress/release below
+	var lookahead_slow: int = 150
+	
+	# Clamp the min and max camera speed
+	if (lookahead_adjust < 1):
+		lookahead_adjust = 1
+	if (lookahead_adjust > 8):
+		lookahead_adjust = 8
+		
 	if direction.x == 0 && attack_direction.x == 0:
 		camera_offset_x = move_toward(camera_offset_x, 0, delta)
 		lookahead_adjust = 0	
+	
 	elif (attack_direction.x > 0): 		
 		if (camera_offset_x < LOOKAHEAD_LIMIT):
 			camera_offset_x += lookahead_adjust
-			lookahead_adjust += delta + LOOKAHEAD_SPEED
+			if (camera_offset_x < lookahead_slow):
+				lookahead_adjust += delta + LOOKAHEAD_SPEED
+			else:
+				lookahead_adjust -= delta + LOOKAHEAD_SPEED
+	
 	elif (attack_direction.x < 0):
 		if (camera_offset_x > -LOOKAHEAD_LIMIT):
 			camera_offset_x -= lookahead_adjust
-			lookahead_adjust += delta + LOOKAHEAD_SPEED	
+			if (camera_offset_x > -lookahead_slow):
+				lookahead_adjust += delta + LOOKAHEAD_SPEED
+			else:
+				lookahead_adjust -= delta + LOOKAHEAD_SPEED
+	
 	elif (direction.x > 0): 
 		if (camera_offset_x < LOOKAHEAD_LIMIT):
 			camera_offset_x += lookahead_adjust
-			lookahead_adjust += delta + LOOKAHEAD_SPEED
+			if (camera_offset_x < lookahead_slow):
+				lookahead_adjust += delta + LOOKAHEAD_SPEED
+			else:
+				lookahead_adjust -= delta + LOOKAHEAD_SPEED
+	
 	elif (direction.x < 0):
 		if (camera_offset_x > -LOOKAHEAD_LIMIT):
 			camera_offset_x -= lookahead_adjust
-			lookahead_adjust += delta + LOOKAHEAD_SPEED		
+			if (camera_offset_x > -lookahead_slow):
+				lookahead_adjust += delta + LOOKAHEAD_SPEED
+			else:
+				lookahead_adjust -= delta + LOOKAHEAD_SPEED
 	
 	# Update cameras	
 	var offset_position: Vector2i = global_position #.round() # Trying to fix scaling jitter
@@ -272,7 +296,7 @@ func range_attack(offset: Vector2i, direction: Vector2):
 		bullet_inst.position.x = self.position.x + offset.x
 		bullet_inst.position.y = self.position.y + offset.y
 		play_field.add_child(bullet_inst)
-		bullet_inst.set_bullet(Globals.shot_life,2,Globals.shot_color,Globals.shot_weight,"diamond")
+		bullet_inst.set_bullet(Globals.shot_life,2,Globals.shot_color,Globals.shot_weight,"diamond",self)
 		bullet_inst.velocity.x = (direction.x * Globals.shot_velocity) + randi_range(-Globals.shot_spread,Globals.shot_spread) # + velocity.x <- inherit velocity
 		self.velocity.x += -direction.x * ((Globals.shot_weight * Globals.shot_velocity) / Globals.inertia)
 		bullet_inst.velocity.y = (direction.y * Globals.shot_velocity) + randi_range(-Globals.shot_spread,Globals.shot_spread) # + velocity.y

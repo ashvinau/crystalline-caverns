@@ -14,6 +14,8 @@ var indicator_scene = preload("res://indicator.tscn")
 
 func update_hud():
 	health_text.text =  str(Globals.player_health,"/",Globals.player_max_health)
+	if Globals.player_health < 0:
+		Globals.player_health = 0
 	var health_percentage: float = (Globals.player_health / Globals.player_max_health) * 100
 	var health_width: int = int(health_percentage) * 6 # 100 * 6 = 600 px wide	
 	for x in HEALTH_BAR_SIZE.x:

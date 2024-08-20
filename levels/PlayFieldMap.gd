@@ -8,11 +8,13 @@ const AV = 998 # Match any value other than 0 for processing geomatrix
 @onready var hud = get_node("../../../../HUD")
 var playerNode: CharacterBody2D
 
-var player_scene = preload("res://character/player.tscn")
+var player_scene = preload("res://character/player.tscn") # Will need to be array for multiplayer
 var hud_scene = preload("res://hud.tscn")
 
-var perlinMatrix : Array = []
-var geoMatrix : Array = []
+var bosses: Array = []
+var enemies: Array = []
+var perlinMatrix: Array = []
+var geoMatrix: Array = []
 var spawnLoc: Vector2i
 
 # Called when the node enters the scene tree for the first time.
@@ -26,26 +28,30 @@ func _init():
 			perlinMatrix[x].append(0)
 	# Copy perlin matrix for modification		
 	geoMatrix = perlinMatrix.duplicate(true)
+	
+	#Load bosses and enemies into memory
+	enemies.append(preload("res://enemies/formless_crawler.tscn"))
 			
-func setGeoMatrix(clamp: int):	
+func setGeoMatrix(clamp: int, test: bool):	
 	var invalid: int = 0
 	
 	for x in Globals.WIDTH:
 		for y in Globals.HEIGHT:
 			if (perlinMatrix[x][y] <= clamp):
 				geoMatrix[x][y] = 1 # Solid square tile	
-				
-	# Test validity of generated geomatrix
-	var testMatrix = geoMatrix.duplicate(true)	
-	# Fill empty space starting at the spawn point		
-	Globals.flood_fill(testMatrix,Globals.pickPlayerSpawn(geoMatrix),0,255);
-	# Check for remaining 0 values
-	for x in Globals.WIDTH:
-		for y in Globals.HEIGHT:
-			if (testMatrix[x][y] == 0):				
-				invalid += 1
 	
-	print(invalid," invalid with clamp ", clamp, ".")	
+	if test:			
+		# Test validity of initial geomatrix if requested - rejection logic later
+		var testMatrix = geoMatrix.duplicate(true)
+		# Fill empty space starting at the spawn point		
+		Globals.flood_fill(testMatrix,Globals.pickSpawn(geoMatrix,40),0,255);
+		# Check for remaining 0 values
+		for x in Globals.WIDTH:
+			for y in Globals.HEIGHT:
+				if (testMatrix[x][y] == 0):				
+					invalid += 1
+		
+		print(invalid," invalid with clamp ", clamp, ".")	
 	
 	for x in Globals.WIDTH:
 		for y in Globals.HEIGHT:
@@ -216,11 +222,12 @@ func fillPerlinMatrix(matrix):
 	
 func respawn():
 	playerNode.queue_free()
-	spawn_character(spawnLoc * 16, Globals.player_color)
+	playerNode = spawn_entity(player_scene, spawnLoc * 16)
+	playerNode.set_player(Globals.player_color)
 	
 func generateSpawn():	
-	print("Building Spawn Point...")	
-	spawnLoc = Globals.pickPlayerSpawn(geoMatrix)
+	print("Building Spawn Point...")
+	spawnLoc = Globals.pickSpawn(geoMatrix,40)
 	print("Spawn Location: ", spawnLoc)	
 	var adjSpawnLoc = spawnLoc * 16
 	print("Adjusted Spawn: ", adjSpawnLoc)
@@ -228,10 +235,11 @@ func generateSpawn():
 	for xi in range(spawnLoc.x-5, spawnLoc.x+5):
 		set_cell(0, Globals.SafeIndex(Vector2i(xi, spawnLoc.y+22)), 1, Vector2i(0,0), 0)	
 	
-	spawn_character(adjSpawnLoc, Globals.player_color)	
+	playerNode = spawn_entity(player_scene, adjSpawnLoc)
+	playerNode.set_player(Globals.player_color)
 
 func set_background(pOffset: int, darken: float, layerNode: TextureRect, bgMap: TileMap, bgViewport: SubViewport):
-	setGeoMatrix(Globals.CLAMP + pOffset)		
+	setGeoMatrix(Globals.CLAMP + pOffset, false)		
 	var bgImage: Image = Image.create(Globals.WIDTH * 16, Globals.HEIGHT * 16, false, Image.FORMAT_RGBA8)	
 	setPlayFieldMap(bgMap, 0,  0, 0)	
 	await RenderingServer.frame_post_draw
@@ -252,7 +260,7 @@ func set_rear_bg():
 			bgImage.set_pixel(x,y,curColor)	
 			
 	bgImage.resize(Globals.WIDTH * 16, Globals.HEIGHT * 16, Image.INTERPOLATE_LANCZOS)	
-	bgImage.adjust_bcs(1.8,1,1)
+	bgImage.adjust_bcs(1.7,1,1)
 	bgNode.texture = ImageTexture.create_from_image(bgImage)	
 	
 func debug_level():
@@ -261,36 +269,43 @@ func debug_level():
 			geoMatrix[x][y] = 1	
 	setPlayFieldMap(self, 1,0,0)
 	
-func spawn_character(position: Vector2i, color: Color):	
-	playerNode = player_scene.instantiate()
-	playerNode.position = position	
-	play_field.add_child.call_deferred(playerNode)
-	playerNode.set_player(color)	
+func spawn_entity(entity: PackedScene, position: Vector2i) -> CharacterBody2D:		
+	var entity_node = entity.instantiate()
+	entity_node.position = position	
+	play_field.add_child.call_deferred(entity_node)	
+	return entity_node
 	
 func _ready():
-	if (Globals.RAND_SEED == 42):
+	if (Globals.RAND_SEED == 42): # Debug/Test Level
 		print("Debug seed mode.")
 		print("Generating perlin matrix...")
 		fillPerlinMatrix(perlinMatrix)
 		print("Generating test level...")
 		debug_level()
 		print("Generating player spawn...")
-		generateSpawn()	
-	else:	
+		generateSpawn()
+		print("Generating preview...")
+		hud.displayPreview(geoMatrix, spawnLoc)
+		print("Test enemies...")
+		var enemy_node = spawn_entity(enemies[0], Vector2i(position.x + 50,position.y))
+		enemy_node.set_mob(Color.ORANGE,300,100,600,-300,3,2,1)
+		
+	else:	# Procgen level
 		print("Generating perlin matrix...")
 		fillPerlinMatrix(perlinMatrix)
 		print("Setting geo matrix...")
-		setGeoMatrix(Globals.CLAMP)
+		setGeoMatrix(Globals.CLAMP, true)
 		print("Setting PlayField TileMap...")
 		setPlayFieldMap(self, 1, 0,0)	
 		print("Generating player spawn...")
 		generateSpawn()	
+		print("Generating preview...")
+		hud.displayPreview(geoMatrix, spawnLoc)
 		print("Generating backgrounds...")	
 		set_background(10, 0.7, $Background/Parallax1/Layer1,get_node("../BGViewContainer/BGViewport1/BackgroundMap1"),get_node("../BGViewContainer/BGViewport1"))	
 		set_background(20, 0.5, $Background/Parallax2/Layer2,get_node("../BGViewContainer/BGViewport2/BackgroundMap2"),get_node("../BGViewContainer/BGViewport2"))	
 	set_rear_bg()
-	print("Generating preview...")		
-	hud.displayPreview(geoMatrix, spawnLoc)
+	
 	print("PlayField ready.")
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.

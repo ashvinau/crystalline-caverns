@@ -1,10 +1,11 @@
 extends Area2D
 
-# Get the gravity from the project settings to be synced with RigidBody nodes.
+var player_node: CharacterBody2D
 var expiring: bool = false
 var velocity: Vector2
+var bullet_weight: float
 
-func set_bullet(life_time: float, coll_mask: int, color: Color, weight: float, shape: String):
+func set_bullet(life_time: float, coll_mask: int, color: Color, weight: float, shape: String, player: CharacterBody2D):
 	$LifeTimer.wait_time = life_time
 	$LifeTimer.start()
 	set_collision_mask_value(coll_mask, true)
@@ -12,6 +13,8 @@ func set_bullet(life_time: float, coll_mask: int, color: Color, weight: float, s
 	self.scale.y *= weight	
 	$AnimatedSprite2D.material.set_shader_parameter("modulate",Globals.color_to_vector(color))
 	modulate = color
+	player_node = player
+	bullet_weight = weight
 	$AnimatedSprite2D.play(shape)
 
 func _physics_process(delta):
@@ -31,9 +34,16 @@ func expire():
 	$Expiry.one_shot = true
 	$Expiry.emitting = true		
 
-func _on_body_entered(body):
+func _on_body_entered(body):	
+	if body.name == "FormlessCrawler":
+		apply_shot_force(body)
+	
 	if not expiring:
 		expire()
+		
+func apply_shot_force(target_node):		
+	target_node.velocity.y = velocity.y * bullet_weight
+	target_node.velocity.x = velocity.x * bullet_weight
 
 func _on_timer_timeout():
 	if not expiring:
