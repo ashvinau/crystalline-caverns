@@ -15,7 +15,8 @@ var camera_offset_x: int = 0
 var lookahead_adjust: float = 1
 var attack_direction: Vector2 = Vector2.ZERO
 
-@onready var animated_sprite : AnimatedSprite2D = $AnimatedSprite2D
+@onready var hud_node = get_node("../../../../HUD")
+@onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var centerCam = get_node("../../CenterCamera")
 @onready var leftCam = get_node("../../../../LeftViewportContainer/LeftViewport/LeftCamera")
 @onready var rightCam = get_node("../../../../RightViewportContainer/RightViewport/RightCamera")
@@ -284,7 +285,12 @@ func melee_attack(offset: Vector2i, direction: Vector2):
 		slash_inst.velocity.x = (direction.x * Globals.melee_velocity) # + velocity.x <- inherit velocity
 		slash_inst.velocity.y = (direction.y * Globals.melee_velocity) # + velocity.y	
 		melee_lock = true
-		$MeleeCDTimer.start()		
+		$MeleeCDTimer.start()
+
+func hit(magnitude: float):
+	Globals.player_health -= abs(magnitude) / float(Globals.inertia)
+	hud_node.update_hud()
+	
 	
 func range_attack(offset: Vector2i, direction: Vector2):
 	if not shot_lock:

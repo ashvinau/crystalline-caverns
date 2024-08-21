@@ -1,0 +1,35 @@
+[gd_scene load_steps=3 format=3 uid="uid://hqpnjnexjcf8"]
+
+[ext_resource type="Script" path="res://effects/sparks.gd" id="1_vbmqk"]
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_515m5"]
+resource_local_to_scene = true
+particle_flag_disable_z = true
+angle_min = -90.0
+angle_max = 90.0
+spread = 0.0
+angular_velocity_min = -356.4
+angular_velocity_max = 327.6
+radial_velocity_min = -2.23517e-05
+radial_velocity_max = 40.0
+gravity = Vector3(0, 3, 0)
+scale_min = 3.0
+scale_max = 7.0
+hue_variation_min = -0.01
+hue_variation_max = 0.00999998
+
+[node name="Sparks" type="GPUParticles2D"]
+z_index = 4
+position = Vector2(0, 1)
+emitting = false
+amount = 30
+process_material = SubResource("ParticleProcessMaterial_515m5")
+lifetime = 4.0
+one_shot = true
+speed_scale = 10.0
+explosiveness = 0.5
+randomness = 1.0
+trail_lifetime = 0.2
+script = ExtResource("1_vbmqk")
+
+[connection signal="finished" from="." to="." method="_on_finished"]

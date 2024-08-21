@@ -1,7 +1,6 @@
 extends Area2D
 
-# Get the gravity from the project settings to be synced with RigidBody nodes.
-var player_node: CharacterBody2D
+var emitter_node: CharacterBody2D
 var expiring: bool = false
 var slash_color: Color
 var transparency: float = 1
@@ -10,40 +9,40 @@ var knockback: bool = false
 var velocity: Vector2
 var melee_force = (Globals.melee_velocity * Globals.melee_weight) / Globals.inertia
 
-func set_slash(life_time: float, coll_mask: int, color: Color, weight: float, direction: Vector2, player: CharacterBody2D):
+func set_slash(life_time: float, coll_mask: int, color: Color, weight: float, direction: Vector2, emitter: CharacterBody2D):
 	$LifeTimer.wait_time = life_time
 	$LifeTimer.start()
-	set_collision_mask_value(coll_mask, true)
+	set_collision_mask_value(coll_mask, true)	
 	self.scale.x *= weight 
 	self.scale.y *= weight
 	slash_color = color
 	slash_direction = direction
 	$AnimatedSprite2D.material.set_shader_parameter("modulate",Globals.color_to_vector(color))
 	modulate = color	
-	player_node = player
+	emitter_node = emitter
 	
-func _physics_process(delta):	
+func _physics_process(delta):
 	position.x += velocity.x * delta
 	position.y += velocity.y * delta
 	check_slash_loc()	
 	if expiring:
 		transparency -= delta * 4		
 		modulate = Color(slash_color.r, slash_color.g, slash_color.b, transparency)		
-		$AnimatedSprite2D.material.set_shader_parameter("modulate",Globals.color_to_vector(modulate))				
+		$AnimatedSprite2D.material.set_shader_parameter("modulate",Globals.color_to_vector(modulate))
 				
 func _on_body_entered(body):		
 	if (not knockback):	
 		if abs(slash_direction.x) > abs(slash_direction.y):
-			player_node.velocity.x = -(slash_direction.x * melee_force)	
+			emitter_node.velocity.x = -(slash_direction.x * melee_force)	
 		else:
-			player_node.velocity.y = -(slash_direction.y * melee_force)
+			emitter_node.velocity.y = -(slash_direction.y * melee_force)
 		
-		if player_node.cur_double_jumps > 0:
-			player_node.cur_double_jumps -= 1
-		_on_life_timer_timeout()		
+		if emitter_node.cur_double_jumps > 0:
+			emitter_node.cur_double_jumps -= 1
+		_on_life_timer_timeout()
 	
 	knockback = true	
-	if body.name == "FormlessCrawler":
+	if (["FormlessCrawler","Player","BasicMelee"].has(body.name)):
 		apply_melee_force(body)		
 	
 func apply_melee_force(target_node):		

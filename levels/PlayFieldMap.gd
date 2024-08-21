@@ -231,7 +231,7 @@ func generate_spawn():
 	print("Spawn Location: ", spawnLoc)	
 	var adjSpawnLoc = spawnLoc * 16
 	print("Adjusted Spawn: ", adjSpawnLoc)
-	#Build spawn
+	#Build spawn structure
 	for xi in range(spawnLoc.x-5, spawnLoc.x+5):
 		set_cell(0, Globals.safe_index(Vector2i(xi, spawnLoc.y+22)), 1, Vector2i(0,0), 0)	
 	
@@ -285,11 +285,7 @@ func _ready():
 		print("Generating player spawn...")
 		generate_spawn()
 		print("Generating preview...")
-		hud.display_preview(geoMatrix, spawnLoc)
-		print("Test enemies...")
-		var enemy_node = spawn_entity(enemies[0], Vector2i(position.x + 50,position.y))
-		enemy_node.set_mob(1,player_nodes,Color.ORANGE,300,100,600,-300,1,2,3,600,450,300)
-		
+		hud.display_preview(geoMatrix, spawnLoc)		
 	else:	# Procgen level
 		print("Generating perlin matrix...")
 		fill_perlin_matrix(perlinMatrix)
@@ -305,6 +301,10 @@ func _ready():
 		set_background(10, 0.7, $Background/Parallax1/Layer1,get_node("../BGViewContainer/BGViewport1/BackgroundMap1"),get_node("../BGViewContainer/BGViewport1"))	
 		set_background(20, 0.5, $Background/Parallax2/Layer2,get_node("../BGViewContainer/BGViewport2/BackgroundMap2"),get_node("../BGViewContainer/BGViewport2"))	
 	set_rear_bg()
+	
+	print("Test enemies...")
+	var enemy_node = spawn_entity(enemies[0], Vector2i(player_nodes[0].position.x + 300,player_nodes[0].position.y))
+	enemy_node.set_mob(1,player_nodes,Color.ORANGE,300,100,600,-300,1,2,3,900,700,400)
 	
 	print("PlayField ready.")
 	

@@ -18,6 +18,8 @@ var player_nodes: Array = []
 var mob_color: Color
 var mob_level: int
 
+var cur_double_jumps: int # Required for compatibility with basic_melee.gd - not used
+
 var basic_bullet = preload("res://attacks/basic_bullet.tscn")
 var basic_melee = preload("res://attacks/basic_melee.tscn")
 @onready var play_field: Node2D = get_node("..") # parent node: PlayField
@@ -102,6 +104,11 @@ func update_animation():
 func _on_animated_sprite_2d_animation_finished():
 	if (["attack", "hit", "jump", "land"].has($AnimatedSprite2D.animation)):
 		animation_locked = false
+		
+func hit(magnitude: float):	
+	mob_health -= abs(magnitude) / float(Globals.INERTIA)	
+	if mob_health > 0:
+		mob_health = 0
 	
 func check_mob_loc():
 	$CollisionShape2D.set_deferred("disabled", false)
@@ -133,7 +140,6 @@ func range_attack(offset: Vector2i, direction: Vector2):
 	if not shot_lock:
 		align_attack(direction)
 		animation_locked = true		
-		
 		var bullet_inst = basic_bullet.instantiate()
 		bullet_inst.position.x = self.position.x + offset.x
 		bullet_inst.position.y = self.position.y + offset.y
@@ -145,6 +151,21 @@ func range_attack(offset: Vector2i, direction: Vector2):
 		self.velocity.y += -direction.y * ((Globals.SHOT_WEIGHT * Globals.SHOT_VELOCITY) / Globals.INERTIA)
 		shot_lock = true
 		$RangeTimer.start()
+		
+func melee_attack(offset: Vector2i, direction: Vector2):
+	if not melee_lock:
+		align_attack(direction)
+		animation_locked = true		
+		var melee_inst = basic_melee.instantiate()
+		melee_inst.position.x = self.position.x + offset.x
+		melee_inst.position.y = self.position.y + offset.y
+		play_field.add_child(melee_inst)
+		melee_inst.look_at(Vector2(self.position.x + direction.x * 50, self.position.y + direction.y * 50))		
+		melee_inst.set_slash(Globals.MELEE_LIFE,1,mob_color,Globals.MELEE_WEIGHT,direction,self)		
+		melee_inst.velocity.x = (direction.x * Globals.melee_velocity) # + velocity.x <- inherit velocity
+		melee_inst.velocity.y = (direction.y * Globals.melee_velocity) # + velocity.y	
+		melee_lock = true
+		$MeleeTimer.start()
 	
 func _on_move_timer_timeout() -> void:
 	direction = Vector2.ZERO # Reset movement direction
@@ -173,8 +194,15 @@ func _on_move_timer_timeout() -> void:
 			
 	if (closest_dist < shot_dist): # Within projectile range
 		var shot_direction: Vector2 = self.position.direction_to(tgt_player_loc)
+		shot_direction.y -= closest_dist * 0.00033 # aim up a bit for distant targets
 		range_attack(shot_direction * 20, shot_direction)
 		
+	if (closest_dist < melee_dist): # Within melee range
+		var slash_direction: Vector2 = self.position.direction_to(tgt_player_loc)
+		melee_attack(slash_direction * 20, slash_direction)		
+		
+	if is_on_wall() && is_on_floor():
+		jump()
 
 func _on_range_timer_timeout() -> void:
 	shot_lock = false

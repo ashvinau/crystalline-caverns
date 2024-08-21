@@ -96,6 +96,7 @@ animations = [{
 size = Vector2(19.8995, 19.8995)
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_bgwj1"]
+resource_local_to_scene = true
 lifetime_randomness = 0.75
 particle_flag_disable_z = true
 emission_shape = 1
@@ -117,7 +118,7 @@ turbulence_noise_scale = 5.0
 z_index = 2
 z_as_relative = false
 collision_layer = 0
-collision_mask = 0
+collision_mask = 16
 script = ExtResource("1_mn4mn")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]

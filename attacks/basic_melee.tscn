@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://buyfouljcr5rq" path="res://art/melee-sheet.png" id="3_o8x58"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_awplc"]
+resource_local_to_scene = true
 shader = ExtResource("2_huj3m")
 shader_parameter/modulate = Vector4(1, 1, 1, 1)
 
@@ -73,14 +74,19 @@ animations = [{
 }]
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_8dbef"]
+resource_local_to_scene = true
 lifetime_randomness = 0.5
 particle_flag_disable_z = true
 emission_shape = 3
 emission_box_extents = Vector3(1, 25, 1)
+angle_min = -90.0
+angle_max = 90.0
 direction = Vector3(0, 0, 0)
 gravity = Vector3(0, 0, 0)
 scale_min = 2.0
-scale_max = 3.0
+scale_max = 5.0
+hue_variation_min = -2.23517e-08
+hue_variation_max = 0.1
 
 [sub_resource type="SegmentShape2D" id="SegmentShape2D_dwpx1"]
 a = Vector2(0, -26)
@@ -105,9 +111,9 @@ autoplay = "slash"
 frame = 7
 frame_progress = 1.0
 
-[node name="GPUParticles2D" type="GPUParticles2D" parent="AnimatedSprite2D"]
+[node name="Trail" type="GPUParticles2D" parent="AnimatedSprite2D"]
 z_index = -1
-amount = 32
+amount = 50
 process_material = SubResource("ParticleProcessMaterial_8dbef")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

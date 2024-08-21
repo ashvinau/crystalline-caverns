@@ -7,16 +7,16 @@ var player_indicator: AnimatedSprite2D
 @onready var health_text = $Health
 
 var bar_color = Color.DARK_RED
-var bar_negative = Color.BLACK
-#var bar_negative = Color(1,1,1,0) # Transparent
+#var bar_negative = Color.BLACK
+var bar_negative = Color(0.6,0,0,0.3) # Translucent dark red
 
 var indicator_scene = preload("res://indicator.tscn")
 
 func update_hud():
-	health_text.text =  str(Globals.player_health,"/",Globals.player_max_health)
 	if Globals.player_health < 0:
 		Globals.player_health = 0
-	var health_percentage: float = (Globals.player_health / Globals.player_max_health) * 100
+	health_text.text = str(Globals.player_health,"/",Globals.player_max_health)	
+	var health_percentage: float = (float(Globals.player_health) / float(Globals.player_max_health)) * 100.0
 	var health_width: int = int(health_percentage) * 6 # 100 * 6 = 600 px wide	
 	for x in HEALTH_BAR_SIZE.x:
 		for y in HEALTH_BAR_SIZE.y:

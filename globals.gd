@@ -8,8 +8,8 @@ const CLAMP: int = 120
 const GRAVITY: int = 490
 
 # Player Stat Constants
-const PLAYER_MAX_HEALTH = 420
-const PLAYER_HEALTH = 420
+const PLAYER_MAX_HEALTH = 1000
+const PLAYER_HEALTH = 1000
 const PLAYER_COLOR: Color = Color.LIGHT_CORAL
 const MOVE_SPEED: float = 500.0
 const SPEED_CAP: int = 800
