@@ -11,15 +11,28 @@ var accel: float = 5
 var slide: float = 10
 var speed_cap: int
 var jump_height: int
+var detection_dist: int
+var shot_dist: int
+var melee_dist: int
+var player_nodes: Array = []
+var mob_color: Color
+var mob_level: int
 
 var basic_bullet = preload("res://attacks/basic_bullet.tscn")
 var basic_melee = preload("res://attacks/basic_melee.tscn")
+@onready var play_field: Node2D = get_node("..") # parent node: PlayField
 
-func set_mob(color: Color, health: int, speed: int, cap: int, jump: int, moveCD: float, rangeCD: float, meleeCD: float):
+func set_mob(level: int, players: Array, color: Color, health: int, speed: int, cap: int, jump: int, moveCD: float, rangeCD: float, meleeCD: float, detect_d: int, shot_d: int, melee_d: int):
+	player_nodes = players
 	mob_health = health
 	move_speed = speed
 	speed_cap = cap
 	jump_height = jump
+	detection_dist = detect_d
+	shot_dist = shot_d
+	melee_dist = melee_d
+	mob_color = color
+	mob_level = level	
 	$AnimatedSprite2D.material.set_shader_parameter("modulate",Globals.color_to_vector(color))
 	modulate = color
 	$MoveTimer.wait_time = moveCD
@@ -107,14 +120,64 @@ func check_mob_loc():
 	elif (locY < 0):
 		$CollisionShape2D.set_deferred("disabled", true)
 		self.position.y = Globals.HEIGHT * 16
-
+		
+func align_attack(direction: Vector2):
+	if (direction.x > 0):
+		$AnimatedSprite2D.flip_h = false
+		$AnimatedSprite2D.play("attack")
+	elif (direction.x < 0):
+		$AnimatedSprite2D.flip_h = true
+		$AnimatedSprite2D.play("attack")
+		
+func range_attack(offset: Vector2i, direction: Vector2):
+	if not shot_lock:
+		align_attack(direction)
+		animation_locked = true		
+		
+		var bullet_inst = basic_bullet.instantiate()
+		bullet_inst.position.x = self.position.x + offset.x
+		bullet_inst.position.y = self.position.y + offset.y
+		play_field.add_child(bullet_inst)
+		bullet_inst.set_bullet(Globals.SHOT_LIFE,1,mob_color,Globals.SHOT_WEIGHT,"oval",self)
+		bullet_inst.velocity.x = (direction.x * Globals.SHOT_VELOCITY) + randi_range(-Globals.SHOT_SPREAD,Globals.SHOT_SPREAD) 
+		self.velocity.x += -direction.x * ((Globals.SHOT_WEIGHT * Globals.shot_velocity) / Globals.INERTIA)
+		bullet_inst.velocity.y = (direction.y * Globals.SHOT_VELOCITY) + randi_range(-Globals.SHOT_SPREAD,Globals.SHOT_SPREAD)
+		self.velocity.y += -direction.y * ((Globals.SHOT_WEIGHT * Globals.SHOT_VELOCITY) / Globals.INERTIA)
+		shot_lock = true
+		$RangeTimer.start()
+	
 func _on_move_timer_timeout() -> void:
-	pass # Replace with function body.
-
+	direction = Vector2.ZERO # Reset movement direction
+	#identify the closest player in range
+	var closest_player: CharacterBody2D
+	var closest_dist: float = 999999 # Max float?
+	for player in player_nodes:
+		var cur_dist: float = Globals.toroidal_matrix_dist(Globals.WIDTH*16,Globals.HEIGHT*16,self.position,player.position)
+		if cur_dist < closest_dist:
+			closest_player = player
+			closest_dist = cur_dist
+				
+	var tgt_player_loc: Vector2i = Vector2i(closest_player.position)
+	# We need to adjust tgt_player_loc x (and y?) values if there is a difference of over half the width of the playfield
+	if abs(tgt_player_loc.x - self.position.x) > ((Globals.WIDTH*16)/2):
+		if (self.position.x < tgt_player_loc.x):
+			tgt_player_loc.x -= Globals.WIDTH*16
+		else:
+			tgt_player_loc.x += Globals.WIDTH*16
+	
+	if (closest_dist < detection_dist): # Within detection range
+		if (tgt_player_loc.x < self.position.x): # Choose movement direction
+			direction = Vector2(-1,0)
+		else:
+			direction = Vector2(1,0)
+			
+	if (closest_dist < shot_dist): # Within projectile range
+		var shot_direction: Vector2 = self.position.direction_to(tgt_player_loc)
+		range_attack(shot_direction * 20, shot_direction)
+		
 
 func _on_range_timer_timeout() -> void:
-	pass # Replace with function body.	
-
+	shot_lock = false
 
 func _on_melee_timer_timeout() -> void:
-	pass # Replace with function body.
+	melee_lock = false

@@ -6,11 +6,10 @@ const AV = 998 # Match any value other than 0 for processing geomatrix
 @onready var perlinNode = $PerlinGraph
 @onready var play_field = get_node("..")
 @onready var hud = get_node("../../../../HUD")
-var playerNode: CharacterBody2D
 
-var player_scene = preload("res://character/player.tscn") # Will need to be array for multiplayer
 var hud_scene = preload("res://hud.tscn")
-
+var player_nodes: Array = []
+var players: Array = []
 var bosses: Array = []
 var enemies: Array = []
 var perlinMatrix: Array = []
@@ -29,7 +28,8 @@ func _init():
 	# Copy perlin matrix for modification		
 	geoMatrix = perlinMatrix.duplicate(true)
 	
-	#Load bosses and enemies into memory
+	#Load entities into memory
+	players.append(preload("res://character/player.tscn"))
 	enemies.append(preload("res://enemies/formless_crawler.tscn"))
 			
 func set_geo_matrix(clamp: int, test: bool):	
@@ -221,9 +221,9 @@ func fill_perlin_matrix(matrix):
 	print("Debug indexes: ", curIndex)
 	
 func respawn():
-	playerNode.queue_free()
-	playerNode = spawn_entity(player_scene, spawnLoc * 16)
-	playerNode.set_player(Globals.player_color)
+	player_nodes[0].queue_free()
+	player_nodes[0] = spawn_entity(players[0], spawnLoc * 16)
+	player_nodes[0].set_player(Globals.player_color)
 	
 func generate_spawn():	
 	print("Building Spawn Point...")
@@ -235,8 +235,8 @@ func generate_spawn():
 	for xi in range(spawnLoc.x-5, spawnLoc.x+5):
 		set_cell(0, Globals.safe_index(Vector2i(xi, spawnLoc.y+22)), 1, Vector2i(0,0), 0)	
 	
-	playerNode = spawn_entity(player_scene, adjSpawnLoc)
-	playerNode.set_player(Globals.player_color)
+	player_nodes.append(spawn_entity(players[0], adjSpawnLoc))
+	player_nodes[0].set_player(Globals.player_color)
 
 func set_background(pOffset: int, darken: float, layerNode: TextureRect, bgMap: TileMap, bgViewport: SubViewport):
 	set_geo_matrix(Globals.CLAMP + pOffset, false)		
@@ -288,7 +288,7 @@ func _ready():
 		hud.display_preview(geoMatrix, spawnLoc)
 		print("Test enemies...")
 		var enemy_node = spawn_entity(enemies[0], Vector2i(position.x + 50,position.y))
-		enemy_node.set_mob(Color.ORANGE,300,100,600,-300,3,2,1)
+		enemy_node.set_mob(1,player_nodes,Color.ORANGE,300,100,600,-300,1,2,3,600,450,300)
 		
 	else:	# Procgen level
 		print("Generating perlin matrix...")

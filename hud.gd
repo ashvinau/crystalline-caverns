@@ -63,8 +63,8 @@ func display_preview(geoMatrix, spawnLoc: Vector2i):
 	
 func update_player_indicator():
 	var player_node = get_node("../CenterViewportContainer/CenterViewport/PlayField/PlayFieldMap")
-	var player_position: Vector2i = player_node.playerNode.position
-	player_position = (player_position / 16) / 2	
+	var player_position: Vector2i = player_node.player_nodes[0].position
+	player_position = (player_position / 16) / 2
 	player_indicator.position = player_position
 
 # Called when the node enters the scene tree for the first time.

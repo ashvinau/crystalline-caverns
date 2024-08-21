@@ -35,7 +35,7 @@ func expire():
 	$Expiry.emitting = true		
 
 func _on_body_entered(body):	
-	if body.name == "FormlessCrawler":
+	if (["FormlessCrawler","Player"].has(body.name)):
 		apply_shot_force(body)
 	
 	if not expiring:
