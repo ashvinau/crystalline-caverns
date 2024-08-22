@@ -14,6 +14,7 @@ var crouched: bool = false
 var camera_offset_x: int = 0
 var lookahead_adjust: float = 1
 var attack_direction: Vector2 = Vector2.ZERO
+var e_inertia: float = Globals.inertia
 
 @onready var hud_node = get_node("../../../../HUD")
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
@@ -28,6 +29,7 @@ var attack_direction: Vector2 = Vector2.ZERO
 @onready var LRCam = get_node("../../../../LRViewportContainer/LRViewport/LRCamera")
 @onready var play_field: Node2D = get_node("..") # parent node: PlayField
 
+var spark_scene = preload("res://effects/sparks.tscn")
 var basic_bullet = preload("res://attacks/basic_bullet.tscn")
 var basic_melee = preload("res://attacks/basic_melee.tscn")
 
@@ -52,7 +54,7 @@ func _physics_process(delta):
 		self.velocity.y = -Globals.speed_cap	
 	
 	# Update offset	- this can probably be refactored - resets to lookahead adjust on keypress/release below
-	var lookahead_slow: int = 150
+	var lookahead_slow: int = LOOKAHEAD_LIMIT / 2
 	
 	# Clamp the min and max camera speed
 	if (lookahead_adjust < 1):
@@ -290,7 +292,21 @@ func melee_attack(offset: Vector2i, direction: Vector2):
 func hit(magnitude: float):
 	Globals.player_health -= abs(magnitude) / float(Globals.inertia)
 	hud_node.update_hud()
+	if Globals.player_health <= 0:
+		Globals.player_health = 0
+		expire()
 	
+func expire():
+	var spark_inst = spark_scene.instantiate()
+	spark_inst.scale *= 4
+	spark_inst.position = self.global_position
+	play_field.add_child(spark_inst)
+	spark_inst.modulate = Color.DARK_RED
+	spark_inst.emitting = true
+	get_node("../PlayFieldMap").respawn()
+	#$AnimatedSprite2D.visible = false
+	#$CollisionShape2D.set_deferred("disabled", true)
+	#$ExpiryTimer.start()
 	
 func range_attack(offset: Vector2i, direction: Vector2):
 	if not shot_lock:
@@ -378,4 +394,6 @@ func check_player_loc():
 	elif (locY < 0):
 		$CollisionShape2D.set_deferred("disabled", true)
 		self.position.y = Globals.HEIGHT * 16
-		
+
+func _on_expiry_timer_timeout() -> void:
+	pass	

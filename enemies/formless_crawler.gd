@@ -4,29 +4,37 @@ var animation_locked: bool = false
 var shot_lock: bool = false
 var melee_lock: bool = false
 var was_in_air: bool = false
+var jump_lock: bool = false
 var direction: Vector2 = Vector2.ZERO
 var mob_health: float = 1
+var max_health: float = 1
 var move_speed: int
 var accel: float = 5
 var slide: float = 10
 var speed_cap: int
 var jump_height: int
 var detection_dist: int
+var detection_mult: int = 1
+var detection_alert: float
 var shot_dist: int
 var melee_dist: int
 var player_nodes: Array = []
 var mob_color: Color
 var mob_level: int
+var e_inertia: float = Globals.INERTIA
+var bar_image: Image = Image.create(32,8,false, Image.FORMAT_RGBA8)
 
 var cur_double_jumps: int # Required for compatibility with basic_melee.gd - not used
 
 var basic_bullet = preload("res://attacks/basic_bullet.tscn")
 var basic_melee = preload("res://attacks/basic_melee.tscn")
+var spark_scene = preload("res://effects/sparks.tscn")
 @onready var play_field: Node2D = get_node("..") # parent node: PlayField
 
-func set_mob(level: int, players: Array, color: Color, health: int, speed: int, cap: int, jump: int, moveCD: float, rangeCD: float, meleeCD: float, detect_d: int, shot_d: int, melee_d: int):
+func set_mob(level: int, players: Array, color: Color, health: int, speed: int, cap: int, jump: int, moveCD: float, alertCD: float, rangeCD: float, meleeCD: float, detect_d: int, shot_d: int, melee_d: int):
 	player_nodes = players
 	mob_health = health
+	max_health = health
 	move_speed = speed
 	speed_cap = cap
 	jump_height = jump
@@ -35,15 +43,28 @@ func set_mob(level: int, players: Array, color: Color, health: int, speed: int, 
 	melee_dist = melee_d
 	mob_color = color
 	mob_level = level	
+	detection_alert = detect_d
 	$AnimatedSprite2D.material.set_shader_parameter("modulate",Globals.color_to_vector(color))
 	modulate = color
 	$MoveTimer.wait_time = moveCD
 	$RangeTimer.wait_time = rangeCD
 	$MeleeTimer.wait_time = meleeCD
+	$AlertTimer.wait_time = alertCD	
 	$AnimatedSprite2D.play("walking")
+	
+func update_health_bar():	
+	var health_proportion: float = (float(mob_health) / float(max_health)) * 32.0	
+	for x in 32:
+		for y in 8:
+			if x <= health_proportion:
+				bar_image.set_pixel(x,y,Color(0.6,0,0,0.5))	
+			else:
+				bar_image.set_pixel(x,y,Color(1,1,1,0))
+	$HealthBar.texture.update(bar_image)
 
 func _ready():
-	pass
+	$HealthBar.texture = ImageTexture.create_from_image(bar_image)	
+	update_health_bar()
 	
 func _physics_process(delta):
 	# Speed Caps
@@ -75,15 +96,18 @@ func _physics_process(delta):
 	update_animation()
 	update_facing_direction()
 	check_mob_loc()
-		
+
 func jump():
-	velocity.y = jump_height
-	$AnimatedSprite2D.play("jump")
-	animation_locked = true
+	if not jump_lock:
+		velocity.y = jump_height
+		$AnimatedSprite2D.play("jump")
+		animation_locked = true
+		jump_lock = true
 
 func land():
 	$AnimatedSprite2D.play("land")
 	animation_locked = true
+	jump_lock = false
 	
 func update_facing_direction():
 	if direction.x > 0:
@@ -106,9 +130,25 @@ func _on_animated_sprite_2d_animation_finished():
 		animation_locked = false
 		
 func hit(magnitude: float):	
-	mob_health -= abs(magnitude) / float(Globals.INERTIA)	
-	if mob_health > 0:
+	$AnimatedSprite2D.play("hit")
+	animation_locked = true
+	var damage = abs(magnitude) / float(Globals.INERTIA)	
+	mob_health -= damage
+	if mob_health <= 0:
 		mob_health = 0
+		expire()
+	detection_mult = 2
+	update_health_bar()
+	$AlertTimer.start()
+	
+func expire():
+	var spark_inst = spark_scene.instantiate()
+	spark_inst.scale *= 4
+	spark_inst.position = self.global_position
+	play_field.add_child(spark_inst)
+	spark_inst.modulate = Color.RED
+	spark_inst.emitting = true
+	queue_free()
 	
 func check_mob_loc():
 	$CollisionShape2D.set_deferred("disabled", false)
@@ -168,7 +208,7 @@ func melee_attack(offset: Vector2i, direction: Vector2):
 		$MeleeTimer.start()
 	
 func _on_move_timer_timeout() -> void:
-	direction = Vector2.ZERO # Reset movement direction
+	direction = Vector2.ZERO # Reset movement direction	
 	#identify the closest player in range
 	var closest_player: CharacterBody2D
 	var closest_dist: float = 999999 # Max float?
@@ -179,20 +219,34 @@ func _on_move_timer_timeout() -> void:
 			closest_dist = cur_dist
 				
 	var tgt_player_loc: Vector2i = Vector2i(closest_player.position)
-	# We need to adjust tgt_player_loc x (and y?) values if there is a difference of over half the width of the playfield
+	
+	# We need to adjust tgt_player_loc x and y values if there is a difference of over half the width of the playfield
 	if abs(tgt_player_loc.x - self.position.x) > ((Globals.WIDTH*16)/2):
 		if (self.position.x < tgt_player_loc.x):
 			tgt_player_loc.x -= Globals.WIDTH*16
 		else:
 			tgt_player_loc.x += Globals.WIDTH*16
+			
+	if abs(tgt_player_loc.y - self.position.y) > ((Globals.HEIGHT*16)/2):
+		if (self.position.y < tgt_player_loc.y):
+			tgt_player_loc.y -= Globals.HEIGHT*16
+		else:
+			tgt_player_loc.y += Globals.HEIGHT*16
 	
-	if (closest_dist < detection_dist): # Within detection range
+	# Update the raycast
+	$ClearShot.target_position.x = tgt_player_loc.x - $ClearShot.global_position.x
+	$ClearShot.target_position.y = tgt_player_loc.y - $ClearShot.global_position.y
+	
+	# Range state machine
+	if (closest_dist < (detection_dist * detection_mult)): # Within detection range
 		if (tgt_player_loc.x < self.position.x): # Choose movement direction
 			direction = Vector2(-1,0)
 		else:
 			direction = Vector2(1,0)
+	else:
+		direction.x = randi_range(-1,1) # random movement with no detection
 			
-	if (closest_dist < shot_dist): # Within projectile range
+	if (closest_dist < shot_dist) && (not $ClearShot.is_colliding()): # Within projectile range
 		var shot_direction: Vector2 = self.position.direction_to(tgt_player_loc)
 		shot_direction.y -= closest_dist * 0.00033 # aim up a bit for distant targets
 		range_attack(shot_direction * 20, shot_direction)
@@ -201,11 +255,17 @@ func _on_move_timer_timeout() -> void:
 		var slash_direction: Vector2 = self.position.direction_to(tgt_player_loc)
 		melee_attack(slash_direction * 20, slash_direction)		
 		
-	if is_on_wall() && is_on_floor():
+	if is_on_wall() || (not is_on_floor()):
 		jump()
+		
+	if direction != Vector2.ZERO && velocity == Vector2.ZERO: # unstucker
+		jump()	
 
 func _on_range_timer_timeout() -> void:
 	shot_lock = false
 
 func _on_melee_timer_timeout() -> void:
 	melee_lock = false
+
+func _on_alert_timer_timeout() -> void:
+	detection_mult = 1

@@ -155,12 +155,23 @@ shape = SubResource("CapsuleShape2D_d74yh")
 autostart = true
 
 [node name="RangeTimer" type="Timer" parent="."]
-autostart = true
 
 [node name="MeleeTimer" type="Timer" parent="."]
-autostart = true
+
+[node name="AlertTimer" type="Timer" parent="."]
+
+[node name="ClearShot" type="RayCast2D" parent="."]
+collision_mask = 2048
+
+[node name="HealthBar" type="TextureRect" parent="."]
+offset_left = -16.0
+offset_top = -25.0
+offset_right = 16.0
+offset_bottom = -17.0
+stretch_mode = 2
 
 [connection signal="animation_finished" from="AnimatedSprite2D" to="." method="_on_animated_sprite_2d_animation_finished"]
 [connection signal="timeout" from="MoveTimer" to="." method="_on_move_timer_timeout"]
 [connection signal="timeout" from="RangeTimer" to="." method="_on_range_timer_timeout"]
 [connection signal="timeout" from="MeleeTimer" to="." method="_on_melee_timer_timeout"]
+[connection signal="timeout" from="AlertTimer" to="." method="_on_alert_timer_timeout"]

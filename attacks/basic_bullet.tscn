@@ -118,7 +118,7 @@ turbulence_noise_scale = 5.0
 z_index = 2
 z_as_relative = false
 collision_layer = 0
-collision_mask = 16
+collision_mask = 0
 script = ExtResource("1_mn4mn")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]

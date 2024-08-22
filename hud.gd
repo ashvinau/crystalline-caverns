@@ -27,14 +27,14 @@ func update_hud():
 				
 	$LifeBar.texture.update(bar_image)
 	
-func display_preview(geoMatrix, spawnLoc: Vector2i):
+func display_preview(geo_matrix, spawn_loc: Vector2i):
 	var perlinImage: Image = Image.create(Globals.WIDTH, Globals.HEIGHT, false, Image.FORMAT_RGBA8)
 	var previewNode = $levelPreview
 	previewNode.texture = ImageTexture.create_from_image(perlinImage)	
 		
 	for x in Globals.WIDTH:
 		for y in Globals.HEIGHT:
-			var gValue = geoMatrix[x][y]
+			var gValue = geo_matrix[x][y]
 			# Values
 			if (gValue == 1):
 				gValue = 255
@@ -51,13 +51,13 @@ func display_preview(geoMatrix, spawnLoc: Vector2i):
 	# spawn point indicator
 	var spawn_indicator = indicator_scene.instantiate()
 	spawn_indicator.play("spawn")
-	spawn_indicator.position = spawnLoc / 2
+	spawn_indicator.position = spawn_loc / 2
 	$levelPreview.add_child.call_deferred(spawn_indicator)
 	
 	# player position indicator
 	player_indicator = indicator_scene.instantiate()
 	player_indicator.play("player")
-	player_indicator.position = spawnLoc / 2
+	player_indicator.position = spawn_loc / 2
 	player_indicator.modulate = Globals.player_color
 	$levelPreview.add_child.call_deferred(player_indicator)
 	

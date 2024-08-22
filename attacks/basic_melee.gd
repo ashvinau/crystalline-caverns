@@ -7,16 +7,20 @@ var transparency: float = 1
 var slash_direction: Vector2
 var knockback: bool = false
 var velocity: Vector2
-var melee_force = (Globals.melee_velocity * Globals.melee_weight) / Globals.inertia
+var slash_weight: float
+var hit_list: Array = []
+var spark_scene = preload("res://effects/sparks.tscn")
 
 func set_slash(life_time: float, coll_mask: int, color: Color, weight: float, direction: Vector2, emitter: CharacterBody2D):
 	$LifeTimer.wait_time = life_time
 	$LifeTimer.start()
+	slash_weight = weight
 	set_collision_mask_value(coll_mask, true)	
 	self.scale.x *= weight 
 	self.scale.y *= weight
 	slash_color = color
 	slash_direction = direction
+	
 	$AnimatedSprite2D.material.set_shader_parameter("modulate",Globals.color_to_vector(color))
 	modulate = color	
 	emitter_node = emitter
@@ -30,7 +34,8 @@ func _physics_process(delta):
 		modulate = Color(slash_color.r, slash_color.g, slash_color.b, transparency)		
 		$AnimatedSprite2D.material.set_shader_parameter("modulate",Globals.color_to_vector(modulate))
 				
-func _on_body_entered(body):		
+func _on_body_entered(body):
+	var melee_force: float = (velocity.length() * slash_weight) / emitter_node.e_inertia
 	if (not knockback):	
 		if abs(slash_direction.x) > abs(slash_direction.y):
 			emitter_node.velocity.x = -(slash_direction.x * melee_force)	
@@ -39,13 +44,27 @@ func _on_body_entered(body):
 		
 		if emitter_node.cur_double_jumps > 0:
 			emitter_node.cur_double_jumps -= 1
-		_on_life_timer_timeout()
+		#_on_life_timer_timeout()	
+		knockback = true
+			
+	if not hit_list.has(body.name):	
+		var spark_inst = spark_scene.instantiate()
+		spark_inst.scale *= slash_weight
+		if (["PlayFieldMap"]).has(body.name):		
+			spark_inst.position = self.position
+			get_parent().add_child(spark_inst)
+			spark_inst.modulate = Color.DARK_GRAY
+			spark_inst.emitting = true	
+		elif (["FormlessCrawler","Player"].has(body.name)):
+			apply_melee_force(body, melee_force)		
+			spark_inst.position = Vector2.ZERO
+			body.add_child(spark_inst)
+			spark_inst.modulate = Color.RED
+			spark_inst.emitting = true
+			body.hit(velocity.length() * slash_weight)
+		hit_list.append(body.name)
 	
-	knockback = true	
-	if (["FormlessCrawler","Player","BasicMelee"].has(body.name)):
-		apply_melee_force(body)		
-	
-func apply_melee_force(target_node):		
+func apply_melee_force(target_node, melee_force: float):
 		target_node.velocity.y = (slash_direction.y * melee_force)
 		target_node.velocity.x = (slash_direction.x * melee_force)
 

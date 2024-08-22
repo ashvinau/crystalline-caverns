@@ -4,15 +4,17 @@
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_515m5"]
 resource_local_to_scene = true
+lifetime_randomness = 0.3
 particle_flag_disable_z = true
-angle_min = -90.0
+angle_min = 1.07288e-05
 angle_max = 90.0
+inherit_velocity_ratio = 0.025
 spread = 0.0
 angular_velocity_min = -356.4
 angular_velocity_max = 327.6
 radial_velocity_min = -2.23517e-05
 radial_velocity_max = 40.0
-gravity = Vector3(0, 3, 0)
+gravity = Vector3(0, 5, 0)
 scale_min = 3.0
 scale_max = 7.0
 hue_variation_min = -0.01

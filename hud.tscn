@@ -1,13 +1,13 @@
 [gd_scene load_steps=5 format=3 uid="uid://bysha1ko78mab"]
 
 [ext_resource type="Script" path="res://hud.gd" id="1_3x2kj"]
-[ext_resource type="FontFile" uid="uid://dlyb44rrcjsdl" path="res://art/Layn.otf" id="2_xia0y"]
+[ext_resource type="FontFile" uid="uid://dia5gtcmuobst" path="res://art/Absans-Regular.otf" id="2_kmy42"]
 [ext_resource type="PackedScene" uid="uid://cyeb5tk8q6j2n" path="res://levels/level_preview.tscn" id="3_pxia0"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_b5htj"]
-font = ExtResource("2_xia0y")
+font = ExtResource("2_kmy42")
 font_size = 24
-outline_size = 5
+outline_size = 3
 outline_color = Color(0, 0, 0, 1)
 
 [node name="HUD" type="CanvasLayer"]

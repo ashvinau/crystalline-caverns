@@ -21,7 +21,7 @@ func set_bullet(life_time: float, coll_mask: int, color: Color, weight: float, s
 func _physics_process(delta):
 	position.x += velocity.x * delta
 	position.y += velocity.y * delta	
-	velocity.y += (Globals.GRAVITY * delta) * Globals.shot_weight # effect of gravity
+	velocity.y += (Globals.GRAVITY * delta) * bullet_weight # effect of gravity
 	rotation_degrees += 100 * delta
 	check_bullet_loc()
 
