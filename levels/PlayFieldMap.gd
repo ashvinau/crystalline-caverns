@@ -224,6 +224,7 @@ func respawn():
 	player_nodes[0].queue_free()
 	player_nodes[0] = spawn_entity(players[0], spawn_loc * 16)
 	player_nodes[0].set_player(Globals.player_color)
+	player_nodes[0].name = "Player"
 	Globals.player_health = Globals.player_max_health
 	hud.update_hud()
 	
@@ -238,7 +239,7 @@ func generate_spawn():
 		set_cell(0, Globals.safe_index(Vector2i(xi, spawn_loc.y+22)), 1, Vector2i(0,0), 0)	
 	
 	player_nodes.append(spawn_entity(players[0], adj_spawn_loc))
-	player_nodes[0].set_player(Globals.player_color)
+	player_nodes[0].set_player(Globals.player_color)	
 
 func set_background(pOffset: int, darken: float, layerNode: TextureRect, bgMap: TileMap, bgViewport: SubViewport):
 	set_geo_matrix(Globals.CLAMP + pOffset, false)		

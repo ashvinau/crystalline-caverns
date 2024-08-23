@@ -1,6 +1,7 @@
 extends Area2D
 
 var emitter_node: CharacterBody2D
+var e_inertia: float
 var expiring: bool = false
 var slash_color: Color
 var transparency: float = 1
@@ -10,6 +11,7 @@ var velocity: Vector2
 var slash_weight: float
 var hit_list: Array = []
 var spark_scene = preload("res://effects/sparks.tscn")
+var melee_force: float
 
 func set_slash(life_time: float, coll_mask: int, color: Color, weight: float, direction: Vector2, emitter: CharacterBody2D):
 	$LifeTimer.wait_time = life_time
@@ -19,11 +21,11 @@ func set_slash(life_time: float, coll_mask: int, color: Color, weight: float, di
 	self.scale.x *= weight 
 	self.scale.y *= weight
 	slash_color = color
-	slash_direction = direction
-	
+	slash_direction = direction	
 	$AnimatedSprite2D.material.set_shader_parameter("modulate",Globals.color_to_vector(color))
 	modulate = color	
 	emitter_node = emitter
+	e_inertia = emitter_node.e_inertia
 	
 func _physics_process(delta):
 	position.x += velocity.x * delta
@@ -34,9 +36,9 @@ func _physics_process(delta):
 		modulate = Color(slash_color.r, slash_color.g, slash_color.b, transparency)		
 		$AnimatedSprite2D.material.set_shader_parameter("modulate",Globals.color_to_vector(modulate))
 				
-func _on_body_entered(body):
-	var melee_force: float = (velocity.length() * slash_weight) / emitter_node.e_inertia
-	if (not knockback):	
+func _on_body_entered(body):	
+	melee_force = (velocity.length() * slash_weight) / e_inertia
+	if (not knockback) && (is_instance_valid(emitter_node)):
 		if abs(slash_direction.x) > abs(slash_direction.y):
 			emitter_node.velocity.x = -(slash_direction.x * melee_force)	
 		else:
@@ -44,18 +46,17 @@ func _on_body_entered(body):
 		
 		if emitter_node.cur_double_jumps > 0:
 			emitter_node.cur_double_jumps -= 1
-		#_on_life_timer_timeout()	
 		knockback = true
 			
 	if not hit_list.has(body.name):	
 		var spark_inst = spark_scene.instantiate()
 		spark_inst.scale *= slash_weight
-		if (["PlayFieldMap"]).has(body.name):		
+		if body is TileMap: #(["PlayFieldMap"]).has(body.name):		
 			spark_inst.position = self.position
 			get_parent().add_child(spark_inst)
 			spark_inst.modulate = Color.DARK_GRAY
 			spark_inst.emitting = true	
-		elif (["FormlessCrawler","Player"].has(body.name)):
+		elif body is CharacterBody2D: #(["FormlessCrawler","Player"].has(body.name)):
 			apply_melee_force(body, melee_force)		
 			spark_inst.position = Vector2.ZERO
 			body.add_child(spark_inst)

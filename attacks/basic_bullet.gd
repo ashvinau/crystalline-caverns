@@ -4,6 +4,7 @@ var player_node: CharacterBody2D
 var expiring: bool = false
 var velocity: Vector2
 var bullet_weight: float
+var hit_list: Array = []
 var spark_scene = preload("res://effects/sparks.tscn")
 
 func set_bullet(life_time: float, coll_mask: int, color: Color, weight: float, shape: String, player: CharacterBody2D):
@@ -36,15 +37,16 @@ func expire():
 	$Expiry.emitting = true		
 
 func _on_body_entered(body):
-	if not expiring:		
+	if (not expiring) && (not hit_list.has(body.name)):
+		hit_list.append(body.name)
 		var spark_inst = spark_scene.instantiate()
 		spark_inst.scale *= bullet_weight
-		if (["PlayFieldMap"]).has(body.name):		
+		if body is TileMap:
 			spark_inst.position = self.position
 			get_parent().add_child(spark_inst)
 			spark_inst.modulate = Color.DARK_GRAY
 			spark_inst.emitting = true	
-		elif (["FormlessCrawler","Player"].has(body.name)):
+		elif body is CharacterBody2D:
 			apply_shot_force(body)		
 			spark_inst.position = Vector2.ZERO
 			body.add_child(spark_inst)

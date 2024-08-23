@@ -1,0 +1,27 @@
+[gd_scene load_steps=4 format=3 uid="uid://bxbdylqsqf8b5"]
+
+[ext_resource type="FontFile" uid="uid://dia5gtcmuobst" path="res://art/Absans-Regular.otf" id="1_j57mm"]
+[ext_resource type="Script" path="res://damage_display.gd" id="1_ll6g1"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_2iijq"]
+line_spacing = 1.0
+font = ExtResource("1_j57mm")
+font_size = 28
+outline_size = 4
+outline_color = Color(0, 0, 0, 1)
+shadow_size = 8
+shadow_color = Color(0, 0, 0, 0.85098)
+
+[node name="DamageDisplay" type="Label"]
+z_index = 4
+offset_left = -32.0
+offset_top = -20.0
+offset_right = 32.0
+offset_bottom = 20.0
+pivot_offset = Vector2(32, 20)
+size_flags_horizontal = 4
+text = "0"
+label_settings = SubResource("LabelSettings_2iijq")
+horizontal_alignment = 1
+autowrap_mode = 2
+script = ExtResource("1_ll6g1")

@@ -1,20 +1,25 @@
 extends CharacterBody2D
 
-const LOOKAHEAD_LIMIT: int = 300
 const LOOKAHEAD_SPEED: float = 0.17 # proportion
+const LOOKAHEAD_LIMIT_X: int = 300
+const LOOKAHEAD_LIMIT_Y: int = 300
 
 var cur_double_jumps: int = 0
 var animation_locked: bool = false
 var orientation_locked: bool = false
 var shot_lock: bool = false
 var melee_lock: bool = false
+var shot_offset: int = 0
 var direction: Vector2 = Vector2.ZERO
 var was_in_air: bool = false
 var crouched: bool = false
-var camera_offset_x: int = 0
-var lookahead_adjust: float = 1
 var attack_direction: Vector2 = Vector2.ZERO
 var e_inertia: float = Globals.inertia
+
+var camera_offset_x: int = 0
+var camera_offset_y: int = 0
+var lookahead_adjust_x: float = 1
+var lookahead_adjust_y: float = 1
 
 @onready var hud_node = get_node("../../../../HUD")
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
@@ -32,6 +37,7 @@ var e_inertia: float = Globals.inertia
 var spark_scene = preload("res://effects/sparks.tscn")
 var basic_bullet = preload("res://attacks/basic_bullet.tscn")
 var basic_melee = preload("res://attacks/basic_melee.tscn")
+var dmg_scene = preload("res://damage_display.tscn")
 
 func set_player(color: Color):
 	$AnimatedSprite2D.material.set_shader_parameter("modulate",Globals.color_to_vector(color))
@@ -40,9 +46,11 @@ func set_player(color: Color):
 	$MeleeCDTimer.wait_time = Globals.melee_gcd
 
 func _ready():
-	pass	
+	pass
+	#print("Player spawned, name: ", self.name)	
 	
-func _physics_process(delta):
+func _physics_process(delta):	
+	var view_btn_pressed: bool = false
 	# Speed caps
 	if (self.velocity.x > Globals.speed_cap):
 		self.velocity.x = Globals.speed_cap
@@ -54,56 +62,81 @@ func _physics_process(delta):
 		self.velocity.y = -Globals.speed_cap	
 	
 	# Update offset	- this can probably be refactored - resets to lookahead adjust on keypress/release below
-	var lookahead_slow: int = LOOKAHEAD_LIMIT / 2
+	var lookahead_slow_x: int = LOOKAHEAD_LIMIT_X / 2
+	var lookahead_slow_y: int = LOOKAHEAD_LIMIT_Y / 2
 	
 	# Clamp the min and max camera speed
-	if (lookahead_adjust < 1):
-		lookahead_adjust = 1
-	if (lookahead_adjust > 8):
-		lookahead_adjust = 8
+	if (lookahead_adjust_x < 1):
+		lookahead_adjust_x = 1
+	if (lookahead_adjust_x > 8):
+		lookahead_adjust_x = 8
+	if (lookahead_adjust_y < 1):
+		lookahead_adjust_y = 1
+	if (lookahead_adjust_y > 8):
+		lookahead_adjust_y = 8
+		
+	if attack_direction.y == 0:
+		camera_offset_y = move_toward(camera_offset_y, 0, delta)
+		lookahead_adjust_y = 0
 		
 	if direction.x == 0 && attack_direction.x == 0:
 		camera_offset_x = move_toward(camera_offset_x, 0, delta)
-		lookahead_adjust = 0	
+		lookahead_adjust_x = 0
 	
-	elif (attack_direction.x > 0): 		
-		if (camera_offset_x < LOOKAHEAD_LIMIT):
-			camera_offset_x += lookahead_adjust
-			if (camera_offset_x < lookahead_slow):
-				lookahead_adjust += delta + LOOKAHEAD_SPEED
+	elif (attack_direction.x > 0):
+		if (camera_offset_x < LOOKAHEAD_LIMIT_X):
+			camera_offset_x += lookahead_adjust_x
+			if (camera_offset_x < lookahead_slow_x):
+				lookahead_adjust_x += delta + LOOKAHEAD_SPEED
 			else:
-				lookahead_adjust -= delta + LOOKAHEAD_SPEED
+				lookahead_adjust_x -= delta + LOOKAHEAD_SPEED
 	
 	elif (attack_direction.x < 0):
-		if (camera_offset_x > -LOOKAHEAD_LIMIT):
-			camera_offset_x -= lookahead_adjust
-			if (camera_offset_x > -lookahead_slow):
-				lookahead_adjust += delta + LOOKAHEAD_SPEED
+		if (camera_offset_x > -LOOKAHEAD_LIMIT_X):
+			camera_offset_x -= lookahead_adjust_x
+			if (camera_offset_x > -lookahead_slow_x):
+				lookahead_adjust_x += delta + LOOKAHEAD_SPEED
 			else:
-				lookahead_adjust -= delta + LOOKAHEAD_SPEED
+				lookahead_adjust_x -= delta + LOOKAHEAD_SPEED
 	
 	elif (direction.x > 0): 
-		if (camera_offset_x < LOOKAHEAD_LIMIT):
-			camera_offset_x += lookahead_adjust
-			if (camera_offset_x < lookahead_slow):
-				lookahead_adjust += delta + LOOKAHEAD_SPEED
+		if (camera_offset_x < LOOKAHEAD_LIMIT_X):
+			camera_offset_x += lookahead_adjust_x
+			if (camera_offset_x < lookahead_slow_x):
+				lookahead_adjust_x += delta + LOOKAHEAD_SPEED
 			else:
-				lookahead_adjust -= delta + LOOKAHEAD_SPEED
+				lookahead_adjust_x -= delta + LOOKAHEAD_SPEED
 	
 	elif (direction.x < 0):
-		if (camera_offset_x > -LOOKAHEAD_LIMIT):
-			camera_offset_x -= lookahead_adjust
-			if (camera_offset_x > -lookahead_slow):
-				lookahead_adjust += delta + LOOKAHEAD_SPEED
+		if (camera_offset_x > -LOOKAHEAD_LIMIT_X):
+			camera_offset_x -= lookahead_adjust_x
+			if (camera_offset_x > -lookahead_slow_x):
+				lookahead_adjust_x += delta + LOOKAHEAD_SPEED
 			else:
-				lookahead_adjust -= delta + LOOKAHEAD_SPEED
+				lookahead_adjust_x -= delta + LOOKAHEAD_SPEED
+				
+	if (attack_direction.y > 0): 		
+		if (camera_offset_y < LOOKAHEAD_LIMIT_Y):
+			camera_offset_y += lookahead_adjust_y
+			if (camera_offset_y < lookahead_slow_y):
+				lookahead_adjust_y += delta + LOOKAHEAD_SPEED
+			else:
+				lookahead_adjust_y -= delta + LOOKAHEAD_SPEED
+	
+	elif (attack_direction.y < 0):
+		if (camera_offset_y > -LOOKAHEAD_LIMIT_Y):
+			camera_offset_y -= lookahead_adjust_y
+			if (camera_offset_y > -lookahead_slow_y):
+				lookahead_adjust_y += delta + LOOKAHEAD_SPEED
+			else:
+				lookahead_adjust_y -= delta + LOOKAHEAD_SPEED	
 	
 	# Update cameras	
 	var offset_position: Vector2i = global_position #.round() # Trying to fix scaling jitter
 	offset_position.x = global_position.x + camera_offset_x
-	offset_position.y = global_position.y	
+	offset_position.y = global_position.y + camera_offset_y	
 	
-	centerCam.global_position = offset_position	
+	centerCam.global_position = offset_position
 	
 	leftCam.global_position.x = offset_position.x - (Globals.WIDTH * 16)
 	leftCam.global_position.y = offset_position.y
@@ -125,7 +158,7 @@ func _physics_process(delta):
 	LRCam.global_position.x = offset_position.x + (Globals.WIDTH * 16)
 	LRCam.global_position.y = offset_position.y + (Globals.HEIGHT * 16)	
 	
-	# Add the gravity.
+	# Gravity
 	if not is_on_floor():		
 		velocity.y += Globals.GRAVITY * delta
 		was_in_air = true
@@ -150,6 +183,15 @@ func _physics_process(delta):
 		if not is_on_floor():
 			unjump()
 			
+	if Input.is_action_just_pressed("up"):
+		shot_offset = -100
+		
+	if Input.is_action_just_released("up"):
+		shot_offset = 0
+	
+	if Input.is_action_pressed("left") || Input.is_action_pressed("right"):
+		view_btn_pressed = true
+	
 	if Input.is_action_pressed("down"):
 		if is_on_floor():				
 			if not crouched:
@@ -165,13 +207,14 @@ func _physics_process(delta):
 		crouched = false
 		
 	if Input.is_action_just_pressed("attack left"):
-		lookahead_adjust = 0
+		lookahead_adjust_x = 0
 		
 	if Input.is_action_just_pressed("attack right"):
-		lookahead_adjust = 0	
-			
+		lookahead_adjust_x = 0		
+		
 	if Input.is_action_pressed("attack up") && Input.is_action_pressed("attack left"):
 		attack_direction = Vector2(-1,-1)
+		view_btn_pressed = true
 		if Input.is_action_pressed("alternate attack"):
 			melee_attack(Vector2i(-20,-20), Vector2(-1,-1).normalized())
 		else:
@@ -179,6 +222,7 @@ func _physics_process(delta):
 		
 	elif Input.is_action_pressed("attack up") && Input.is_action_pressed("attack right"):
 		attack_direction = Vector2(1,-1)
+		view_btn_pressed = true
 		if Input.is_action_pressed("alternate attack"):
 			melee_attack(Vector2i(20,-20),Vector2(1,-1).normalized())	
 		else:
@@ -186,6 +230,7 @@ func _physics_process(delta):
 	
 	elif Input.is_action_pressed("attack down") && Input.is_action_pressed("attack left"):
 		attack_direction = Vector2(-1,1)
+		view_btn_pressed = true
 		if Input.is_action_pressed("alternate attack"):
 			melee_attack(Vector2i(-20,20),Vector2(-1,1).normalized())	
 		else:
@@ -193,6 +238,7 @@ func _physics_process(delta):
 		
 	elif Input.is_action_pressed("attack down") && Input.is_action_pressed("attack right"):
 		attack_direction = Vector2(1,1)
+		view_btn_pressed = true
 		if Input.is_action_pressed("alternate attack"):
 			melee_attack(Vector2i(20,20),Vector2(1,1).normalized())
 		else:
@@ -200,6 +246,7 @@ func _physics_process(delta):
 			
 	elif Input.is_action_pressed("attack up"):
 		attack_direction = Vector2(0,-1)
+		view_btn_pressed = true
 		if Input.is_action_pressed("alternate attack"):
 			melee_attack(Vector2i(0,-20), Vector2(0,-1))
 		else:
@@ -207,6 +254,7 @@ func _physics_process(delta):
 		
 	elif Input.is_action_pressed("attack down"):
 		attack_direction = Vector2(0,1)
+		view_btn_pressed = true
 		if Input.is_action_pressed("alternate attack"):
 			melee_attack(Vector2i(0,20),Vector2(0,1))	
 		else:
@@ -214,6 +262,7 @@ func _physics_process(delta):
 		
 	elif Input.is_action_pressed("attack left"):
 		attack_direction = Vector2(-1,0)
+		view_btn_pressed = true
 		if Input.is_action_pressed("alternate attack"):
 			melee_attack(Vector2i(-20,0),Vector2(-1,0))	
 		else:
@@ -221,6 +270,7 @@ func _physics_process(delta):
 		
 	elif Input.is_action_pressed("attack right"):
 		attack_direction = Vector2(1,0)
+		view_btn_pressed = true
 		if Input.is_action_pressed("alternate attack"):
 			melee_attack(Vector2i(20,0),Vector2(1,0))	
 		else:
@@ -228,18 +278,42 @@ func _physics_process(delta):
 		
 	if Input.is_action_just_released("attack up"):
 		attack_direction = Vector2.ZERO		
+		lookahead_adjust_y = 0
 		
 	if Input.is_action_just_released("attack down"):
 		attack_direction = Vector2.ZERO
-			
-	if Input.is_action_just_released("attack left"):			
-		attack_direction = Vector2.ZERO
-		lookahead_adjust = 0
+		lookahead_adjust_y = 0	
 		
-	if Input.is_action_just_released("attack right"):		
+	if Input.is_action_just_released("attack left"):
 		attack_direction = Vector2.ZERO
-		lookahead_adjust = 0
-
+		lookahead_adjust_x = 0
+		
+	if Input.is_action_just_released("attack right"):
+		attack_direction = Vector2.ZERO
+		lookahead_adjust_x = 0
+		
+	# If we do not have an attack direction established via buttonpress, check the right analog
+	if not view_btn_pressed:	
+		var analog_atk_vec = Input.get_vector("analog attack left", "analog attack right", "analog attack up", "analog attack down")
+		if analog_atk_vec != Vector2.ZERO:
+			analog_atk_vec = analog_atk_vec.normalized()
+			if Input.is_action_pressed("alternate attack"):
+				melee_attack(analog_atk_vec * 20, analog_atk_vec)
+			else:
+				range_attack(analog_atk_vec * 20, analog_atk_vec)
+			
+		if abs(analog_atk_vec.x) < 0.5:
+			attack_direction.x = 0
+			lookahead_adjust_x = 0
+		else:
+			attack_direction.x = analog_atk_vec.x
+		
+		if abs(analog_atk_vec.y) < 0.5:
+			attack_direction.y = 0
+			lookahead_adjust_y = 0
+		else:
+			attack_direction.y = analog_atk_vec.y	
+		
 	# Get the input direction and handle the movement/deceleration.	
 	direction = Input.get_vector("left", "right", "up", "down")	
 	# Temporary undo vector normalization for now.			
@@ -248,10 +322,11 @@ func _physics_process(delta):
 	elif direction.x > 0:
 		direction.x = 1
 		
-	if direction.x != 0:
-		velocity.x = move_toward(velocity.x, direction.x * Globals.move_speed, Globals.accel)
-	else:
-		velocity.x = move_toward(velocity.x, 0, Globals.slide)
+	if not crouched:
+		if direction.x != 0:
+			velocity.x = move_toward(velocity.x, direction.x * Globals.move_speed, Globals.accel)
+		else:
+			velocity.x = move_toward(velocity.x, 0, Globals.slide)
 	
 	move_and_slide()
 	update_animation()
@@ -292,6 +367,11 @@ func melee_attack(offset: Vector2i, direction: Vector2):
 func hit(magnitude: float):
 	Globals.player_health -= abs(magnitude) / float(Globals.inertia)
 	hud_node.update_hud()
+	var dmg_inst = dmg_scene.instantiate()
+	dmg_inst.position.x = self.position.x - 32
+	dmg_inst.position.y = self.position.y - 55	
+	play_field.add_child(dmg_inst)
+	dmg_inst.set_dmg_disp(magnitude, Color.RED)
 	if Globals.player_health <= 0:
 		Globals.player_health = 0
 		expire()
@@ -321,7 +401,7 @@ func range_attack(offset: Vector2i, direction: Vector2):
 		bullet_inst.set_bullet(Globals.shot_life,2,Globals.shot_color,Globals.shot_weight,"diamond",self)
 		bullet_inst.velocity.x = (direction.x * Globals.shot_velocity) + randi_range(-Globals.shot_spread,Globals.shot_spread) # + velocity.x <- inherit velocity
 		self.velocity.x += -direction.x * ((Globals.shot_weight * Globals.shot_velocity) / Globals.inertia)
-		bullet_inst.velocity.y = (direction.y * Globals.shot_velocity) + randi_range(-Globals.shot_spread,Globals.shot_spread) # + velocity.y
+		bullet_inst.velocity.y = (direction.y * Globals.shot_velocity) + randi_range(-Globals.shot_spread,Globals.shot_spread) + shot_offset # + velocity.y
 		self.velocity.y += -direction.y * ((Globals.shot_weight * Globals.shot_velocity) / Globals.inertia)
 		shot_lock = true
 		$RangeCDTimer.start()

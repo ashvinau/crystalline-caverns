@@ -29,6 +29,8 @@ var cur_double_jumps: int # Required for compatibility with basic_melee.gd - not
 var basic_bullet = preload("res://attacks/basic_bullet.tscn")
 var basic_melee = preload("res://attacks/basic_melee.tscn")
 var spark_scene = preload("res://effects/sparks.tscn")
+var dmg_scene = preload("res://damage_display.tscn")
+
 @onready var play_field: Node2D = get_node("..") # parent node: PlayField
 
 func set_mob(level: int, players: Array, color: Color, health: int, speed: int, cap: int, jump: int, moveCD: float, alertCD: float, rangeCD: float, meleeCD: float, detect_d: int, shot_d: int, melee_d: int):
@@ -57,10 +59,14 @@ func update_health_bar():
 	for x in 32:
 		for y in 8:
 			if x <= health_proportion:
-				bar_image.set_pixel(x,y,Color(0.6,0,0,0.5))	
+				bar_image.set_pixel(x,y,Color(0.8,0,0,0.6))	
 			else:
 				bar_image.set_pixel(x,y,Color(1,1,1,0))
-	$HealthBar.texture.update(bar_image)
+	if health_proportion == 32:
+		$HealthBar.visible = false
+	else:
+		$HealthBar.visible = true
+		$HealthBar.texture.update(bar_image)	
 
 func _ready():
 	$HealthBar.texture = ImageTexture.create_from_image(bar_image)	
@@ -140,6 +146,12 @@ func hit(magnitude: float):
 	detection_mult = 2
 	update_health_bar()
 	$AlertTimer.start()
+	# Damage number display
+	var dmg_inst = dmg_scene.instantiate()
+	dmg_inst.position.x = self.position.x - 32
+	dmg_inst.position.y = self.position.y - 55	
+	play_field.add_child(dmg_inst)
+	dmg_inst.set_dmg_disp(magnitude, Color.RED)
 	
 func expire():
 	var spark_inst = spark_scene.instantiate()
