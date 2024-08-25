@@ -70,7 +70,7 @@ animations = [{
 }],
 "loop": false,
 "name": &"slash",
-"speed": 20.0
+"speed": 30.0
 }]
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_8dbef"]
@@ -88,16 +88,15 @@ scale_max = 5.0
 hue_variation_min = -2.23517e-08
 hue_variation_max = 0.1
 
-[sub_resource type="SegmentShape2D" id="SegmentShape2D_dwpx1"]
-a = Vector2(0, -26)
-b = Vector2(0, 26)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ptnwa"]
+size = Vector2(32, 48)
 
 [node name="BasicMelee" type="Area2D"]
 z_index = 2
 z_as_relative = false
 position = Vector2(-1, 0)
-collision_layer = 0
-collision_mask = 0
+collision_layer = 2048
+collision_mask = 2048
 script = ExtResource("1_exdix")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
@@ -117,8 +116,8 @@ amount = 50
 process_material = SubResource("ParticleProcessMaterial_8dbef")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(1, 0)
-shape = SubResource("SegmentShape2D_dwpx1")
+position = Vector2(-13, 0)
+shape = SubResource("RectangleShape2D_ptnwa")
 
 [node name="LifeTimer" type="Timer" parent="."]
 one_shot = true
@@ -127,6 +126,7 @@ one_shot = true
 wait_time = 0.25
 one_shot = true
 
+[connection signal="area_entered" from="." to="." method="_on_area_entered"]
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]
 [connection signal="timeout" from="LifeTimer" to="." method="_on_life_timer_timeout"]
 [connection signal="timeout" from="ExpiryTimer" to="." method="_on_expiry_timer_timeout"]

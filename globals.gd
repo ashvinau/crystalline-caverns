@@ -1,5 +1,8 @@
 extends Node
 
+# Game Constants
+const DAMAGE_COLOR: Color = Color(1,0.1,0.1,0.8)
+
 # World Constants
 const RAND_SEED: int = 42 # 42 for fast-loading debug level
 const WIDTH: int = 512
@@ -7,7 +10,7 @@ const HEIGHT: int = 512
 const CLAMP: int = 120
 const GRAVITY: int = 490
 
-# Player Stat Constants
+# Stat Reference Values
 const PLAYER_MAX_HEALTH = 1000
 const PLAYER_HEALTH = 1000
 const PLAYER_COLOR: Color = Color.LIGHT_CORAL
@@ -32,6 +35,13 @@ const MELEE_LIFE: float = 0.15
 const MELEE_GCD: float = 1
 
 # Player Stat Variables
+var STR: float = 5
+var CON: float = 5
+var DEX: float = 5
+var INT: float = 5
+var WIS: float = 5
+
+# Derived Stat Variables
 var player_max_health: int
 var player_health: int
 var player_color: Color
@@ -56,24 +66,58 @@ var melee_life: float
 var melee_gcd: float
 
 func init_player():
-	player_max_health = PLAYER_MAX_HEALTH
-	player_health = PLAYER_HEALTH
+	print("Init Player...")
 	player_color = PLAYER_COLOR
-	move_speed = MOVE_SPEED
-	speed_cap = SPEED_CAP
-	inertia = INERTIA
-	jump_velocity = JUMP_VELOCITY
-	dbl_jump_velocity = DBL_JUMP_VELOCITY
-	slide = SLIDE
-	accel = ACCEL
-	double_jumps = DOUBLE_JUMPS
-	shot_color = SHOT_COLOR
-	shot_spread = SHOT_SPREAD
-	shot_velocity = SHOT_VELOCITY
-	shot_weight = SHOT_WEIGHT
-	shot_life = SHOT_LIFE
-	shot_gcd = SHOT_GCD
-	melee_color = MELEE_COLOR
+	melee_color = player_color
+	shot_color = player_color
+	
+	player_max_health = 60 * log(pow(CON,10) + 3.5) # y=60 ln(x^10+3.5)
+	player_health = player_max_health
+	print("Max/Current Health: ", player_health)
+	
+	move_speed = 20 * log(pow(DEX,15.5) + 100) # y=20 ln(x^15.5+100)
+	print("Move Speed: ", move_speed)
+	
+	speed_cap = 40 * log(pow(CON,15) + 100) # y=40 ln(x^15+100)
+	print("Speed Cap: ", speed_cap)
+	
+	inertia = log(pow(STR+CON,0.65) + 3) # y=ln(x^0.65+3)
+	print("Inertia: ", inertia)
+	
+	jump_velocity = -(15 * log(pow(STR+DEX,11.6) + 500)) # y=ln(x^11.6+500)
+	print("Jump velocity: ", jump_velocity)
+	
+	dbl_jump_velocity = -(20 * log(pow(DEX,12.3) + 70)) # y=ln(x^12.3+70)
+	print("Double jump velocity: ", dbl_jump_velocity)
+	
+	slide = log(6 * pow(DEX+WIS, 4) + 3) - 1 # y=ln(6x^4+3)-1
+	print("Slide control: ", slide)
+	
+	accel = log(15 * pow(DEX+CON, 1.43) + 1) # y=ln (15x^1.43+1)
+	print("Acceleration: ", accel)
+	
+	double_jumps = floor(log(67 * pow(DEX+INT, 1.23))-4) # ln(67x^1.23)-4
+	print("Double jumps: ", double_jumps)
+	
+	shot_spread = -log(2.5 * pow(WIS,2.9)) + 16.5 # y=-ln(2.5x^2.9)+15.5
+	if shot_spread < 0:
+		shot_spread = 0
+	print("Shot Spread: ", shot_spread)
+	
+	shot_velocity = 90 * log(pow(INT+WIS,3.2)) - 60 # y=90 ln(x^3.2)-60
+	print("Shot velocity: ", shot_velocity)
+		
+	shot_weight = ((log(pow(INT + 2.4, 3) + 6.62)) / 12) # y=(ln((x+2.4)^3)+6.62)/12
+	print("Shot weight: ", shot_weight)
+	
+	shot_life = log(pow(WIS,3)+1)+1 # ln(x^3+1)+1
+	print("Shot life: ", shot_life)
+	
+	shot_gcd = -(log(pow(INT+DEX,5))-23)/10 # y=-(ln(x^5)-23)/10
+	if shot_gcd < 0.1:
+		shot_gcd = 0.1
+	print("Shot gcd: ", shot_gcd)
+	
 	melee_velocity = MELEE_VELOCITY
 	melee_weight = MELEE_WEIGHT
 	melee_life = MELEE_LIFE

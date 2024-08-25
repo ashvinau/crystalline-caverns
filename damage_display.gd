@@ -24,5 +24,5 @@ func _process(delta: float) -> void:
 		queue_free()
 	else:
 		modulate = Color(r,g,b,a)
-		position.y -= delta
+		position.y -= delta * 50
 	

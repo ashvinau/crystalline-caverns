@@ -151,7 +151,7 @@ func hit(magnitude: float):
 	dmg_inst.position.x = self.position.x - 32
 	dmg_inst.position.y = self.position.y - 55	
 	play_field.add_child(dmg_inst)
-	dmg_inst.set_dmg_disp(magnitude, Color.RED)
+	dmg_inst.set_dmg_disp(damage, Globals.DAMAGE_COLOR)
 	
 func expire():
 	var spark_inst = spark_scene.instantiate()

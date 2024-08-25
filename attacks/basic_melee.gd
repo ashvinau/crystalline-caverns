@@ -36,6 +36,26 @@ func _physics_process(delta):
 		modulate = Color(slash_color.r, slash_color.g, slash_color.b, transparency)		
 		$AnimatedSprite2D.material.set_shader_parameter("modulate",Globals.color_to_vector(modulate))
 				
+func _on_area_entered(area: Area2D) -> void:
+	melee_force = (velocity.length() * slash_weight) / e_inertia
+	if (not knockback) && (is_instance_valid(emitter_node)):
+		if abs(slash_direction.x) > abs(slash_direction.y):
+			emitter_node.velocity.x = -(slash_direction.x * melee_force)	
+		else:
+			emitter_node.velocity.y = -(slash_direction.y * melee_force)
+		
+		if emitter_node.cur_double_jumps > 0:
+			emitter_node.cur_double_jumps -= 1
+		knockback = true
+		
+	var spark_inst = spark_scene.instantiate()
+	spark_inst.scale *= slash_weight
+	spark_inst.position = self.position
+	get_parent().add_child(spark_inst)
+	spark_inst.modulate = Color.YELLOW
+	spark_inst.emitting = true	
+	area.queue_free()
+
 func _on_body_entered(body):	
 	melee_force = (velocity.length() * slash_weight) / e_inertia
 	if (not knockback) && (is_instance_valid(emitter_node)):
@@ -62,7 +82,7 @@ func _on_body_entered(body):
 			body.add_child(spark_inst)
 			spark_inst.modulate = Color.RED
 			spark_inst.emitting = true
-			body.hit(velocity.length() * slash_weight)
+			body.hit(velocity.length() * slash_weight)			
 		hit_list.append(body.name)
 	
 func apply_melee_force(target_node, melee_force: float):
