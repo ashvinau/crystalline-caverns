@@ -10,29 +10,8 @@ const HEIGHT: int = 512
 const CLAMP: int = 120
 const GRAVITY: int = 490
 
-# Stat Reference Values
-const PLAYER_MAX_HEALTH = 1000
-const PLAYER_HEALTH = 1000
-const PLAYER_COLOR: Color = Color.LIGHT_CORAL
-const MOVE_SPEED: float = 500.0
-const SPEED_CAP: int = 800
-const INERTIA: float = 2
-const JUMP_VELOCITY: float = -400
-const DBL_JUMP_VELOCITY: float = -300
-const SLIDE: float = 10
-const ACCEL: float = 5
-const DOUBLE_JUMPS: int = 3
-const SHOT_COLOR: Color = Color.BLUE_VIOLET
-const SHOT_SPREAD: int = 10
-const SHOT_VELOCITY: int = 575
-const SHOT_WEIGHT: float = 0.5
-const SHOT_LIFE: float = 7
-const SHOT_GCD: float = 0.75
-const MELEE_COLOR: Color = Color.HOT_PINK
-const MELEE_VELOCITY: int = 900
-const MELEE_WEIGHT: float = 0.5
-const MELEE_LIFE: float = 0.15
-const MELEE_GCD: float = 1
+# Customization
+const PLAYER_COLOR: Color = Color.PURPLE
 
 # Player Stat Variables
 var STR: float = 5
@@ -71,57 +50,138 @@ func init_player():
 	melee_color = player_color
 	shot_color = player_color
 	
-	player_max_health = 60 * log(pow(CON,10) + 3.5) # y=60 ln(x^10+3.5)
+	player_max_health = calc_health(CON) # Ref val 1000
 	player_health = player_max_health
 	print("Max/Current Health: ", player_health)
 	
-	move_speed = 20 * log(pow(DEX,15.5) + 100) # y=20 ln(x^15.5+100)
+	move_speed = calc_move_speed(DEX) # Ref val 500
 	print("Move Speed: ", move_speed)
 	
-	speed_cap = 40 * log(pow(CON,15) + 100) # y=40 ln(x^15+100)
+	speed_cap = calc_speed_cap(CON) # Ref val 800
 	print("Speed Cap: ", speed_cap)
 	
-	inertia = log(pow(STR+CON,0.65) + 3) # y=ln(x^0.65+3)
+	inertia = calc_inertia(STR, CON) # Ref val 2
 	print("Inertia: ", inertia)
 	
-	jump_velocity = -(15 * log(pow(STR+DEX,11.6) + 500)) # y=ln(x^11.6+500)
+	jump_velocity = calc_jump_velocity(STR, DEX) # Ref val -400
 	print("Jump velocity: ", jump_velocity)
 	
-	dbl_jump_velocity = -(20 * log(pow(DEX,12.3) + 70)) # y=ln(x^12.3+70)
+	dbl_jump_velocity = calc_double_jump_vel(DEX) # Ref val -300
 	print("Double jump velocity: ", dbl_jump_velocity)
 	
-	slide = log(6 * pow(DEX+WIS, 4) + 3) - 1 # y=ln(6x^4+3)-1
+	slide = calc_slide(DEX, WIS) # Ref val 10
 	print("Slide control: ", slide)
 	
-	accel = log(15 * pow(DEX+CON, 1.43) + 1) # y=ln (15x^1.43+1)
+	accel = calc_accel(DEX, CON) # Ref val 5
 	print("Acceleration: ", accel)
 	
-	double_jumps = floor(log(67 * pow(DEX+INT, 1.23))-4) # ln(67x^1.23)-4
+	double_jumps = calc_double_jumps(DEX, INT) # Ref val 3
 	print("Double jumps: ", double_jumps)
 	
-	shot_spread = -log(2.5 * pow(WIS,2.9)) + 16.5 # y=-ln(2.5x^2.9)+15.5
-	if shot_spread < 0:
-		shot_spread = 0
+	shot_spread = calc_shot_spread(WIS) # Ref val 10
 	print("Shot Spread: ", shot_spread)
 	
-	shot_velocity = 90 * log(pow(INT+WIS,3.2)) - 60 # y=90 ln(x^3.2)-60
+	shot_velocity = calc_shot_vel(INT, WIS) # Ref val 600
 	print("Shot velocity: ", shot_velocity)
 		
-	shot_weight = ((log(pow(INT + 2.4, 3) + 6.62)) / 12) # y=(ln((x+2.4)^3)+6.62)/12
+	shot_weight = calc_shot_weight(INT) # Ref val 0.5
 	print("Shot weight: ", shot_weight)
 	
-	shot_life = log(pow(WIS,3)+1)+1 # ln(x^3+1)+1
+	shot_life = calc_shot_life(WIS) # Ref val 7
 	print("Shot life: ", shot_life)
 	
-	shot_gcd = -(log(pow(INT+DEX,5))-23)/10 # y=-(ln(x^5)-23)/10
-	if shot_gcd < 0.1:
-		shot_gcd = 0.1
+	shot_gcd = calc_shot_gcd(INT, DEX) # Ref val 0.75
 	print("Shot gcd: ", shot_gcd)
 	
-	melee_velocity = MELEE_VELOCITY
-	melee_weight = MELEE_WEIGHT
-	melee_life = MELEE_LIFE
-	melee_gcd = MELEE_GCD	
+	melee_velocity = calc_melee_velocity(STR, DEX) # Ref val 900
+	print("Melee velocity: ", melee_velocity)	
+	
+	melee_weight = calc_melee_weight(STR) # Ref val 0.5
+	print("Melee weight: ", melee_weight)
+	
+	melee_life = calc_melee_life(WIS) # Ref val 0.15
+	print("Melee life: ", melee_life)
+	
+	melee_gcd = calc_melee_gcd(CON, DEX) # Ref val 1
+	print("Melee gcd: ", melee_gcd)
+	
+func calc_health(con: float) -> float:
+	return 60 * log(pow(con,10) + 3.5) # y=60 ln(x^10+3.5)
+	
+func calc_move_speed(dex: float) -> float:
+	return 20 * log(pow(dex,15.5) + 100) # y=20 ln(x^15.5+100)
+	
+func calc_speed_cap(con: float) -> float:
+	return 40 * log(pow(con,15) + 100) # y=40 ln(x^15+100)
+	
+func calc_inertia(str: float, con: float) -> float:
+	return log(pow(str+con,0.65) + 3) # y=ln(x^0.65+3)
+	
+func calc_jump_velocity(str: float, dex: float) -> float:
+	return -(15 * log(pow(str+dex,11.6) + 500)) # y=ln(x^11.6+500)
+	
+func calc_double_jump_vel(dex: float) -> float:
+	return -(20 * log(pow(dex,12.3) + 70)) # y=ln(x^12.3+70)
+	
+func calc_slide(dex: float, wis: float) -> float:
+	return log(6 * pow(dex+wis, 4) + 3) - 1 # y=ln(6x^4+3)-1
+	
+func calc_accel(dex: float, con: float) -> float:
+	return log(15 * pow(dex+con, 1.43) + 1) # y=ln (15x^1.43+1)
+	
+func calc_double_jumps(dex: float, inte: float) -> float:
+	return floor(log(67 * pow(dex+inte, 1.23))-4) # ln(67x^1.23)-4
+	
+func calc_shot_spread(wis: float) -> float:
+	var retVal: float = -log(2.5 * pow(wis,2.9)) + 16.5 # y=-ln(2.5x^2.9)+15.5
+	if retVal < 0:
+		retVal = 0
+	return retVal
+	
+func calc_shot_vel(inte: float, wis: float) -> float:
+	return 90 * log(pow(inte+wis,3.2)) - 60 # y=90 ln(x^3.2)-60
+	
+func calc_shot_weight(inte: float) -> float:
+	return ((log(pow(inte + 2.4, 3) + 6.62)) / 12) # y=(ln((x+2.4)^3)+6.62)/12
+	
+func calc_shot_life(wis: float) -> float:
+	return log(pow(wis,3)+1)+1 # ln(x^3+1)+1
+	
+func calc_shot_gcd(inte: float, dex: float) -> float:
+	var retVal: float = -(log(pow(inte+dex,5))-23)/10 # y=-(ln(x^5)-23)/10
+	if retVal < 0.1:
+		retVal = 0.1
+	return retVal
+	
+func calc_melee_velocity(str: float, dex: float) -> float:
+	return 50 * log(pow(str+dex,8)+40) # 50 ln(x^8+40)
+	
+func calc_melee_weight(str: float) -> float:
+	return ((log(pow(str + 2.4, 3) + 6.62)) / 11) # y=(ln((x+2.4)^3)+6.62)/11
+	
+func calc_melee_life(wis: float) -> float:
+	return (log(pow(wis,4)+3)) / 38 # y=(ln(x^4+3))/38
+	
+func calc_melee_gcd(con: float, dex: float) -> float:
+	var retVal: float = -(log(pow(con+dex,5))-23)/9 # y=-(ln(x^5)-23)/10
+	if retVal < 0.1:
+		retVal = 0.1
+	return retVal
+	
+func calc_detection_dist(wis: float) -> float:
+	return 50 * log(pow(wis,11.5) + 80)
+	
+func calc_shot_dist(inte: float, wis: float) -> float:
+	return 42 * log(pow(inte+wis+1,7) + 1)
+	
+func calc_melee_dist(str: float, dex: float) -> float:
+	return 30 * log(pow(str+dex+1,5.6) + 1)
+	
+func calc_move_gcd(dex: float, wis: float) -> float:
+	return -(log(pow(wis+dex,5))-23)/9 # y=-(ln(x^5)-23)/10
+	
+func calc_alert_gcd(inte: float, wis: float) -> float:
+	return (4 * log(pow(inte+wis,3)+5)) / 6
 	
 # For using vector4 colors in shaders
 func color_to_vector(inColor: Color) -> Vector4:

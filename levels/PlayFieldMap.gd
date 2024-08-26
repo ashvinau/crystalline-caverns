@@ -307,7 +307,7 @@ func _ready():
 	
 	print("Test enemies...")
 	var enemy_node = spawn_entity(enemies[0], Vector2i(player_nodes[0].position.x + 300,player_nodes[0].position.y))
-	enemy_node.set_mob(1,player_nodes,Color.ORANGE,800,100,600,-300,1,5,2,3,900,700,400)
+	enemy_node.set_mob(player_nodes,Color.LAWN_GREEN,5,5,5,5,5)
 	
 	print("PlayField ready.")
 	
