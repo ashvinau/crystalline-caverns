@@ -4,7 +4,9 @@ const HEALTH_BAR_SIZE: Vector2i = Vector2i(600,30)
 
 var bar_image: Image = Image.create(HEALTH_BAR_SIZE.x,HEALTH_BAR_SIZE.y,false, Image.FORMAT_RGBA8)
 var player_indicator: AnimatedSprite2D
+var boss_indicator: AnimatedSprite2D
 @onready var health_text = $Health
+@onready var play_field_map = get_node("../CenterViewportContainer/CenterViewport/PlayField/PlayFieldMap")
 
 var bar_color = Color.DARK_RED
 #var bar_negative = Color.BLACK
@@ -61,11 +63,22 @@ func display_preview(geo_matrix, spawn_loc: Vector2i):
 	player_indicator.modulate = Globals.player_color
 	$levelPreview.add_child.call_deferred(player_indicator)
 	
-func update_player_indicator():
-	var player_node = get_node("../CenterViewportContainer/CenterViewport/PlayField/PlayFieldMap")
-	var player_position: Vector2i = player_node.player_nodes[0].position
+	# boss position indicator
+	boss_indicator = indicator_scene.instantiate()
+	boss_indicator.play("boss")
+	boss_indicator.position = spawn_loc / 2	
+	$levelPreview.add_child.call_deferred(boss_indicator)	
+	
+func update_indicators():	
+	var player_position: Vector2i = play_field_map.player_nodes[0].position
 	player_position = (player_position / 16) / 2
 	player_indicator.position = player_position
+	if is_instance_valid(play_field_map.boss_nodes[0]):
+		var boss_position: Vector2i = play_field_map.boss_nodes[0].position	
+		boss_position = (boss_position / 16) / 2
+		boss_indicator.position = boss_position	
+	else:
+		boss_indicator.visible = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready():	
@@ -74,4 +87,4 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	update_player_indicator()
+	update_indicators()

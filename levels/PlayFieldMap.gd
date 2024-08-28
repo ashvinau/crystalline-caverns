@@ -1,5 +1,7 @@
 extends TileMap
 
+signal navigation_map_complete
+
 const IV = 999 # Ignore value for processing geo_matrix
 const AV = 998 # Match any value other than 0 for processing geo_matrix
 
@@ -8,12 +10,13 @@ const AV = 998 # Match any value other than 0 for processing geo_matrix
 @onready var hud = get_node("../../../../HUD")
 
 var hud_scene = preload("res://hud.tscn")
-var player_nodes: Array = []
 var players: Array = []
+var player_nodes: Array = []
+var boss_nodes: Array = []
 var bosses: Array = []
-var enemies: Array = []
 var perlin_matrix: Array = []
 var geo_matrix: Array = []
+var unmodified_geo_matrix: Array = []
 var spawn_loc: Vector2i
 
 # Called when the node enters the scene tree for the first time.
@@ -30,7 +33,7 @@ func _init():
 	
 	#Load entities into memory
 	players.append(preload("res://character/player.tscn"))
-	enemies.append(preload("res://enemies/formless_crawler.tscn"))
+	bosses.append(preload("res://enemies/fungus_lord.tscn"))	
 			
 func set_geo_matrix(clamp: int, test: bool):	
 	var invalid: int = 0
@@ -38,17 +41,17 @@ func set_geo_matrix(clamp: int, test: bool):
 	for x in Globals.WIDTH:
 		for y in Globals.HEIGHT:
 			if (perlin_matrix[x][y] <= clamp):
-				geo_matrix[x][y] = 1 # Solid square tile	
+				geo_matrix[x][y] = 1 # Solid square tile
 	
-	if test:			
+	if test:
 		# Test validity of initial geo_matrix if requested - rejection logic later
 		var testMatrix = geo_matrix.duplicate(true)
-		# Fill empty space starting at the spawn point		
-		Globals.flood_fill(testMatrix,Globals.pick_spawn(geo_matrix,40),0,255);
+		# Fill empty space starting at the spawn point
+		flood_fill(testMatrix,Globals.pick_spawn(geo_matrix,40),255,false);
 		# Check for remaining 0 values
 		for x in Globals.WIDTH:
 			for y in Globals.HEIGHT:
-				if (testMatrix[x][y] == 0):				
+				if (testMatrix[x][y] == 0):
 					invalid += 1
 		
 		print(invalid," invalid with clamp ", clamp, ".")	
@@ -220,6 +223,47 @@ func fill_perlin_matrix(matrix):
 			curIndex += 1
 	print("Debug indexes: ", curIndex)
 	
+func flood_fill(matrix, start_pos: Vector2i, replacement_value, sniff_map: bool):
+	var target_value = matrix[start_pos.x][start_pos.y]
+	if sniff_map:
+		replacement_value = 1		
+	
+	# Create a stack for positions to visit
+	var stack = [start_pos]
+
+	while stack.size() > 0:
+		var pos = stack.pop_front()
+				
+		# Make index positions safe
+		var adj_index: Vector2i = Globals.safe_index(Vector2i(pos.x, pos.y))
+		
+		# Get the current value at the position
+		var current_value = matrix[adj_index.x][adj_index.y]
+
+		# If the current value is not the target value, continue
+		if current_value != target_value:
+			continue
+
+		# Replace the value at the current position		
+		matrix[adj_index.x][adj_index.y] = replacement_value
+
+		# Push neighboring positions to the stack
+		if (Globals.get_mat_val(matrix, Vector2(pos.x, pos.y - 1)) == target_value):
+			stack.append(Globals.safe_index(Vector2i(pos.x, pos.y - 1)))
+		if (Globals.get_mat_val(matrix, Vector2(pos.x + 1, pos.y)) == target_value):
+			stack.append(Globals.safe_index(Vector2i(pos.x + 1, pos.y)))
+		if (Globals.get_mat_val(matrix, Vector2(pos.x, pos.y + 1)) == target_value):
+			stack.append(Globals.safe_index(Vector2i(pos.x, pos.y + 1)))
+		if (Globals.get_mat_val(matrix, Vector2(pos.x - 1, pos.y)) == target_value):
+			stack.append(Globals.safe_index(Vector2i(pos.x - 1, pos.y)))
+			
+		if sniff_map:
+			replacement_value += 1
+			await boss_nodes[0].process_more_nav_map			
+		
+	navigation_map_complete.emit()
+	
+	
 func respawn():
 	player_nodes[0].queue_free()
 	player_nodes[0] = spawn_entity(players[0], spawn_loc * 16)
@@ -285,15 +329,17 @@ func _ready():
 		fill_perlin_matrix(perlin_matrix)
 		print("Generating test level...")
 		debug_level()
+		unmodified_geo_matrix = geo_matrix.duplicate(true)
 		print("Generating player spawn...")
 		generate_spawn()
-		print("Generating preview...")
+		print("Generating preview...")		
 		hud.display_preview(geo_matrix, spawn_loc)		
 	else:	# Procgen level
 		print("Generating perlin matrix...")
 		fill_perlin_matrix(perlin_matrix)
 		print("Setting geo matrix...")
 		set_geo_matrix(Globals.CLAMP, true)
+		unmodified_geo_matrix = geo_matrix.duplicate(true)
 		print("Setting PlayField TileMap...")
 		set_playfield_map(self, 1, 0,0)	
 		print("Generating player spawn...")
@@ -306,11 +352,14 @@ func _ready():
 	set_rear_bg()
 	
 	print("Test enemies...")
-	var enemy_node = spawn_entity(enemies[0], Vector2i(player_nodes[0].position.x + 300,player_nodes[0].position.y))
-	enemy_node.set_mob(player_nodes,Color.LAWN_GREEN,5,5,5,5,5)
-	
+	boss_nodes.append(spawn_entity(bosses[0], Vector2i(player_nodes[0].position.x + 300,player_nodes[0].position.y)))
+	boss_nodes[0].set_mob(player_nodes,Color.LAWN_GREEN,5,5,5,5,5)
+	boss_nodes[0].process_more_nav_map.connect(_on_process_more_nav)
 	print("PlayField ready.")
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):	
+	pass
+	
+func _on_process_more_nav():
 	pass

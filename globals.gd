@@ -4,7 +4,7 @@ extends Node
 const DAMAGE_COLOR: Color = Color(1,0.1,0.1,0.8)
 
 # World Constants
-const RAND_SEED: int = 42 # 42 for fast-loading debug level
+const RAND_SEED: int = 5272 # 42 for fast-loading debug level
 const WIDTH: int = 512
 const HEIGHT: int = 512
 const CLAMP: int = 120
@@ -213,41 +213,15 @@ func fade(x: float) -> float:
 	
 func invert_mono_color(value: int) -> Color:
 	value = 255 - value
-	return Color8(value, value, value)
+	return Color8(value, value, value)	
 	
-func flood_fill(matrix, start_pos: Vector2i, target_value, replacement_value):
-	# Check if the target value is the same as the replacement value
-	if target_value == replacement_value:
-		return
-
-	# Check if start position is within the bounds of the matrix
-	if start_pos.x < 0 or start_pos.x >= matrix.size() or start_pos.y < 0 or start_pos.y >= matrix[0].size():
-		return
-
-	# Create a stack for positions to visit
-	var stack = [start_pos]
-
-	while stack.size() > 0:
-		var pos = stack.pop_back()
-				
-		# Make index positions safe
-		var adj_index: Vector2i = Globals.safe_index(Vector2i(pos.x, pos.y))
-		
-		# Get the current value at the position
-		var current_value = matrix[adj_index.x][adj_index.y]
-
-		# If the current value is not the target value, continue
-		if current_value != target_value:
-			continue
-
-		# Replace the value at the current position		
-		matrix[adj_index.x][adj_index.y] = replacement_value
-
-		# Push neighboring positions to the stack
-		stack.append(Vector2i(pos.x + 1, pos.y))
-		stack.append(Vector2i(pos.x - 1, pos.y))
-		stack.append(Vector2i(pos.x, pos.y + 1))
-		stack.append(Vector2i(pos.x, pos.y - 1))
+func get_mat_val(matrix: Array, index: Vector2) -> int:
+	index = safe_index(index)
+	return matrix[index.x][index.y]
+	
+func set_mat_val(matrix: Array, index: Vector2, value: int) -> void:
+	index = safe_index(index)
+	matrix[index.x][index.y] = value	
 		
 func pick_spawn(matrix, dist: int) -> Vector2i:
 	var found: bool = false	

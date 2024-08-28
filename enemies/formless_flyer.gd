@@ -3,8 +3,6 @@ extends CharacterBody2D
 var animation_locked: bool = false
 var shot_lock: bool = false
 var melee_lock: bool = false
-var was_in_air: bool = false
-var jump_lock: bool = false
 var direction: Vector2 = Vector2.ZERO
 var bar_image: Image = Image.create(32,8,false, Image.FORMAT_RGBA8)
 var cur_double_jumps: int # Required for compatibility with basic_melee.gd - not used
@@ -15,9 +13,8 @@ var move_speed: int
 var accel: float
 var slide: float
 var speed_cap: int
-var jump_height: int
 var detection_dist: int
-var detection_mult: int = 1
+var detection_mult: int = 2
 var shot_dist: int
 var melee_dist: int
 var player_nodes: Array = []
@@ -52,8 +49,7 @@ func set_mob(players: Array, color: Color, str: float, con: float, dex: float, i
 	max_health = Globals.calc_health(con)
 	mob_health = max_health
 	move_speed = Globals.calc_move_speed(dex)
-	speed_cap = Globals.calc_speed_cap(con)
-	jump_height = Globals.calc_jump_velocity(str, dex)
+	speed_cap = Globals.calc_speed_cap(con)	
 	detection_dist = Globals.calc_detection_dist(wis) # ref value 900
 	print("mob detection dist: ", detection_dist)
 	shot_dist = Globals.calc_shot_dist(inte, wis) # ref value 700
@@ -71,7 +67,7 @@ func set_mob(players: Array, color: Color, str: float, con: float, dex: float, i
 	print("mob alert timer: ", $AlertTimer.wait_time)
 	$AnimatedSprite2D.material.set_shader_parameter("modulate",Globals.color_to_vector(color))
 	modulate = color	
-	$AnimatedSprite2D.play("walking")
+	$AnimatedSprite2D.play("idle")
 	
 func update_health_bar():	
 	var health_proportion: float = (float(mob_health) / float(max_health)) * 32.0	
@@ -91,7 +87,7 @@ func _ready():
 	$HealthBar.texture = ImageTexture.create_from_image(bar_image)	
 	update_health_bar()
 	
-func _physics_process(delta):	
+func _physics_process(delta):
 	# Speed Caps
 	if velocity.x > speed_cap:
 		velocity.x = speed_cap
@@ -102,41 +98,24 @@ func _physics_process(delta):
 	elif velocity.y < -speed_cap:
 		velocity.y = -speed_cap
 		
-	#Gravity
-	if not is_on_floor():
-		velocity.y += Globals.GRAVITY * delta
-		was_in_air = true
-	else:
-		if was_in_air:
-			land()
-		was_in_air = false
-		
-	# Jumping
-	if is_on_wall() || (not is_on_floor()):
-		jump()
-		
-	# acceleration and friction deceleration
+		# acceleration and friction deceleration
 	if direction.x != 0:
 		velocity.x = move_toward(velocity.x, direction.x * move_speed, accel)
 	else:
 		velocity.x = move_toward(velocity.x, 0, slide)
 		
+	if direction.y != 0:
+		velocity.y = move_toward(velocity.y, direction.y * move_speed, accel)
+	else:
+		velocity.y = move_toward(velocity.y, 0, slide)
+		
+	if is_on_wall() || is_on_ceiling() || is_on_floor(): # unstucker
+		_on_move_timer_timeout()
+		
 	move_and_slide()
 	update_animation()
 	update_facing_direction()
 	check_mob_loc()
-
-func jump():
-	if not jump_lock:
-		velocity.y = jump_height
-		$AnimatedSprite2D.play("jump")
-		animation_locked = true
-		jump_lock = true
-
-func land():
-	$AnimatedSprite2D.play("land")
-	animation_locked = true
-	jump_lock = false
 	
 func update_facing_direction():
 	if direction.x > 0:
@@ -146,16 +125,13 @@ func update_facing_direction():
 		
 func update_animation():
 	if !animation_locked:
-		if !is_on_floor():
-			$AnimatedSprite2D.play("idle") # jump animation
+		if direction.x != 0 || direction.y != 0:
+			$AnimatedSprite2D.play("walking")
 		else:
-			if direction.x != 0:
-				$AnimatedSprite2D.play("walking")
-			else:
-				$AnimatedSprite2D.play("idle")
+			$AnimatedSprite2D.play("idle")
 
 func _on_animated_sprite_2d_animation_finished():
-	if (["attack", "hit", "jump", "land"].has($AnimatedSprite2D.animation)):
+	if (["attack", "hit"].has($AnimatedSprite2D.animation)):
 		animation_locked = false
 		
 func hit(magnitude: float):	
@@ -166,7 +142,7 @@ func hit(magnitude: float):
 	if mob_health <= 0:
 		mob_health = 0
 		expire()
-	detection_mult = 2
+	detection_mult = 4
 	update_health_bar()
 	$AlertTimer.start()
 	# Damage number display
@@ -274,26 +250,24 @@ func _on_move_timer_timeout() -> void:
 	$ClearShot.target_position.x = tgt_player_loc.x - $ClearShot.global_position.x
 	$ClearShot.target_position.y = tgt_player_loc.y - $ClearShot.global_position.y
 	
-	# Range state machine
-	if (closest_dist < (detection_dist * detection_mult)): # Within detection range
-		if (tgt_player_loc.x < self.position.x): # Choose movement direction
-			direction = Vector2(-1,0)
-		else:
-			direction = Vector2(1,0)
+	if $ClearShot.is_colliding() || closest_dist >= detection_dist * detection_mult:
+		direction.x = randf_range(-1,1) # random movement with no line of sight
+		direction.y = randf_range(-1,1)
 	else:
-		direction.x = randi_range(-1,1) # random movement with no detection
+		# Range state machine
+		if (closest_dist < (detection_dist * detection_mult)) && (closest_dist >= shot_dist): # Within detection range, but not too close
+			direction = self.position.direction_to(tgt_player_loc) # move toward
+		elif (closest_dist < shot_dist): # if we are too close
+			direction = -self.position.direction_to(tgt_player_loc) # move back		
 			
-	if (closest_dist < shot_dist) && (not $ClearShot.is_colliding()): # Within projectile range
-		var shot_direction: Vector2 = self.position.direction_to(tgt_player_loc)
-		shot_direction.y -= closest_dist * 0.00045 # aim up a bit for distant targets - replace with correct math later
-		range_attack(shot_direction * 20, shot_direction)
-		
-	if (closest_dist < melee_dist): # Within melee range
-		var slash_direction: Vector2 = self.position.direction_to(tgt_player_loc)
-		melee_attack(slash_direction * 20, slash_direction)			
-		
-	if direction != Vector2.ZERO && velocity == Vector2.ZERO: # unstucker
-		jump()	
+		if (closest_dist < shot_dist): # Within projectile range
+			var shot_direction: Vector2 = self.position.direction_to(tgt_player_loc)
+			shot_direction.y -= closest_dist * 0.00033 # aim up a bit for distant targets - replace with correct math later
+			range_attack(shot_direction * 20, shot_direction)
+			
+		if (closest_dist < melee_dist): # Within melee range
+			var slash_direction: Vector2 = self.position.direction_to(tgt_player_loc)
+			melee_attack(slash_direction * 20, slash_direction)	
 
 func _on_range_timer_timeout() -> void:
 	shot_lock = false
@@ -302,4 +276,4 @@ func _on_melee_timer_timeout() -> void:
 	melee_lock = false
 
 func _on_alert_timer_timeout() -> void:
-	detection_mult = 1
+	detection_mult = 2
