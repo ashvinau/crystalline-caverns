@@ -145,8 +145,11 @@ autostart = true
 [node name="AlertTimer" type="Timer" parent="."]
 
 [node name="NavTimer" type="Timer" parent="."]
-wait_time = 10.0
-autostart = true
+wait_time = 15.0
+one_shot = true
+
+[node name="AddTimer" type="Timer" parent="."]
+one_shot = true
 
 [node name="ClearShot" type="RayCast2D" parent="."]
 collision_mask = 2048
@@ -164,3 +167,4 @@ stretch_mode = 2
 [connection signal="timeout" from="MeleeTimer" to="." method="_on_melee_timer_timeout"]
 [connection signal="timeout" from="AlertTimer" to="." method="_on_alert_timer_timeout"]
 [connection signal="timeout" from="NavTimer" to="." method="_on_nav_timer_timeout"]
+[connection signal="timeout" from="AddTimer" to="." method="_on_add_timer_timeout"]

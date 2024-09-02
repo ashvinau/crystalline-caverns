@@ -46,7 +46,7 @@ func set_mob(players: Array, color: Color, str: float, con: float, dex: float, i
 	melee_life = Globals.calc_melee_life(wis)
 	melee_weight = Globals.calc_melee_weight(str)
 	melee_velocity = Globals.calc_melee_velocity(str, dex)
-	max_health = Globals.calc_health(con)
+	max_health = Globals.calc_health(con) / 2
 	mob_health = max_health
 	move_speed = Globals.calc_move_speed(dex)
 	speed_cap = Globals.calc_speed_cap(con)	

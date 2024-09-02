@@ -20,6 +20,7 @@ var camera_offset_x: int = 0
 var camera_offset_y: int = 0
 var lookahead_adjust_x: float = 1
 var lookahead_adjust_y: float = 1
+var freelook: bool = false
 
 @onready var hud_node = get_node("../../../../HUD")
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
@@ -206,6 +207,12 @@ func _physics_process(delta):
 		animation_locked = false
 		crouched = false
 		
+	if Input.is_action_just_pressed("freelook"):
+		freelook = true
+		
+	if Input.is_action_just_released("freelook"):
+		freelook = false
+		
 	if Input.is_action_just_pressed("attack left"):
 		lookahead_adjust_x = 0
 		
@@ -390,7 +397,7 @@ func expire():
 	#$ExpiryTimer.start()
 	
 func range_attack(offset: Vector2i, direction: Vector2):
-	if not shot_lock:
+	if not shot_lock && not freelook:
 		align_attack(direction)
 		animation_locked = true
 		orientation_locked = true	

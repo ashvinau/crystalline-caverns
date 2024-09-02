@@ -51,7 +51,7 @@ func set_mob(players: Array, color: Color, str: float, con: float, dex: float, i
 	melee_velocity = Globals.calc_melee_velocity(str, dex)
 	max_health = Globals.calc_health(con)
 	mob_health = max_health
-	move_speed = Globals.calc_move_speed(dex)
+	move_speed = Globals.calc_move_speed(dex) / 2
 	speed_cap = Globals.calc_speed_cap(con)
 	jump_height = Globals.calc_jump_velocity(str, dex)
 	detection_dist = Globals.calc_detection_dist(wis) # ref value 900

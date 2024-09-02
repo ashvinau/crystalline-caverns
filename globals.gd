@@ -2,16 +2,17 @@ extends Node
 
 # Game Constants
 const DAMAGE_COLOR: Color = Color(1,0.1,0.1,0.8)
+const NAV_SPEED: float = 0.5
 
 # World Constants
-const RAND_SEED: int = 5272 # 42 for fast-loading debug level
+const RAND_SEED: int = 43499209 # 42 for fast-loading debug level
 const WIDTH: int = 512
 const HEIGHT: int = 512
 const CLAMP: int = 120
 const GRAVITY: int = 490
 
 # Customization
-const PLAYER_COLOR: Color = Color.PURPLE
+const PLAYER_COLOR: Color = Color.FUCHSIA
 
 # Player Stat Variables
 var STR: float = 5
@@ -231,8 +232,8 @@ func pick_spawn(matrix, dist: int) -> Vector2i:
 	
 	while !found:
 		tried += 1
-		curX = randi_range(0,Globals.WIDTH)
-		curY = randi_range(0,Globals.HEIGHT)
+		curX = randi_range(0,Globals.WIDTH-1)
+		curY = randi_range(0,Globals.HEIGHT-1)
 		found = raycast_cardinal(matrix, curX, curY, dist)
 	
 	print("Spawn found in ", tried, " attempts.")

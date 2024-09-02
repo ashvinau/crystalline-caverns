@@ -47,7 +47,7 @@ func set_geo_matrix(clamp: int, test: bool):
 		# Test validity of initial geo_matrix if requested - rejection logic later
 		var testMatrix = geo_matrix.duplicate(true)
 		# Fill empty space starting at the spawn point
-		flood_fill(testMatrix,Globals.pick_spawn(geo_matrix,40),255,false);
+		flood_fill(testMatrix,spawn_loc,255,false);
 		# Check for remaining 0 values
 		for x in Globals.WIDTH:
 			for y in Globals.HEIGHT:
@@ -259,7 +259,7 @@ func flood_fill(matrix, start_pos: Vector2i, replacement_value, sniff_map: bool)
 			
 		if sniff_map:
 			replacement_value += 1
-			await boss_nodes[0].process_more_nav_map			
+			await boss_nodes[0].process_more_nav_map
 		
 	navigation_map_complete.emit()
 	
@@ -283,7 +283,29 @@ func generate_spawn():
 		set_cell(0, Globals.safe_index(Vector2i(xi, spawn_loc.y+22)), 1, Vector2i(0,0), 0)	
 	
 	player_nodes.append(spawn_entity(players[0], adj_spawn_loc))
-	player_nodes[0].set_player(Globals.player_color)	
+	player_nodes[0].set_player(Globals.player_color)
+	
+func spawn_boss(boss_scene: PackedScene):
+	print("Choosing boss spawn...")
+	var boss_spawn_loc: Vector2i = Globals.pick_spawn(geo_matrix,40)
+	
+	var tries: int = 1
+	var distance: float
+	while distance < 256:
+		distance = Globals.toroidal_matrix_dist(Globals.WIDTH,Globals.HEIGHT,spawn_loc,boss_spawn_loc)
+		tries += 1
+		boss_spawn_loc = Globals.pick_spawn(geo_matrix,40)
+	print("Boss spawn location found at ", boss_spawn_loc, " in ", tries, " tries, ", distance, " cells from the player spawn at: ", spawn_loc)
+	
+	boss_nodes.append(spawn_entity(boss_scene, Vector2i(boss_spawn_loc.x*16,boss_spawn_loc.y*16)))
+	boss_nodes[0].set_mob(player_nodes,Color.LAWN_GREEN,3,3,3,3,3)
+	boss_nodes[0].process_more_nav_map.connect(_on_process_more_nav)
+		
+func spawn_entity(entity: PackedScene, e_position: Vector2i) -> CharacterBody2D:
+	var entity_node = entity.instantiate()
+	entity_node.position = e_position	
+	play_field.add_child.call_deferred(entity_node)
+	return entity_node
 
 func set_background(pOffset: int, darken: float, layerNode: TextureRect, bgMap: TileMap, bgViewport: SubViewport):
 	set_geo_matrix(Globals.CLAMP + pOffset, false)		
@@ -316,12 +338,6 @@ func debug_level():
 			geo_matrix[x][y] = 1	
 	set_playfield_map(self, 1,0,0)
 	
-func spawn_entity(entity: PackedScene, position: Vector2i) -> CharacterBody2D:		
-	var entity_node = entity.instantiate()
-	entity_node.position = position	
-	play_field.add_child.call_deferred(entity_node)	
-	return entity_node
-	
 func _ready():
 	if (Globals.RAND_SEED == 42): # Debug/Test Level
 		print("Debug seed mode.")
@@ -344,17 +360,15 @@ func _ready():
 		set_playfield_map(self, 1, 0,0)	
 		print("Generating player spawn...")
 		generate_spawn()	
+		print("Spawning boss...")
+		spawn_boss(bosses[0])
 		print("Generating preview...")
 		hud.display_preview(geo_matrix, spawn_loc)
 		print("Generating backgrounds...")	
 		set_background(10, 0.7, $Background/Parallax1/Layer1,get_node("../BGViewContainer/BGViewport1/BackgroundMap1"),get_node("../BGViewContainer/BGViewport1"))	
-		set_background(20, 0.5, $Background/Parallax2/Layer2,get_node("../BGViewContainer/BGViewport2/BackgroundMap2"),get_node("../BGViewContainer/BGViewport2"))	
-	set_rear_bg()
-	
-	print("Test enemies...")
-	boss_nodes.append(spawn_entity(bosses[0], Vector2i(player_nodes[0].position.x + 300,player_nodes[0].position.y)))
-	boss_nodes[0].set_mob(player_nodes,Color.LAWN_GREEN,5,5,5,5,5)
-	boss_nodes[0].process_more_nav_map.connect(_on_process_more_nav)
+		set_background(20, 0.5, $Background/Parallax2/Layer2,get_node("../BGViewContainer/BGViewport2/BackgroundMap2"),get_node("../BGViewContainer/BGViewport2"))
+		
+	set_rear_bg()	
 	print("PlayField ready.")
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.

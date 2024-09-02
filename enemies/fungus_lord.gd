@@ -17,6 +17,12 @@ var mob_geo_matrix_original: Array = []
 var mob_geo_matrix: Array = []
 var cur_double_jumps: int # Required for compatibility with basic_melee.gd - not used
 
+var STR: float
+var CON: float
+var DEX: float
+var INT: float
+var WIS: float
+
 var max_health: float = 1
 var mob_health: float = 1
 var move_speed: int
@@ -48,6 +54,11 @@ var dmg_scene = preload("res://damage_display.tscn")
 @onready var hud_node = get_node("../../../../HUD")
 
 func set_mob(players: Array, color: Color, str: float, con: float, dex: float, inte: float, wis: float):
+	STR = str
+	CON = con
+	DEX = dex
+	INT = inte
+	WIS = wis
 	minions.append(preload("res://enemies/formless_crawler.tscn"))
 	minions.append(preload("res://enemies/formless_flyer.tscn"))	
 	player_nodes = players
@@ -83,6 +94,8 @@ func set_mob(players: Array, color: Color, str: float, con: float, dex: float, i
 	$AnimatedSprite2D.material.set_shader_parameter("modulate",Globals.color_to_vector(color))
 	modulate = color	
 	$AnimatedSprite2D.play("idle")
+	$NavTimer.wait_time = 15
+	$AddTimer.wait_time = $MoveTimer.wait_time * 25
 	
 func update_health_bar():	
 	var health_proportion: float = (float(mob_health) / float(max_health)) * 64.0	
@@ -108,20 +121,17 @@ func save_nav_map(): # debug function
 		file.store_string(curline)
 	print("Nav map saved.")
 
-func _ready():		
-	mob_geo_matrix_original = play_field_map.unmodified_geo_matrix.duplicate(true)
-	# Process geo matrix copy as boss navigation map
+func _ready():	
+	mob_geo_matrix_original = play_field_map.unmodified_geo_matrix.duplicate(true)	
 	for x in Globals.WIDTH:
 		for y in Globals.HEIGHT:
-			if mob_geo_matrix_original[x][y] != 0:
-				mob_geo_matrix_original[x][y] = 999999 # max integer is 9.2 quintillion, there are 262k cells
-	
-	#mob_geo_matrix = mob_geo_matrix_original.duplicate(true)
-	#play_field_map.flood_fill(mob_geo_matrix,tgt_map_loc,0,true)
-	
+			if mob_geo_matrix_original[x][y] == 1: # Geo matrix from the playfield has 1s in spots with terrain, and 0s in open areas
+				mob_geo_matrix_original[x][y] = 999999
 	play_field_map.navigation_map_complete.connect(_on_navigation_map_complete)
 	$HealthBar.texture = ImageTexture.create_from_image(bar_image)	
 	update_health_bar()
+	$NavTimer.start()
+	$AddTimer.start()
 	
 func _physics_process(delta):
 	for i in 512:
@@ -175,8 +185,8 @@ func _on_animated_sprite_2d_animation_finished():
 		animation_locked = false
 		
 func hit(magnitude: float):	
-	$AnimatedSprite2D.play("hit")
 	animation_locked = true
+	$AnimatedSprite2D.play("hit")	
 	var damage = abs(magnitude) / float(e_inertia)	
 	mob_health -= damage
 	if mob_health <= 0:
@@ -248,7 +258,7 @@ func range_attack(offset: Vector2i, direction: Vector2):
 func melee_attack(offset: Vector2i, direction: Vector2):
 	if not melee_lock:
 		align_attack(direction)
-		animation_locked = true		
+		animation_locked = true
 		var melee_inst = basic_melee.instantiate()
 		melee_inst.position.x = self.position.x + offset.x
 		melee_inst.position.y = self.position.y + offset.y
@@ -291,13 +301,14 @@ func _on_move_timer_timeout() -> void:
 	# Update the raycast
 	$ClearShot.target_position.x = tgt_player_loc.x - $ClearShot.global_position.x
 	$ClearShot.target_position.y = tgt_player_loc.y - $ClearShot.global_position.y
+	$ClearShot.force_raycast_update()
 	
 	if $ClearShot.is_colliding() || closest_dist >= detection_dist * detection_mult:
 		if navigation_ready && (not (is_on_wall() || is_on_ceiling() || is_on_floor())):
 			# Query map for values
 			print("Following map...")
 			var nav_array: Array = []
-			var nav_offset: int = 32
+			var nav_offset: int = 3
 			nav_array.append(Globals.get_mat_val(mob_geo_matrix, Vector2i(map_loc.x, map_loc.y - nav_offset)))	# [0] North
 			nav_array.append(Globals.get_mat_val(mob_geo_matrix, Vector2i(map_loc.x + nav_offset, map_loc.y - nav_offset))) # [1] Northeast
 			nav_array.append(Globals.get_mat_val(mob_geo_matrix, Vector2i(map_loc.x + nav_offset, map_loc.y))) # [2] East
@@ -317,36 +328,38 @@ func _on_move_timer_timeout() -> void:
 					lowest_index = i
 					
 			print("Lowest value: ", lowest_value, " in index: ", lowest_index)
-			
+						
 			# Choose a direction based on the lowest index		
-			if lowest_index == 0: # N
-				direction = Vector2(0,-1)
+			if lowest_value == 999999:
+				direction = Vector2.ZERO
+			elif lowest_index == 0: # N
+				direction = Vector2(0,-Globals.NAV_SPEED)
 			elif lowest_index == 1: # NE
-				direction = Vector2(1,-1)
+				direction = Vector2(Globals.NAV_SPEED,-Globals.NAV_SPEED)
 			elif lowest_index == 2: # E
-				direction = Vector2(1,0)
+				direction = Vector2(Globals.NAV_SPEED,0)
 			elif lowest_index == 3: # SE
-				direction = Vector2(1,1)
+				direction = Vector2(Globals.NAV_SPEED,Globals.NAV_SPEED)
 			elif lowest_index == 4: # S
-				direction = Vector2(0,1)
+				direction = Vector2(0,Globals.NAV_SPEED)
 			elif lowest_index == 5: # SW
-				direction = Vector2(-1,1)
+				direction = Vector2(-Globals.NAV_SPEED,Globals.NAV_SPEED)
 			elif lowest_index == 6: # W
-				direction = Vector2(-1,0)
+				direction = Vector2(-Globals.NAV_SPEED,0)
 			elif lowest_index == 7: # NW
-				direction = Vector2(-1,-1)			
+				direction = Vector2(-Globals.NAV_SPEED,-Globals.NAV_SPEED)
 			
 		else:
-			direction.x = randf_range(-1,1) # random movement with no line of sight
-			direction.y = randf_range(-1,1)
+			direction.x = randf_range(-0.5,0.5) # random movement with no line of sight
+			direction.y = randf_range(-0.5,0.5)
 		if not navigating:
 			navigating = true
-	else:
+	else:		
 		# Range state machine
 		if (closest_dist < (detection_dist * detection_mult)) && (closest_dist >= shot_dist): # Within detection range, but not too close
-			direction = self.position.direction_to(tgt_player_loc) # move toward
-		elif (closest_dist < shot_dist): # if we are too close
-			direction = -self.position.direction_to(tgt_player_loc) # move back
+			direction = self.position.direction_to(tgt_player_loc).normalized() # move toward
+		elif (closest_dist < (shot_dist / 2)): # if we are too close
+			direction = -self.position.direction_to(tgt_player_loc).normalized() # move back
 			
 		if (closest_dist < shot_dist): # Within projectile range
 			var shot_direction: Vector2 = self.position.direction_to(tgt_player_loc)
@@ -380,6 +393,7 @@ func _on_nav_timer_timeout() -> void:
 		navigation_ready = false
 		mob_geo_matrix = mob_geo_matrix_original.duplicate(true)
 		play_field_map.flood_fill(mob_geo_matrix,tgt_map_loc,0,true)
+		navigating = false
 		
 func _on_navigation_map_complete():
 	navigating = false
@@ -389,3 +403,18 @@ func _on_navigation_map_complete():
 			if mob_geo_matrix[x][y] == 0:
 				mob_geo_matrix[x][y] = 999999
 	print("Navigation map complete.")
+	$NavTimer.start()
+
+func _on_add_timer_timeout() -> void:
+	print("Fungus lord spawning add...")
+	var minion_idx = randi_range(0,minions.size()-1)
+	var minion_inst = minions[minion_idx].instantiate()
+	var tgt_direction = self.position.direction_to(tgt_player_loc)
+	animation_locked = true
+	$AnimatedSprite2D.play("hit")
+	minion_inst.position.x = self.position.x + (tgt_direction.x * 32)
+	minion_inst.position.y = self.position.y + (tgt_direction.y * 32)
+	play_field.add_child(minion_inst)
+	minion_inst.set_mob(player_nodes,mob_color,STR,CON,DEX,INT,WIS)
+	$AddTimer.start()
+	
