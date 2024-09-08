@@ -75,7 +75,7 @@ texture = ExtResource("1_neqad")
 [sub_resource type="TileSet" id="TileSet_u8d8u"]
 physics_layer_0/collision_layer = 2051
 physics_layer_0/collision_mask = 3
-navigation_layer_0/layers = 1
+navigation_layer_0/layers = 0
 sources/1 = SubResource("TileSetAtlasSource_vvbw8")
 
 [sub_resource type="ImageTexture" id="ImageTexture_72gjw"]
@@ -105,9 +105,11 @@ texture = ExtResource("1_neqad")
 sources/0 = SubResource("TileSetAtlasSource_x08et")
 
 [node name="PlayField" type="Node2D"]
+z_index = 4
+z_as_relative = false
 
 [node name="PlayFieldMap" type="TileMap" parent="."]
-z_index = 1
+z_index = 4
 z_as_relative = false
 tile_set = SubResource("TileSet_u8d8u")
 format = 2

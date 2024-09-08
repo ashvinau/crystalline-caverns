@@ -44,15 +44,15 @@ func _on_body_entered(body):
 		if body is TileMap:
 			spark_inst.position = self.position
 			get_parent().add_child(spark_inst)
-			spark_inst.modulate = Color.DARK_GRAY
+			spark_inst.modulate = body.BLOOD_COLOR
 			spark_inst.emitting = true	
 		elif body is CharacterBody2D:
 			apply_shot_force(body)		
 			spark_inst.position = Vector2.ZERO
 			body.add_child(spark_inst)
-			spark_inst.modulate = Color.RED
+			spark_inst.modulate = body.BLOOD_COLOR
 			spark_inst.emitting = true
-			body.hit(velocity.length() * bullet_weight)
+			body.hit(self, velocity.length() * bullet_weight)
 		expire()
 		
 func apply_shot_force(target_node):		

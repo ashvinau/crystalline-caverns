@@ -5,7 +5,7 @@ const DAMAGE_COLOR: Color = Color(1,0.1,0.1,0.8)
 const NAV_SPEED: float = 0.5
 
 # World Constants
-const RAND_SEED: int = 43499209 # 42 for fast-loading debug level
+const RAND_SEED: int = 75303546 # 42 for fast-loading debug level
 const WIDTH: int = 512
 const HEIGHT: int = 512
 const CLAMP: int = 120
@@ -274,6 +274,16 @@ func toroidal_distance(x1: float, y1: float, x2: float, y2: float) -> float:
 		dy = 1.0 - dy
 		
 	return sqrt(dx*dx + dy*dy)	
+	
+func save_map_file(matrix: Array, name: String): # debug function	
+	var file = FileAccess.open(str("user://",name), FileAccess.WRITE)
+	for y in Globals.HEIGHT:
+		var curline: String = ""
+		for x in Globals.WIDTH:
+			curline = str(curline, ", ", str(matrix[x][y]).pad_zeros(6))
+		curline = str(curline, "\n")
+		file.store_string(curline)
+	print("Map file saved: ", name)		
 
 # Called when the node enters the scene tree for the first time.
 func _ready():	

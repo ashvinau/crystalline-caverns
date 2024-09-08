@@ -3,6 +3,7 @@ extends CharacterBody2D
 const LOOKAHEAD_SPEED: float = 0.17 # proportion
 const LOOKAHEAD_LIMIT_X: int = 300
 const LOOKAHEAD_LIMIT_Y: int = 300
+const BLOOD_COLOR: Color = Color.RED
 
 var cur_double_jumps: int = 0
 var animation_locked: bool = false
@@ -167,6 +168,9 @@ func _physics_process(delta):
 		if was_in_air == true:
 			land()
 		was_in_air = false
+		
+	if Input.is_action_just_pressed("save_nav"):
+		get_node("../PlayFieldMap").save_boss_map()
 		
 	# Respawn
 	if Input.is_action_pressed("respawn"):
@@ -371,7 +375,7 @@ func melee_attack(offset: Vector2i, direction: Vector2):
 		melee_lock = true
 		$MeleeCDTimer.start()
 
-func hit(magnitude: float):
+func hit(from_node, magnitude: float):
 	var damage = abs(magnitude) / float(Globals.inertia)
 	Globals.player_health -= damage
 	hud_node.update_hud()
@@ -389,7 +393,7 @@ func expire():
 	spark_inst.scale *= 4
 	spark_inst.position = self.global_position
 	play_field.add_child(spark_inst)
-	spark_inst.modulate = Color.DARK_RED
+	spark_inst.modulate = BLOOD_COLOR
 	spark_inst.emitting = true
 	get_node("../PlayFieldMap").respawn()
 	#$AnimatedSprite2D.visible = false

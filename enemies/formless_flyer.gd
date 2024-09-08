@@ -1,5 +1,7 @@
 extends CharacterBody2D
 
+const BLOOD_COLOR: Color = Color.RED
+
 var animation_locked: bool = false
 var shot_lock: bool = false
 var melee_lock: bool = false
@@ -134,7 +136,7 @@ func _on_animated_sprite_2d_animation_finished():
 	if (["attack", "hit"].has($AnimatedSprite2D.animation)):
 		animation_locked = false
 		
-func hit(magnitude: float):	
+func hit(from_node, magnitude: float):	
 	$AnimatedSprite2D.play("hit")
 	animation_locked = true
 	var damage = abs(magnitude) / float(e_inertia)	
@@ -157,7 +159,7 @@ func expire():
 	spark_inst.scale *= 4
 	spark_inst.position = self.global_position
 	play_field.add_child(spark_inst)
-	spark_inst.modulate = Color.RED
+	spark_inst.modulate = BLOOD_COLOR
 	spark_inst.emitting = true
 	queue_free()
 	

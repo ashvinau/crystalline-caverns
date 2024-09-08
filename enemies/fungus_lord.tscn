@@ -120,6 +120,7 @@ radius = 12.0
 height = 56.0
 
 [node name="FungusLord" type="CharacterBody2D"]
+z_as_relative = false
 scale = Vector2(1.5, 1.5)
 collision_layer = 2
 collision_mask = 3
@@ -145,6 +146,7 @@ autostart = true
 [node name="AlertTimer" type="Timer" parent="."]
 
 [node name="NavTimer" type="Timer" parent="."]
+process_callback = 0
 wait_time = 15.0
 one_shot = true
 
@@ -153,6 +155,7 @@ one_shot = true
 
 [node name="ClearShot" type="RayCast2D" parent="."]
 collision_mask = 2048
+collide_with_areas = true
 
 [node name="HealthBar" type="TextureRect" parent="."]
 offset_left = -32.0

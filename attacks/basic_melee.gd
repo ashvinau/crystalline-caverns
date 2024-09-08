@@ -1,5 +1,7 @@
 extends Area2D
 
+const BLOOD_COLOR: Color = Color.YELLOW
+
 var emitter_node: CharacterBody2D
 var e_inertia: float
 var expiring: bool = false
@@ -47,14 +49,16 @@ func _on_area_entered(area: Area2D) -> void:
 		if emitter_node.cur_double_jumps > 0:
 			emitter_node.cur_double_jumps -= 1
 		knockback = true
+	area.hit(self,0)
 		
+func hit(from_node, magnitude: float):
 	var spark_inst = spark_scene.instantiate()
 	spark_inst.scale *= slash_weight
 	spark_inst.position = self.position
 	get_parent().add_child(spark_inst)
-	spark_inst.modulate = Color.YELLOW
+	spark_inst.modulate = BLOOD_COLOR
 	spark_inst.emitting = true	
-	area.queue_free()
+	queue_free()
 
 func _on_body_entered(body):	
 	melee_force = (velocity.length() * slash_weight) / e_inertia
@@ -74,15 +78,15 @@ func _on_body_entered(body):
 		if body is TileMap: #(["PlayFieldMap"]).has(body.name):		
 			spark_inst.position = self.position
 			get_parent().add_child(spark_inst)
-			spark_inst.modulate = Color.DARK_GRAY
+			spark_inst.modulate = body.BLOOD_COLOR
 			spark_inst.emitting = true	
 		elif body is CharacterBody2D: #(["FormlessCrawler","Player"].has(body.name)):
 			apply_melee_force(body, melee_force)		
 			spark_inst.position = Vector2.ZERO
 			body.add_child(spark_inst)
-			spark_inst.modulate = Color.RED
+			spark_inst.modulate = body.BLOOD_COLOR
 			spark_inst.emitting = true
-			body.hit(velocity.length() * slash_weight)			
+			body.hit(self, velocity.length() * slash_weight)			
 		hit_list.append(body.name)
 	
 func apply_melee_force(target_node, melee_force: float):

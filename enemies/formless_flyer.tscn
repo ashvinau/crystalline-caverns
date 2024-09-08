@@ -119,6 +119,7 @@ animations = [{
 height = 28.0
 
 [node name="FormlessFlyer" type="CharacterBody2D"]
+z_as_relative = false
 collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false

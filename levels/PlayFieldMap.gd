@@ -2,12 +2,14 @@ extends TileMap
 
 signal navigation_map_complete
 
+const BLOOD_COLOR: Color = Color.DARK_GRAY
 const IV = 999 # Ignore value for processing geo_matrix
 const AV = 998 # Match any value other than 0 for processing geo_matrix
 
 @onready var perlin_node = $PerlinGraph
 @onready var play_field = get_node("..")
 @onready var hud = get_node("../../../../HUD")
+@onready var crystal_scene = preload("res://levels/crystal.tscn")
 
 var hud_scene = preload("res://hud.tscn")
 var players: Array = []
@@ -18,6 +20,11 @@ var perlin_matrix: Array = []
 var geo_matrix: Array = []
 var unmodified_geo_matrix: Array = []
 var spawn_loc: Vector2i
+var crystals: Array = []
+
+func save_boss_map():
+	Globals.save_map_file(boss_nodes[0].mob_geo_matrix, "boss_nav_map.csv")	
+	#Globals.save_map_file(crystals[0].cry_geo_matrix, "crystal_nav_map.csv")
 
 # Called when the node enters the scene tree for the first time.
 func _init():	
@@ -31,10 +38,10 @@ func _init():
 	# Copy perlin matrix for modification		
 	geo_matrix = perlin_matrix.duplicate(true)
 	
-	#Load entities into memory
+	#Load entities into memory		
 	players.append(preload("res://character/player.tscn"))
-	bosses.append(preload("res://enemies/fungus_lord.tscn"))	
-			
+	bosses.append(preload("res://enemies/fungus_lord.tscn"))
+	
 func set_geo_matrix(clamp: int, test: bool):	
 	var invalid: int = 0
 	
@@ -47,14 +54,14 @@ func set_geo_matrix(clamp: int, test: bool):
 		# Test validity of initial geo_matrix if requested - rejection logic later
 		var testMatrix = geo_matrix.duplicate(true)
 		# Fill empty space starting at the spawn point
-		flood_fill(testMatrix,spawn_loc,255,false);
+		flood_fill(testMatrix,Globals.pick_spawn(testMatrix,40),255,false,false);
 		# Check for remaining 0 values
 		for x in Globals.WIDTH:
 			for y in Globals.HEIGHT:
 				if (testMatrix[x][y] == 0):
 					invalid += 1
 		
-		print(invalid," invalid with clamp ", clamp, ".")	
+		print(invalid," invalid with clamp ", clamp, ".")			
 	
 	for x in Globals.WIDTH:
 		for y in Globals.HEIGHT:
@@ -223,10 +230,10 @@ func fill_perlin_matrix(matrix):
 			curIndex += 1
 	print("Debug indexes: ", curIndex)
 	
-func flood_fill(matrix, start_pos: Vector2i, replacement_value, sniff_map: bool):
+func flood_fill(matrix, start_pos: Vector2i, replacement_value, sniff_map: bool, thread: bool):
 	var target_value = matrix[start_pos.x][start_pos.y]
 	if sniff_map:
-		replacement_value = 1		
+		replacement_value = 1
 	
 	# Create a stack for positions to visit
 	var stack = [start_pos]
@@ -259,10 +266,11 @@ func flood_fill(matrix, start_pos: Vector2i, replacement_value, sniff_map: bool)
 			
 		if sniff_map:
 			replacement_value += 1
-			await boss_nodes[0].process_more_nav_map
+			if thread:
+				await boss_nodes[0].process_more_nav_map
 		
-	navigation_map_complete.emit()
-	
+	if thread:
+		navigation_map_complete.emit()	
 	
 func respawn():
 	player_nodes[0].queue_free()
@@ -289,19 +297,20 @@ func spawn_boss(boss_scene: PackedScene):
 	print("Choosing boss spawn...")
 	var boss_spawn_loc: Vector2i = Globals.pick_spawn(geo_matrix,40)
 	
-	var tries: int = 1
-	var distance: float
+	var tries: int = 0
+	var distance: float = 0
 	while distance < 256:
-		distance = Globals.toroidal_matrix_dist(Globals.WIDTH,Globals.HEIGHT,spawn_loc,boss_spawn_loc)
 		tries += 1
 		boss_spawn_loc = Globals.pick_spawn(geo_matrix,40)
+		distance = Globals.toroidal_matrix_dist(Globals.WIDTH,Globals.HEIGHT,spawn_loc,boss_spawn_loc)		
+		
 	print("Boss spawn location found at ", boss_spawn_loc, " in ", tries, " tries, ", distance, " cells from the player spawn at: ", spawn_loc)
 	
 	boss_nodes.append(spawn_entity(boss_scene, Vector2i(boss_spawn_loc.x*16,boss_spawn_loc.y*16)))
 	boss_nodes[0].set_mob(player_nodes,Color.LAWN_GREEN,3,3,3,3,3)
 	boss_nodes[0].process_more_nav_map.connect(_on_process_more_nav)
 		
-func spawn_entity(entity: PackedScene, e_position: Vector2i) -> CharacterBody2D:
+func spawn_entity(entity: PackedScene, e_position: Vector2i):
 	var entity_node = entity.instantiate()
 	entity_node.position = e_position	
 	play_field.add_child.call_deferred(entity_node)
@@ -331,7 +340,52 @@ func set_rear_bg():
 	bgImage.resize(Globals.WIDTH * 16, Globals.HEIGHT * 16, Image.INTERPOLATE_LANCZOS)	
 	bgImage.adjust_bcs(1.7,1,1)
 	bgNode.texture = ImageTexture.create_from_image(bgImage)	
-	
+
+func place_crystals():	
+	var edge_offset: int = 75
+	var num_crystals: int = randi_range(3,5)
+	print("Placing ", num_crystals, " crystals.")
+	for i in num_crystals:
+		crystals.append(spawn_entity(crystal_scene,Vector2i(0,0)))
+		
+	for crystal in crystals:		
+		var cry_spawn: Vector2i
+		var offset_const = crystal.nodes * 30
+		var spawn_offset: Vector2i
+		var spawn_found: bool
+		var tries: int = 0
+		while not spawn_found:
+			tries += 1			
+			var curX = randi_range(edge_offset,Globals.WIDTH-edge_offset)
+			var curY = randi_range(edge_offset,Globals.HEIGHT-edge_offset)
+			var cur_index: Vector2i = Vector2i(curX,curY)
+			if check_geo_index(cur_index,1,6,6,1,1,1,1,1,6): # on the floor, pointed upward
+				crystal.set_rotation(randf_range(-PI/6,PI/6))
+				cry_spawn = Vector2i(curX,curY)
+				spawn_offset = Vector2i(0,-offset_const)
+				spawn_found = true
+			elif check_geo_index(cur_index,1,1,1,1,7,7,7,1,1): # on the ceiling, pointed downward
+				crystal.set_rotation(randf_range(-PI/6,PI/6))
+				cry_spawn = Vector2i(curX,curY)
+				spawn_offset = Vector2i(0,offset_const)
+				spawn_found = true
+			elif check_geo_index(cur_index,1,1,8,8,8,1,1,1,1): # on the left wall, pointed rightward
+				crystal.set_rotation(randf_range(-PI/6,PI/6)+PI/2)
+				cry_spawn = Vector2i(curX,curY)
+				spawn_offset = Vector2i(offset_const,0)
+				spawn_found = true
+			elif check_geo_index(cur_index,1,1,1,1,1,1,9,9,9): # on the right wall, pointed leftward
+				crystal.set_rotation(randf_range(-PI/6,PI/6)-PI/2)
+				cry_spawn = Vector2i(curX,curY)
+				spawn_offset = Vector2i(-offset_const,0)
+				spawn_found = true
+			
+		print("Crystal spawn found in ",tries," tries at: ", cry_spawn)		
+		cry_spawn *= 16 # Convert from map to screen space
+		cry_spawn.x = cry_spawn.x + spawn_offset.x
+		cry_spawn.y = cry_spawn.y + spawn_offset.y
+		crystal.set_position(cry_spawn)
+		
 func debug_level():
 	for x in Globals.WIDTH:
 		for y in range(255, 285):
@@ -348,26 +402,30 @@ func _ready():
 		unmodified_geo_matrix = geo_matrix.duplicate(true)
 		print("Generating player spawn...")
 		generate_spawn()
-		print("Generating preview...")		
+		print("Generating preview...")
 		hud.display_preview(geo_matrix, spawn_loc)		
+		# Test code here	
+		
 	else:	# Procgen level
 		print("Generating perlin matrix...")
 		fill_perlin_matrix(perlin_matrix)
 		print("Setting geo matrix...")
 		set_geo_matrix(Globals.CLAMP, true)
-		unmodified_geo_matrix = geo_matrix.duplicate(true)
+		unmodified_geo_matrix = geo_matrix.duplicate(true)		
 		print("Setting PlayField TileMap...")
 		set_playfield_map(self, 1, 0,0)	
 		print("Generating player spawn...")
-		generate_spawn()	
-		print("Spawning boss...")
+		generate_spawn()		
+		print("Spawning boss...")		
 		spawn_boss(bosses[0])
+		print("Spawning crystals...")
+		place_crystals()
 		print("Generating preview...")
 		hud.display_preview(geo_matrix, spawn_loc)
 		print("Generating backgrounds...")	
 		set_background(10, 0.7, $Background/Parallax1/Layer1,get_node("../BGViewContainer/BGViewport1/BackgroundMap1"),get_node("../BGViewContainer/BGViewport1"))	
 		set_background(20, 0.5, $Background/Parallax2/Layer2,get_node("../BGViewContainer/BGViewport2/BackgroundMap2"),get_node("../BGViewContainer/BGViewport2"))
-		
+				
 	set_rear_bg()	
 	print("PlayField ready.")
 	
