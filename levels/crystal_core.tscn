@@ -1,18 +1,19 @@
-[gd_scene load_steps=24 format=3 uid="uid://bludfkgikkhcc"]
+[gd_scene load_steps=19 format=3 uid="uid://bludfkgikkhcc"]
 
 [ext_resource type="Texture2D" uid="uid://cbq8uf58touw2" path="res://art/crystal_sheet.png" id="1_xjhkq"]
 [ext_resource type="Script" path="res://levels/crystal_core.gd" id="2_2dyci"]
-[ext_resource type="Texture2D" uid="uid://du6ikyxiroiou" path="res://art/particles/particle-sheet_sparkle 1.png" id="2_qf6gd"]
-[ext_resource type="Texture2D" uid="uid://b5squs38b0xom" path="res://art/particles/particle-sheet_sparkle 2.png" id="3_fetw7"]
-[ext_resource type="Texture2D" uid="uid://ud00vxutjfrt" path="res://art/particles/particle-sheet_sparkle 3.png" id="4_ounrx"]
-[ext_resource type="Texture2D" uid="uid://cg4q2jjn7q3rh" path="res://art/particles/particle-sheet_sparkle 4.png" id="5_gj57o"]
-[ext_resource type="Texture2D" uid="uid://dvx6adopg10fg" path="res://art/particles/particle-sheet_sparkle 5.png" id="6_4qryh"]
-[ext_resource type="Texture2D" uid="uid://b6lafnifrxvrq" path="res://art/particles/particle-sheet_sparkle 6.png" id="7_lddqa"]
+[ext_resource type="Texture2D" uid="uid://ekpk5p5g7pqb" path="res://art/sparkle_particle.png" id="2_xj1ds"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_177x0"]
 bounce = 0.35
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_jdu5g"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_v8hke"]
+particles_animation = true
+particles_anim_h_frames = 6
+particles_anim_v_frames = 1
+particles_anim_loop = true
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_qy6dl"]
 resource_local_to_scene = true
@@ -28,20 +29,8 @@ scale_min = 0.5
 scale_max = 1.5
 hue_variation_min = -1.0
 hue_variation_max = 1.0
-
-[sub_resource type="AnimatedTexture" id="AnimatedTexture_rdbdk"]
-frames = 6
-frame_0/texture = ExtResource("2_qf6gd")
-frame_1/texture = ExtResource("3_fetw7")
-frame_1/duration = 1.0
-frame_2/texture = ExtResource("4_ounrx")
-frame_2/duration = 1.0
-frame_3/texture = ExtResource("5_gj57o")
-frame_3/duration = 1.0
-frame_4/texture = ExtResource("6_4qryh")
-frame_4/duration = 1.0
-frame_5/texture = ExtResource("7_lddqa")
-frame_5/duration = 1.0
+anim_speed_min = 1.0
+anim_speed_max = 2.0
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_gmpg2"]
 atlas = ExtResource("1_xjhkq")
@@ -134,11 +123,13 @@ scale = Vector2(1.1, 1.1)
 shape = SubResource("RectangleShape2D_jdu5g")
 
 [node name="GPUParticles2D" type="GPUParticles2D" parent="."]
-self_modulate = Color(1, 1, 1, 0.619608)
-z_index = 1
+self_modulate = Color(1, 1, 1, 0.501961)
+z_index = 3
+material = SubResource("CanvasItemMaterial_v8hke")
 amount = 16
 process_material = SubResource("ParticleProcessMaterial_qy6dl")
-texture = SubResource("AnimatedTexture_rdbdk")
+texture = ExtResource("2_xj1ds")
+visibility_rect = Rect2(-1000, -1000, 2000, 2000)
 
 [node name="CrystalCore" type="AnimatedSprite2D" parent="."]
 z_index = 2

@@ -61,6 +61,7 @@ atlas = ExtResource("1_qdm8h")
 region = Rect2(96, 0, 32, 32)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_pepir"]
+resource_local_to_scene = true
 animations = [{
 "frames": [{
 "duration": 2.0,
@@ -133,6 +134,7 @@ animations = [{
 }]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_d74yh"]
+resource_local_to_scene = true
 radius = 11.0
 height = 28.0
 

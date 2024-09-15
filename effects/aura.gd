@@ -10,6 +10,7 @@ func _ready() -> void:
 	print("Aura spawned for: ", self.get_parent().name)
 	num_nodes = from_crystal.nodes
 	crystal_type = from_crystal.type
+	amount = num_nodes * 25
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _physics_process(delta: float) -> void:	

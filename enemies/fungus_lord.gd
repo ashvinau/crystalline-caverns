@@ -24,6 +24,13 @@ var DEX: float
 var INT: float
 var WIS: float
 
+var add_STR: float
+var add_CON: float
+var add_DEX: float
+var add_INT: float
+var add_WIS: float
+
+
 var max_health: float = 1
 var mob_health: float = 1
 var move_speed: int
@@ -44,6 +51,8 @@ var shot_spread: float
 var melee_life: float
 var melee_weight: float
 var melee_velocity: float
+var bonus_stat: int
+var bonus_amount: int
 
 var basic_bullet = preload("res://attacks/basic_bullet.tscn")
 var basic_melee = preload("res://attacks/basic_melee.tscn")
@@ -55,12 +64,42 @@ var dmg_scene = preload("res://damage_display.tscn")
 @onready var hud_node = get_node("../../../../HUD")
 
 func set_mob(players: Array, color: Color, str: float, con: float, dex: float, inte: float, wis: float):
+	bonus_stat = randi_range(0,4)
+	bonus_amount = randi_range(1,min(str,con,dex,inte,wis))
+	
 	STR = str
 	CON = con
 	DEX = dex
 	INT = inte
-	WIS = wis
+	WIS = wis	
+	add_STR = str
+	add_CON = con
+	add_DEX = dex
+	add_INT = inte
+	add_WIS = wis
 	
+	if bonus_stat == 0:
+		STR += bonus_amount
+		add_STR += bonus_amount / 2
+		color = Globals.color_dict[Globals.CRYSTAL_TYPES.VERMILLION]		
+	elif bonus_stat == 1:
+		CON += bonus_amount
+		add_CON += bonus_amount / 2
+		color = Globals.color_dict[Globals.CRYSTAL_TYPES.TITIAN]
+	elif bonus_stat == 2:
+		DEX += bonus_amount
+		add_DEX += bonus_amount / 2
+		color = Globals.color_dict[Globals.CRYSTAL_TYPES.XANTHOUS]
+	elif bonus_stat == 3:
+		INT += bonus_amount
+		add_INT += bonus_amount / 2
+		color = Globals.color_dict[Globals.CRYSTAL_TYPES.CERULEAN]
+	elif bonus_stat == 4:
+		WIS += bonus_amount
+		add_WIS += bonus_amount / 2
+		color = Globals.color_dict[Globals.CRYSTAL_TYPES.AMARANTHINE]
+	
+	color.a = 1	
 	minions.append(preload("res://enemies/formless_crawler.tscn"))
 	minions.append(preload("res://enemies/formless_flyer.tscn"))	
 	player_nodes = players
@@ -267,7 +306,7 @@ func range_attack(offset: Vector2i, direction: Vector2):
 		bullet_inst.position.x = self.position.x + offset.x
 		bullet_inst.position.y = self.position.y + offset.y
 		play_field.add_child(bullet_inst)
-		bullet_inst.set_bullet(shot_life,1,mob_color,shot_weight,"oval",self)
+		bullet_inst.set_bullet(shot_life,1,self_modulate,shot_weight,"oval",self)
 		bullet_inst.velocity.x = (direction.x * shot_velocity) + randi_range(-shot_spread,shot_spread) 
 		self.velocity.x += -direction.x * ((shot_weight * shot_velocity) / e_inertia)
 		bullet_inst.velocity.y = (direction.y * shot_velocity) + randi_range(-shot_spread,shot_spread)
@@ -284,7 +323,7 @@ func melee_attack(offset: Vector2i, direction: Vector2):
 		melee_inst.position.y = self.position.y + offset.y
 		play_field.add_child(melee_inst)
 		melee_inst.look_at(Vector2(self.position.x + direction.x * 50, self.position.y + direction.y * 50))
-		melee_inst.set_slash(melee_life,1,mob_color,melee_weight,direction,self)
+		melee_inst.set_slash(melee_life,1,self_modulate,melee_weight,direction,self)
 		melee_inst.velocity.x = (direction.x * melee_velocity) # + velocity.x <- inherit velocity
 		melee_inst.velocity.y = (direction.y * melee_velocity) # + velocity.y
 		melee_lock = true
@@ -448,6 +487,6 @@ func _on_add_timer_timeout() -> void:
 	minion_inst.position.x = self.position.x + (tgt_direction.x * 32)
 	minion_inst.position.y = self.position.y + (tgt_direction.y * 32)
 	play_field.add_child(minion_inst)
-	minion_inst.set_mob(player_nodes,mob_color,STR,CON,DEX,INT,WIS)
+	minion_inst.set_mob(player_nodes,mob_color,add_STR,add_CON,add_DEX,add_INT,add_WIS)
 	$AddTimer.start()
 	

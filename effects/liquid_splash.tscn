@@ -41,6 +41,7 @@ lifetime = 2.0
 one_shot = true
 explosiveness = 1.0
 randomness = 1.0
+visibility_rect = Rect2(-1000, -1000, 2000, 2000)
 trail_lifetime = 0.2
 script = ExtResource("2_s3cur")
 

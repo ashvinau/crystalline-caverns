@@ -27,7 +27,7 @@ func set_slash(life_time: float, coll_mask: int, color: Color, weight: float, di
 	slash_color = color
 	slash_direction = direction	
 	$AnimatedSprite2D.material.set_shader_parameter("modulate",Globals.color_to_vector(color))
-	modulate = color	
+	$AnimatedSprite2D.modulate = color	
 	emitter_node = emitter
 	e_inertia = emitter_node.e_inertia
 	
