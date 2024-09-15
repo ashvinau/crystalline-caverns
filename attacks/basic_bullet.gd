@@ -6,6 +6,8 @@ var velocity: Vector2
 var bullet_weight: float
 var hit_list: Array = []
 var spark_scene = preload("res://effects/sparks.tscn")
+var liquid_scene = preload("res://effects/liquid_splash.tscn")
+var smash_scene = preload("res://effects/tilemap_smash.tscn")
 
 func set_bullet(life_time: float, coll_mask: int, color: Color, weight: float, shape: String, player: CharacterBody2D):
 	$LifeTimer.wait_time = life_time
@@ -29,29 +31,29 @@ func _physics_process(delta):
 func expire():
 	expiring = true	
 	$AnimatedSprite2D.visible = false
-	$CollisionShape2D.set_deferred("disabled", true)
-	$ExpiryTimer.start()
-	$Aura.emitting = false
-	$Expiry.emitting = false
+	$CollisionShape2D.set_deferred("disabled", true)	
+	$Aura.emitting = false	
 	$Expiry.one_shot = true
 	$Expiry.emitting = true		
 
 func _on_body_entered(body):
 	if (not expiring) && (not hit_list.has(body.name)):
-		hit_list.append(body.name)
-		var spark_inst = spark_scene.instantiate()
-		spark_inst.scale *= bullet_weight
+		hit_list.append(body.name)		
 		if body is TileMap:
-			spark_inst.position = self.position
-			get_parent().add_child(spark_inst)
-			spark_inst.modulate = body.BLOOD_COLOR
-			spark_inst.emitting = true	
+			var smash_inst = smash_scene.instantiate()
+			smash_inst.scale *= bullet_weight
+			smash_inst.position = self.position
+			get_parent().add_child(smash_inst)
+			smash_inst.modulate = body.BLOOD_COLOR
+			smash_inst.emitting = true	
 		elif body is CharacterBody2D:
+			var liquid_inst = liquid_scene.instantiate()
+			liquid_inst.scale *= bullet_weight
 			apply_shot_force(body)		
-			spark_inst.position = Vector2.ZERO
-			body.add_child(spark_inst)
-			spark_inst.modulate = body.BLOOD_COLOR
-			spark_inst.emitting = true
+			liquid_inst.position = Vector2.ZERO
+			body.add_child(liquid_inst)
+			liquid_inst.modulate = body.BLOOD_COLOR
+			liquid_inst.emitting = true
 			body.hit(self, velocity.length() * bullet_weight)
 		expire()
 		

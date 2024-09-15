@@ -5,7 +5,7 @@ const DAMAGE_COLOR: Color = Color(1,0.1,0.1,0.8)
 const NAV_SPEED: float = 0.5
 
 # World Constants
-const RAND_SEED: int = 213338 # 42 for fast-loading debug level
+const RAND_SEED: int = 42 # 42 for fast-loading debug level
 const WIDTH: int = 512
 const HEIGHT: int = 512
 const CLAMP: int = 120

@@ -3,7 +3,7 @@ extends CharacterBody2D
 const LOOKAHEAD_SPEED: float = 0.17 # proportion
 const LOOKAHEAD_LIMIT_X: int = 300
 const LOOKAHEAD_LIMIT_Y: int = 300
-const BLOOD_COLOR: Color = Color.RED
+const BLOOD_COLOR: Color = Color8(255,20,20,128)
 
 var cur_double_jumps: int = 0
 var animation_locked: bool = false

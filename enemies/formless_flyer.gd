@@ -1,6 +1,6 @@
 extends CharacterBody2D
 
-const BLOOD_COLOR: Color = Color.RED
+const BLOOD_COLOR: Color = Color8(255,20,20,128)
 
 var animation_locked: bool = false
 var shot_lock: bool = false
@@ -38,7 +38,7 @@ var melee_velocity: float
 
 var basic_bullet = preload("res://attacks/basic_bullet.tscn")
 var basic_melee = preload("res://attacks/basic_melee.tscn")
-var spark_scene = preload("res://effects/sparks.tscn")
+var chunk_scene = preload("res://effects/tilemap_smash.tscn")
 var dmg_scene = preload("res://damage_display.tscn")
 
 @onready var play_field: Node2D = get_node("..") # parent node: PlayField
@@ -195,12 +195,12 @@ func hit(from_node, magnitude: float):
 	dmg_inst.set_dmg_disp(damage, Globals.DAMAGE_COLOR)
 	
 func expire():
-	var spark_inst = spark_scene.instantiate()
-	spark_inst.scale *= 4
-	spark_inst.position = self.global_position
-	play_field.add_child(spark_inst)
-	spark_inst.modulate = BLOOD_COLOR
-	spark_inst.emitting = true
+	var chunk_inst = chunk_scene.instantiate()
+	chunk_inst.scale *= 4
+	chunk_inst.position = self.global_position
+	play_field.add_child(chunk_inst)
+	chunk_inst.modulate = BLOOD_COLOR
+	chunk_inst.emitting = true
 	queue_free()
 	
 func check_mob_loc():

@@ -24,7 +24,7 @@ var aura_inst: Node2D
 var aoe_range: float
 var char_aura
 var expiring: bool = false
-var spark_scene = preload("res://effects/sparks.tscn")
+var chunk_scene = preload("res://effects/tilemap_smash.tscn")
 var aura_scene = preload("res://effects/aura.tscn")
 var shatter_scene = preload("res://effects/crystal_shatter.tscn")
 var dmg_scene = preload("res://damage_display.tscn")
@@ -158,12 +158,11 @@ func hit(from_node, magnitude: float):
 		reeling = true
 		position.x += from_node.velocity.x / 50
 		position.y += from_node.velocity.y / 50
-		var spark_inst = spark_scene.instantiate()
-		spark_inst.scale *= nodes
-		spark_inst.position = from_node.position
-		get_parent().add_child(spark_inst)
-		spark_inst.modulate = BLOOD_COLOR
-		spark_inst.emitting = true
+		var chunk_inst = chunk_scene.instantiate()		
+		chunk_inst.position = from_node.position
+		get_parent().add_child(chunk_inst)
+		chunk_inst.modulate = BLOOD_COLOR
+		chunk_inst.emitting = true
 		
 		var dmg_inst = dmg_scene.instantiate()
 		dmg_inst.position.x = from_node.position.x - 32
@@ -209,7 +208,7 @@ func spawn_coll_diamond(loc: Vector2i):
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	if expiring && $TextureRect.self_modulate.a > 0:
-		$TextureRect.self_modulate.a -= delta * 4
+		$TextureRect.self_modulate.a -= delta * 8
 	if position != crystal_location && reeling:
 		position = position.move_toward(crystal_location,delta * 100)
 	else:

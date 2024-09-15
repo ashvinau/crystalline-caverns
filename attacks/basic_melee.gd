@@ -1,6 +1,6 @@
 extends Area2D
 
-const BLOOD_COLOR: Color = Color.YELLOW
+const BLOOD_COLOR: Color = Color8(255,247,99,200)
 
 var emitter_node: CharacterBody2D
 var e_inertia: float

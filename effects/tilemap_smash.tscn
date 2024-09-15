@@ -18,7 +18,6 @@ emission_shape = 1
 emission_sphere_radius = 16.0
 angle_min = -180.0
 angle_max = 180.0
-inherit_velocity_ratio = 0.5
 spread = 0.0
 angular_velocity_min = -720.0
 angular_velocity_max = 720.0
