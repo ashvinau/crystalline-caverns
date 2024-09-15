@@ -64,7 +64,7 @@ func _on_timer_timeout():
 		expire()		
 	
 func _on_expiry_finished():	
-	queue_free()
+	call_deferred("queue_free")
 	
 func check_bullet_loc():
 	$CollisionShape2D.set_deferred("disabled", false)

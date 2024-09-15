@@ -3,18 +3,13 @@ extends Area2D
 const MIN_SIZE: Vector2i = Vector2i(512,512)
 const MAX_SIZE: Vector2i = Vector2i(512,1100)
 const BUFFER: int = 175
-const TRANSLUCENCY: int = 128
-enum CRYSTAL_TYPES {VERMILLION, TITIAN, XANTHOUS, VIRIDIAN, CERULEAN, AMARANTHINE}
-var color_array = [CRYSTAL_TYPES.VERMILLION,CRYSTAL_TYPES.TITIAN,CRYSTAL_TYPES.XANTHOUS,CRYSTAL_TYPES.VIRIDIAN,CRYSTAL_TYPES.CERULEAN,CRYSTAL_TYPES.AMARANTHINE]
-var color_dict = {
-	CRYSTAL_TYPES.VERMILLION: Color8(255,32,41,TRANSLUCENCY),
-	CRYSTAL_TYPES.TITIAN: Color8(255,145,36,TRANSLUCENCY),
-	CRYSTAL_TYPES.XANTHOUS: Color8(255,248,36,TRANSLUCENCY),
-	CRYSTAL_TYPES.VIRIDIAN: Color8(48,255,25,TRANSLUCENCY),
-	CRYSTAL_TYPES.CERULEAN: Color8(25,33,255,TRANSLUCENCY),
-	CRYSTAL_TYPES.AMARANTHINE: Color8(225,25,228,TRANSLUCENCY)
-}
 
+var str_mod: int = 0
+var con_mod: int = 0
+var dex_mod: int = 0
+var int_mod: int = 0
+var wis_mod: int = 0
+var crystal_hp: float
 var crystal_location: Vector2
 var reeling: bool = false
 var BLOOD_COLOR: Color
@@ -24,8 +19,19 @@ var horiz_nodes: Array = []
 var point_selections: Array = []
 var cry_geo_matrix: Array = []
 var nodes: int
-var type: CRYSTAL_TYPES
+var type: Globals.CRYSTAL_TYPES
+var aura_inst: Node2D
+var aoe_range: float
+var char_aura
+var expiring: bool = false
 var spark_scene = preload("res://effects/sparks.tscn")
+var aura_scene = preload("res://effects/aura.tscn")
+var shatter_scene = preload("res://effects/crystal_shatter.tscn")
+var dmg_scene = preload("res://damage_display.tscn")
+var core_scene = preload("res://levels/crystal_core.tscn")
+
+@onready var play_field_map_node = get_node("../PlayFieldMap")
+@onready var hud_node = get_node("../../../../HUD")
 
 # Called when the node enters the scene tree for the first time.
 func _init() -> void:	
@@ -67,22 +73,40 @@ func _init() -> void:
 	grow_crystal(point_selections[0],256)
 	
 	var type_ord: int = randi_range(0,5)
-	type = color_array[type_ord]
-	modulate = color_dict[type]
-	BLOOD_COLOR = modulate
-	print("Crystal type selected: ", str(type))
-	
+	type = Globals.color_array[type_ord]
+	var name: String
+	modulate = Globals.color_dict[type]
+	BLOOD_COLOR = modulate	
+	if type == 0:
+		name = "Vermillion"
+		str_mod += 5
+	elif type == 1:
+		name = "Titian"
+		con_mod += 5
+	elif type == 2:
+		name = "Xanthous"	
+		dex_mod += 5
+	elif type == 3:	
+		name = "Viridian"
+	elif type == 4:
+		name = "Cerulean"
+		int_mod += 5
+	elif type == 5:
+		name = "Amaranthine"
+		wis_mod += 5
+	print("Crystal type selected: ", name)
 	print("Creating collision boxes...")
 	for location in point_selections:
-		spawn_coll_diamond(location)	
+		spawn_coll_diamond(location)
 		
 func _ready():
 	print("Setting AOE...")
-	get_node("AOE/Area").get_shape().radius = nodes * 100
+	aoe_range = pow(nodes * 100,1.01)
+	get_node("AOE/Area").get_shape().radius = aoe_range
+	crystal_hp = nodes * 500	
 	print("Updating texture...")
 	$TextureRect.texture = ImageTexture.create_from_image(crystal_image)
-	print("Generating crystal nav map...")
-	var play_field_map_node = get_node("../PlayFieldMap")
+	print("Generating crystal nav map...")	
 	cry_geo_matrix = play_field_map_node.unmodified_geo_matrix.duplicate(true)
 	for x in Globals.WIDTH:
 		for y in Globals.HEIGHT:
@@ -113,13 +137,13 @@ func grow_crystal(start_point: Vector2i, size: int):
 		
 		crystal_image.set_pixel(pos.x,pos.y,Color(rep_val,rep_val,rep_val,1.0))
 		
-		if is_safe_index(Vector2i(pos.x,pos.y-1)) && crystal_image.get_pixel(pos.x,pos.y-1) == target_color:
+		if is_safe_index(Vector2i(pos.x,pos.y - 1)) && crystal_image.get_pixel(pos.x,pos.y - 1) == target_color:
 			queue.append(Vector2i(pos.x, pos.y - 1))
-		if is_safe_index(Vector2i(pos.x+1,pos.y)) && crystal_image.get_pixel(pos.x+1,pos.y) == target_color:
+		if is_safe_index(Vector2i(pos.x + 1,pos.y)) && crystal_image.get_pixel(pos.x + 1,pos.y) == target_color:
 			queue.append(Vector2i(pos.x + 1, pos.y))
-		if is_safe_index(Vector2i(pos.x,pos.y+1)) && crystal_image.get_pixel(pos.x,pos.y+1) == target_color:
+		if is_safe_index(Vector2i(pos.x,pos.y+1)) && crystal_image.get_pixel(pos.x,pos.y + 1) == target_color:
 			queue.append(Vector2i(pos.x, pos.y + 1))
-		if is_safe_index(Vector2i(pos.x-1,pos.y)) && crystal_image.get_pixel(pos.x-1,pos.y) == target_color:
+		if is_safe_index(Vector2i(pos.x - 1,pos.y)) && crystal_image.get_pixel(pos.x - 1,pos.y) == target_color:
 			queue.append(Vector2i(pos.x - 1, pos.y))
 		
 		rep_val -= 0.00002 / nodes	
@@ -140,8 +164,35 @@ func hit(from_node, magnitude: float):
 		get_parent().add_child(spark_inst)
 		spark_inst.modulate = BLOOD_COLOR
 		spark_inst.emitting = true
-	
-	#queue_free()
+		
+		var dmg_inst = dmg_scene.instantiate()
+		dmg_inst.position.x = from_node.position.x - 32
+		dmg_inst.position.y = from_node.position.y - 55
+		play_field_map_node.get_parent().add_child(dmg_inst)
+		dmg_inst.set_dmg_disp(magnitude,BLOOD_COLOR)
+		crystal_hp -= magnitude
+		print("Remaining HP: ", crystal_hp)
+		if crystal_hp <= 0 && not expiring:
+			expire()
+
+func expire():
+	expiring = true
+	for location in point_selections:
+		var shatter_inst = shatter_scene.instantiate()
+		shatter_inst.position.x = location.x - (crystal_size.x / 2)
+		shatter_inst.position.y = location.y - (crystal_size.y / 2)		
+		self.add_child(shatter_inst)
+		shatter_inst.modulate = BLOOD_COLOR
+	var child_nodes = get_children()
+	for child in child_nodes:
+		if child is CollisionShape2D:
+			child.set_deferred("disabled", true)
+	for i in nodes:
+		var core_inst = core_scene.instantiate()
+		core_inst.position = global_position
+		play_field_map_node.call_deferred("add_child",core_inst)
+	hud_node.add_map_indicator("destroyed", position / 16)
+	$ExpiryTimer.start()	
 	
 func spawn_coll_diamond(loc: Vector2i):		
 	var shape = RectangleShape2D.new()	
@@ -153,11 +204,43 @@ func spawn_coll_diamond(loc: Vector2i):
 	new_diamond.position.x = loc.x - (crystal_size.x / 2)
 	new_diamond.position.y = loc.y - (crystal_size.y / 2)
 	new_diamond.rotation_degrees = 45	
-	add_child(new_diamond)
-
+	add_child(new_diamond)		
+	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
+	if expiring && $TextureRect.self_modulate.a > 0:
+		$TextureRect.self_modulate.a -= delta * 4
 	if position != crystal_location && reeling:
 		position = position.move_toward(crystal_location,delta * 100)
 	else:
 		reeling = false
+
+func _on_aoe_body_entered(body: Node2D) -> void:	
+	print(body.name, " entered a crystal aoe.")
+	char_aura = aura_scene.instantiate()
+	body.call_deferred("add_child", char_aura)	
+	
+	if body is CharacterBody2D:		
+		if type == 0:
+			body.change_stat("STR",nodes)
+		elif type == 1:
+			body.change_stat("CON",nodes)
+		elif type == 2:
+			body.change_stat("DEX",nodes)
+		elif type == 3:
+			start_heal_timer()
+		elif type == 4:
+			body.change_stat("INT",nodes)
+		elif type == 5:
+			body.change_stat("WIS",nodes)		
+		
+		char_aura.from_crystal = self
+		char_aura.emitting = true
+		char_aura.modulate = BLOOD_COLOR
+		
+func start_heal_timer():
+	var heal_node = char_aura.get_node("HealTimer")
+	heal_node.call_deferred("start")
+
+func _on_expiry_timer_timeout() -> void:
+	call_deferred("queue_free")

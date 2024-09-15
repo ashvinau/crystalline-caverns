@@ -2,7 +2,7 @@ extends TileMap
 
 signal navigation_map_complete
 
-const BLOOD_COLOR: Color = Color.DARK_GRAY
+const BLOOD_COLOR: Color = Color.SADDLE_BROWN
 const IV = 999 # Ignore value for processing geo_matrix
 const AV = 998 # Match any value other than 0 for processing geo_matrix
 
@@ -10,6 +10,7 @@ const AV = 998 # Match any value other than 0 for processing geo_matrix
 @onready var play_field = get_node("..")
 @onready var hud = get_node("../../../../HUD")
 @onready var crystal_scene = preload("res://levels/crystal.tscn")
+
 
 var hud_scene = preload("res://hud.tscn")
 var players: Array = []
@@ -278,6 +279,11 @@ func respawn():
 	player_nodes[0].set_player(Globals.player_color)
 	player_nodes[0].name = "Player"
 	Globals.player_health = Globals.player_max_health
+	Globals.STR = 5
+	Globals.CON = 5
+	Globals.DEX = 5
+	Globals.INT = 5
+	Globals.WIS = 5	
 	hud.update_hud()
 	
 func generate_spawn():	
@@ -379,6 +385,26 @@ func place_crystals():
 				cry_spawn = Vector2i(curX,curY)
 				spawn_offset = Vector2i(-offset_const,0)
 				spawn_found = true
+			elif check_geo_index(cur_index,2,IV,2,1,1,1,2,IV,IV): # lower right corner
+				crystal.set_rotation(randf_range(-PI/6,PI/6)-PI/4)
+				cry_spawn = Vector2i(curX,curY)
+				spawn_offset = Vector2i(-offset_const,-offset_const)
+				spawn_found = true
+			elif check_geo_index(cur_index,3,IV,IV,IV,3,1,1,1,3): # lower left corner
+				crystal.set_rotation(randf_range(-PI/6,PI/6)+PI/4)
+				cry_spawn = Vector2i(curX,curY)
+				spawn_offset = Vector2i(offset_const,-offset_const)
+				spawn_found = true
+			elif check_geo_index(cur_index,4,1,4,IV,IV,IV,4,1,1): # upper left corner
+				crystal.set_rotation(randf_range(-PI/6,PI/6)-PI/4)
+				cry_spawn = Vector2i(curX,curY)
+				spawn_offset = Vector2i(offset_const,offset_const)
+				spawn_found = true
+			elif check_geo_index(cur_index,5,1,1,1,5,IV,IV,IV,5): # upper right corner
+				crystal.set_rotation(randf_range(-PI/6,PI/6)+PI/4)
+				cry_spawn = Vector2i(curX,curY)
+				spawn_offset = Vector2i(-offset_const,offset_const)
+				spawn_found = true
 			
 		print("Crystal spawn found in ",tries," tries at: ", cry_spawn)		
 		cry_spawn *= 16 # Convert from map to screen space
@@ -401,10 +427,10 @@ func _ready():
 		debug_level()
 		unmodified_geo_matrix = geo_matrix.duplicate(true)
 		print("Generating player spawn...")
-		generate_spawn()
+		generate_spawn()		
 		print("Generating preview...")
-		hud.display_preview(geo_matrix, spawn_loc)		
-		# Test code here	
+		hud.display_preview(geo_matrix, spawn_loc)
+		# Test code here		
 		
 	else:	# Procgen level
 		print("Generating perlin matrix...")

@@ -122,7 +122,7 @@ height = 56.0
 [node name="FungusLord" type="CharacterBody2D"]
 z_as_relative = false
 scale = Vector2(1.5, 1.5)
-collision_layer = 2
+collision_layer = 8388610
 collision_mask = 3
 floor_stop_on_slope = false
 script = ExtResource("1_d5ltm")

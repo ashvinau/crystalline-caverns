@@ -5,11 +5,22 @@ const DAMAGE_COLOR: Color = Color(1,0.1,0.1,0.8)
 const NAV_SPEED: float = 0.5
 
 # World Constants
-const RAND_SEED: int = 75303546 # 42 for fast-loading debug level
+const RAND_SEED: int = 213338 # 42 for fast-loading debug level
 const WIDTH: int = 512
 const HEIGHT: int = 512
 const CLAMP: int = 120
 const GRAVITY: int = 490
+const TRANSLUCENCY: int = 128
+enum CRYSTAL_TYPES {VERMILLION, TITIAN, XANTHOUS, VIRIDIAN, CERULEAN, AMARANTHINE}
+var color_array = [CRYSTAL_TYPES.VERMILLION,CRYSTAL_TYPES.TITIAN,CRYSTAL_TYPES.XANTHOUS,CRYSTAL_TYPES.VIRIDIAN,CRYSTAL_TYPES.CERULEAN,CRYSTAL_TYPES.AMARANTHINE]
+var color_dict = {
+	CRYSTAL_TYPES.VERMILLION: Color8(255,32,41,TRANSLUCENCY), # 0. Red: Str + nodes
+	CRYSTAL_TYPES.TITIAN: Color8(255,145,36,TRANSLUCENCY), # 1. Orange: Con + nodes
+	CRYSTAL_TYPES.XANTHOUS: Color8(255,248,36,TRANSLUCENCY), # 2. Yellow: Dex + nodes
+	CRYSTAL_TYPES.VIRIDIAN: Color8(48,255,25,TRANSLUCENCY), # 3. Green: Healing 10hp * nodes per second
+	CRYSTAL_TYPES.CERULEAN: Color8(33,48,255,TRANSLUCENCY), # 4. Blue: Int + nodes
+	CRYSTAL_TYPES.AMARANTHINE: Color8(225,25,228,TRANSLUCENCY) # 5. Purple: Wis + nodes
+}
 
 # Customization
 const PLAYER_COLOR: Color = Color.FUCHSIA
@@ -28,6 +39,7 @@ var player_color: Color
 var move_speed : float
 var speed_cap: int
 var inertia: float
+var faith: float
 var jump_velocity: float
 var dbl_jump_velocity: float
 var slide: float
@@ -46,65 +58,70 @@ var melee_life: float
 var melee_gcd: float
 
 func init_player():
-	print("Init Player...")
+	print("Init Player stats...")
 	player_color = PLAYER_COLOR
 	melee_color = player_color
-	shot_color = player_color
-	
-	player_max_health = calc_health(CON) # Ref val 1000
+	shot_color = player_color	
+	calculate_stats()
 	player_health = player_max_health
-	print("Max/Current Health: ", player_health)
+	
+func calculate_stats():
+	player_max_health = calc_health(CON) # Ref val 1000
+	#print("Max Health: ", player_max_health)
 	
 	move_speed = calc_move_speed(DEX) # Ref val 500
-	print("Move Speed: ", move_speed)
+	#print("Move Speed: ", move_speed)
 	
 	speed_cap = calc_speed_cap(CON) # Ref val 800
-	print("Speed Cap: ", speed_cap)
+	#print("Speed Cap: ", speed_cap)
 	
-	inertia = calc_inertia(STR, CON) # Ref val 2
-	print("Inertia: ", inertia)
+	inertia = calc_defense(STR, CON) # Ref val 2
+	#print("Inertia: ", inertia)
+	
+	faith = calc_defense(WIS, INT) # Ref val 2
+	#print("Faith: ", inertia)
 	
 	jump_velocity = calc_jump_velocity(STR, DEX) # Ref val -400
-	print("Jump velocity: ", jump_velocity)
+	#print("Jump velocity: ", jump_velocity)
 	
 	dbl_jump_velocity = calc_double_jump_vel(DEX) # Ref val -300
-	print("Double jump velocity: ", dbl_jump_velocity)
+	#print("Double jump velocity: ", dbl_jump_velocity)
 	
 	slide = calc_slide(DEX, WIS) # Ref val 10
-	print("Slide control: ", slide)
+	#print("Slide control: ", slide)
 	
 	accel = calc_accel(DEX, CON) # Ref val 5
-	print("Acceleration: ", accel)
+	#print("Acceleration: ", accel)
 	
 	double_jumps = calc_double_jumps(DEX, INT) # Ref val 3
-	print("Double jumps: ", double_jumps)
+	#print("Double jumps: ", double_jumps)
 	
 	shot_spread = calc_shot_spread(WIS) # Ref val 10
-	print("Shot Spread: ", shot_spread)
+	#print("Shot Spread: ", shot_spread)
 	
 	shot_velocity = calc_shot_vel(INT, WIS) # Ref val 600
-	print("Shot velocity: ", shot_velocity)
+	#print("Shot velocity: ", shot_velocity)
 		
 	shot_weight = calc_shot_weight(INT) # Ref val 0.5
-	print("Shot weight: ", shot_weight)
+	#print("Shot weight: ", shot_weight)
 	
 	shot_life = calc_shot_life(WIS) # Ref val 7
-	print("Shot life: ", shot_life)
+	#print("Shot life: ", shot_life)
 	
 	shot_gcd = calc_shot_gcd(INT, DEX) # Ref val 0.75
-	print("Shot gcd: ", shot_gcd)
+	#print("Shot gcd: ", shot_gcd)
 	
 	melee_velocity = calc_melee_velocity(STR, DEX) # Ref val 900
-	print("Melee velocity: ", melee_velocity)	
+	#print("Melee velocity: ", melee_velocity)	
 	
 	melee_weight = calc_melee_weight(STR) # Ref val 0.5
-	print("Melee weight: ", melee_weight)
+	#print("Melee weight: ", melee_weight)
 	
 	melee_life = calc_melee_life(WIS) # Ref val 0.15
-	print("Melee life: ", melee_life)
+	#print("Melee life: ", melee_life)
 	
 	melee_gcd = calc_melee_gcd(CON, DEX) # Ref val 1
-	print("Melee gcd: ", melee_gcd)
+	#print("Melee gcd: ", melee_gcd)
 	
 func calc_health(con: float) -> float:
 	return 60 * log(pow(con,10) + 3.5) # y=60 ln(x^10+3.5)
@@ -115,7 +132,7 @@ func calc_move_speed(dex: float) -> float:
 func calc_speed_cap(con: float) -> float:
 	return 40 * log(pow(con,15) + 100) # y=40 ln(x^15+100)
 	
-func calc_inertia(str: float, con: float) -> float:
+func calc_defense(str: float, con: float) -> float:
 	return log(pow(str+con,0.65) + 3) # y=ln(x^0.65+3)
 	
 func calc_jump_velocity(str: float, dex: float) -> float:

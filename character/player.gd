@@ -43,7 +43,7 @@ var dmg_scene = preload("res://damage_display.tscn")
 
 func set_player(color: Color):
 	$AnimatedSprite2D.material.set_shader_parameter("modulate",Globals.color_to_vector(color))
-	modulate = color
+	self_modulate = color
 	$RangeCDTimer.wait_time = Globals.shot_gcd
 	$MeleeCDTimer.wait_time = Globals.melee_gcd
 
@@ -169,9 +169,12 @@ func _physics_process(delta):
 			land()
 		was_in_air = false
 		
-	if Input.is_action_just_pressed("save_nav"):
+	if Input.is_action_just_pressed("save_nav"): # M
 		get_node("../PlayFieldMap").save_boss_map()
 		
+	if Input.is_action_just_pressed("debug heal"):
+		heal(self, 50)
+				
 	# Respawn
 	if Input.is_action_pressed("respawn"):
 		var playFieldNode = get_node("../PlayFieldMap")
@@ -345,6 +348,23 @@ func _physics_process(delta):
 		update_facing_direction()
 	check_player_loc()
 	
+func change_stat(stat: String, amount: float):
+	if stat == "STR":
+		Globals.STR += amount
+	elif stat == "CON":
+		Globals.CON += amount
+	elif stat == "DEX":
+		Globals.DEX += amount
+	elif stat == "INT":
+		Globals.INT += amount
+	elif stat == "WIS":
+		Globals.WIS += amount
+	else:
+		print("Invalid stat.")
+	print("STR: ", Globals.STR, " CON: ", Globals.CON, " DEX: ", Globals.DEX, " INT: ", Globals.INT, " WIS: ", Globals.WIS)
+	Globals.calculate_stats()
+	hud_node.update_hud()
+	
 func align_attack(direction: Vector2):
 	if (direction.x > 0):
 		animated_sprite.flip_h = false
@@ -374,6 +394,18 @@ func melee_attack(offset: Vector2i, direction: Vector2):
 		slash_inst.velocity.y = (direction.y * Globals.melee_velocity) # + velocity.y	
 		melee_lock = true
 		$MeleeCDTimer.start()
+
+func heal(from_node, magnitude: float):
+	var cured = abs(magnitude) * Globals.WIS
+	Globals.player_health += cured
+	if Globals.player_health > Globals.player_max_health:
+		Globals.player_health = Globals.player_max_health
+	hud_node.update_hud()
+	var cure_inst = dmg_scene.instantiate()
+	cure_inst.position.x = self.position.x - 32
+	cure_inst.position.y = self.position.y - 55	
+	play_field.add_child(cure_inst)
+	cure_inst.set_dmg_disp(cured, Color.GREEN)	
 
 func hit(from_node, magnitude: float):
 	var damage = abs(magnitude) / float(Globals.inertia)

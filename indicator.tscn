@@ -1,10 +1,18 @@
-[gd_scene load_steps=8 format=3 uid="uid://dwkkk33hda8lh"]
+[gd_scene load_steps=10 format=3 uid="uid://dwkkk33hda8lh"]
 
 [ext_resource type="Texture2D" uid="uid://b6o4oajku6uvw" path="res://art/indicator-sheet.png" id="1_8mqub"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_20k7h"]
 atlas = ExtResource("1_8mqub")
 region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kk5j3"]
+atlas = ExtResource("1_8mqub")
+region = Rect2(80, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xsy01"]
+atlas = ExtResource("1_8mqub")
+region = Rect2(96, 0, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_yqh58"]
 atlas = ExtResource("1_8mqub")
@@ -30,6 +38,22 @@ animations = [{
 }],
 "loop": false,
 "name": &"boss",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kk5j3")
+}],
+"loop": true,
+"name": &"crystal",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xsy01")
+}],
+"loop": true,
+"name": &"destroyed",
 "speed": 0.0
 }, {
 "frames": [{
@@ -67,4 +91,4 @@ animations = [{
 
 [node name="Indicator" type="AnimatedSprite2D"]
 sprite_frames = SubResource("SpriteFrames_ptkap")
-animation = &"boss"
+animation = &"destroyed"

@@ -12,7 +12,9 @@ var knockback: bool = false
 var velocity: Vector2
 var slash_weight: float
 var hit_list: Array = []
-var spark_scene = preload("res://effects/sparks.tscn")
+var spark_scene = preload("res://effects/melee_sparks.tscn")
+var liquid_scene = preload("res://effects/liquid_splash.tscn")
+var smash_scene = preload("res://effects/tilemap_smash.tscn")
 var melee_force: float
 
 func set_slash(life_time: float, coll_mask: int, color: Color, weight: float, direction: Vector2, emitter: CharacterBody2D):
@@ -49,7 +51,7 @@ func _on_area_entered(area: Area2D) -> void:
 		if emitter_node.cur_double_jumps > 0:
 			emitter_node.cur_double_jumps -= 1
 		knockback = true
-	area.hit(self,0)
+	area.hit(self,melee_force)
 		
 func hit(from_node, magnitude: float):
 	var spark_inst = spark_scene.instantiate()
@@ -72,20 +74,22 @@ func _on_body_entered(body):
 			emitter_node.cur_double_jumps -= 1
 		knockback = true
 			
-	if not hit_list.has(body.name):	
-		var spark_inst = spark_scene.instantiate()
-		spark_inst.scale *= slash_weight
-		if body is TileMap: #(["PlayFieldMap"]).has(body.name):		
-			spark_inst.position = self.position
-			get_parent().add_child(spark_inst)
-			spark_inst.modulate = body.BLOOD_COLOR
-			spark_inst.emitting = true	
-		elif body is CharacterBody2D: #(["FormlessCrawler","Player"].has(body.name)):
+	if not hit_list.has(body.name):			
+		if body is TileMap:
+			var smash_inst = smash_scene.instantiate()
+			smash_inst.scale *= slash_weight
+			smash_inst.position = self.position
+			get_parent().add_child(smash_inst)
+			smash_inst.modulate = body.BLOOD_COLOR
+			smash_inst.emitting = true		
+		elif body is CharacterBody2D:
+			var liquid_inst = liquid_scene.instantiate()
+			liquid_inst.scale *= slash_weight
 			apply_melee_force(body, melee_force)		
-			spark_inst.position = Vector2.ZERO
-			body.add_child(spark_inst)
-			spark_inst.modulate = body.BLOOD_COLOR
-			spark_inst.emitting = true
+			liquid_inst.position = Vector2.ZERO
+			body.add_child(liquid_inst)
+			liquid_inst.modulate = body.BLOOD_COLOR
+			liquid_inst.emitting = true
 			body.hit(self, velocity.length() * slash_weight)			
 		hit_list.append(body.name)
 	

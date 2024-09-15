@@ -9,6 +9,12 @@ var direction: Vector2 = Vector2.ZERO
 var bar_image: Image = Image.create(32,8,false, Image.FORMAT_RGBA8)
 var cur_double_jumps: int # Required for compatibility with basic_melee.gd - not used
 
+var STR: float
+var CON: float
+var DEX: float
+var INT: float
+var WIS: float
+
 var max_health: float = 1
 var mob_health: float = 1
 var move_speed: int
@@ -37,39 +43,61 @@ var dmg_scene = preload("res://damage_display.tscn")
 
 @onready var play_field: Node2D = get_node("..") # parent node: PlayField
 
-func set_mob(players: Array, color: Color, str: float, con: float, dex: float, inte: float, wis: float):
-	#level: int, players: Array, color: Color, health: int, speed: int, cap: int, jump: int, moveCD: float, alertCD: float, rangeCD: float, meleeCD: float, detect_d: int, shot_d: int, melee_d: int
+func set_mob(players: Array, color: Color, str: float, con: float, dex: float, inte: float, wis: float):	
 	player_nodes = players
 	mob_color = color
-	shot_life = Globals.calc_shot_life(wis)
-	shot_weight = Globals.calc_shot_weight(inte)
-	shot_velocity = Globals.calc_shot_vel(inte, wis)
-	shot_spread = Globals.calc_shot_spread(wis)
-	melee_life = Globals.calc_melee_life(wis)
-	melee_weight = Globals.calc_melee_weight(str)
-	melee_velocity = Globals.calc_melee_velocity(str, dex)
-	max_health = Globals.calc_health(con) / 2
+	
+	STR = str
+	CON = con
+	DEX = dex
+	INT = inte
+	WIS = wis
+	
+	calculate_stats()	
 	mob_health = max_health
-	move_speed = Globals.calc_move_speed(dex)
-	speed_cap = Globals.calc_speed_cap(con)	
-	detection_dist = Globals.calc_detection_dist(wis) # ref value 900
-	print("mob detection dist: ", detection_dist)
-	shot_dist = Globals.calc_shot_dist(inte, wis) # ref value 700
-	print("mob shot dist: ", shot_dist)
-	melee_dist = Globals.calc_melee_dist(str, dex) # ref value 400
-	print("mob melee dist: ", melee_dist)
-	accel = Globals.calc_accel(dex, con)
-	slide = Globals.calc_slide(dex, wis)
-	e_inertia = Globals.calc_inertia(str, con)
-	$MoveTimer.wait_time = Globals.calc_move_gcd(dex, wis) # ref value 1
-	print("mob move timer: ", $MoveTimer.wait_time)
-	$RangeTimer.wait_time = Globals.calc_shot_gcd(inte, dex)
-	$MeleeTimer.wait_time = Globals.calc_melee_gcd(con, dex)
-	$AlertTimer.wait_time = Globals.calc_alert_gcd(inte, wis)# ref value 5
-	print("mob alert timer: ", $AlertTimer.wait_time)
+	
 	$AnimatedSprite2D.material.set_shader_parameter("modulate",Globals.color_to_vector(color))
-	modulate = color	
+	self_modulate = color
 	$AnimatedSprite2D.play("idle")
+	
+func calculate_stats():
+	shot_life = Globals.calc_shot_life(WIS)
+	shot_weight = Globals.calc_shot_weight(INT)
+	shot_velocity = Globals.calc_shot_vel(INT,WIS)
+	shot_spread = Globals.calc_shot_spread(WIS)
+	melee_life = Globals.calc_melee_life(WIS)
+	melee_weight = Globals.calc_melee_weight(STR)
+	melee_velocity = Globals.calc_melee_velocity(STR,DEX)
+	max_health = Globals.calc_health(CON) / 2	
+	move_speed = Globals.calc_move_speed(DEX)
+	speed_cap = Globals.calc_speed_cap(CON)	
+	detection_dist = Globals.calc_detection_dist(WIS) # ref value 900	
+	shot_dist = Globals.calc_shot_dist(INT,WIS) # ref value 700	
+	melee_dist = Globals.calc_melee_dist(STR,DEX) # ref value 400	
+	accel = Globals.calc_accel(DEX,CON)
+	slide = Globals.calc_slide(DEX,WIS)
+	e_inertia = Globals.calc_defense(STR,CON)
+	$MoveTimer.wait_time = Globals.calc_move_gcd(DEX,WIS) # ref value 1	
+	$RangeTimer.wait_time = Globals.calc_shot_gcd(INT,DEX)
+	$MeleeTimer.wait_time = Globals.calc_melee_gcd(CON,DEX)
+	$AlertTimer.wait_time = Globals.calc_alert_gcd(INT,WIS)# ref value 5
+	
+func change_stat(stat: String, amount: float):
+	if stat == "STR":
+		STR += amount
+	elif stat == "CON":
+		CON += amount
+	elif stat == "DEX":
+		DEX += amount
+	elif stat == "INT":
+		INT += amount
+	elif stat == "WIS":
+		WIS += amount
+	else:
+		print("Invalid stat.")
+	print("STR: ", STR, " CON: ", CON, " DEX: ", DEX, " INT: ", INT, " WIS: ", WIS)
+	calculate_stats()
+	update_health_bar()
 	
 func update_health_bar():	
 	var health_proportion: float = (float(mob_health) / float(max_health)) * 32.0	
@@ -135,6 +163,18 @@ func update_animation():
 func _on_animated_sprite_2d_animation_finished():
 	if (["attack", "hit"].has($AnimatedSprite2D.animation)):
 		animation_locked = false
+		
+func heal(from_node, magnitude: float):
+	var cured = abs(magnitude) * WIS
+	mob_health += cured
+	if mob_health > max_health:
+		mob_health = max_health
+	update_health_bar()
+	var cure_inst = dmg_scene.instantiate()
+	cure_inst.position.x = self.position.x - 32
+	cure_inst.position.y = self.position.y - 55	
+	play_field.add_child(cure_inst)
+	cure_inst.set_dmg_disp(cured, Color.GREEN)	
 		
 func hit(from_node, magnitude: float):	
 	$AnimatedSprite2D.play("hit")

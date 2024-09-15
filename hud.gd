@@ -72,20 +72,27 @@ func display_preview(geo_matrix, spawn_loc: Vector2i):
 	# Crystal position indicator
 	for crystal in play_field_map.crystals:
 		var crystal_indicator = indicator_scene.instantiate() 
-		crystal_indicator.play("player") # need to differentiate player and crystals
+		crystal_indicator.play("crystal")
 		crystal_indicator.position = (crystal.position / 16) / 2
 		crystal_indicator.modulate = crystal.modulate
 		$levelPreview.add_child.call_deferred(crystal_indicator)
+		
+func add_map_indicator(name: String, map_location: Vector2i) -> AnimatedSprite2D:
+	var new_indicator = indicator_scene.instantiate()
+	new_indicator.play(name)
+	new_indicator.position = map_location / 2
+	$levelPreview.add_child.call_deferred(new_indicator)
+	return new_indicator
 	
 func update_indicators():	
 	var player_position: Vector2i = play_field_map.player_nodes[0].position
 	player_position = (player_position / 16) / 2
 	player_indicator.position = player_position
-	if (Globals.RAND_SEED != 42):
+	if (Globals.RAND_SEED != 42) && play_field_map.boss_nodes.size() > 0:
 		if is_instance_valid(play_field_map.boss_nodes[0]):
-			var boss_position: Vector2i = play_field_map.boss_nodes[0].position	
+			var boss_position: Vector2i = play_field_map.boss_nodes[0].position
 			boss_position = (boss_position / 16) / 2
-			boss_indicator.position = boss_position	
+			boss_indicator.position = boss_position
 		else:
 			boss_indicator.visible = false
 

@@ -29,8 +29,15 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 
 [node name="AOE" type="Area2D" parent="."]
-collision_layer = 0
+collision_layer = 524288
 collision_mask = 8388608
 
 [node name="Area" type="CollisionShape2D" parent="AOE"]
 shape = SubResource("CircleShape2D_pi00s")
+
+[node name="ExpiryTimer" type="Timer" parent="."]
+wait_time = 2.5
+one_shot = true
+
+[connection signal="body_entered" from="AOE" to="." method="_on_aoe_body_entered"]
+[connection signal="timeout" from="ExpiryTimer" to="." method="_on_expiry_timer_timeout"]

@@ -1,0 +1,42 @@
+[gd_scene load_steps=5 format=3 uid="uid://bj7xkxkgwwcno"]
+
+[ext_resource type="Texture2D" uid="uid://dskjln4atmpjq" path="res://art/rock_particle.png" id="1_hj1d2"]
+[ext_resource type="Script" path="res://effects/crystal_shatter.gd" id="6_j7fc7"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_hgkiw"]
+particles_animation = true
+particles_anim_h_frames = 5
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_l3smn"]
+lifetime_randomness = 0.5
+particle_flag_disable_z = true
+emission_shape = 1
+emission_sphere_radius = 200.0
+angle_min = -180.0
+angle_max = 180.0
+angular_velocity_min = -720.0
+angular_velocity_max = 720.0
+radial_velocity_min = 4.99998
+radial_velocity_max = 200.0
+gravity = Vector3(0, 50, 0)
+scale_max = 3.0
+anim_speed_min = 1.0
+anim_speed_max = 2.0
+
+[node name="CrystalShatter" type="GPUParticles2D"]
+z_index = 4
+z_as_relative = false
+material = SubResource("CanvasItemMaterial_hgkiw")
+emitting = false
+amount = 200
+process_material = SubResource("ParticleProcessMaterial_l3smn")
+texture = ExtResource("1_hj1d2")
+lifetime = 2.0
+one_shot = true
+explosiveness = 1.0
+randomness = 0.5
+script = ExtResource("6_j7fc7")
+
+[connection signal="finished" from="." to="." method="_on_finished"]
