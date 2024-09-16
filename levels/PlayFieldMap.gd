@@ -22,48 +22,77 @@ var geo_matrix: Array = []
 var unmodified_geo_matrix: Array = []
 var spawn_loc: Vector2i
 var crystals: Array = []
+var map_clamp: int = Globals.CLAMP
 
 func save_boss_map():
 	Globals.save_map_file(boss_nodes[0].mob_geo_matrix, "boss_nav_map.csv")	
 	#Globals.save_map_file(crystals[0].cry_geo_matrix, "crystal_nav_map.csv")
-
+	
 # Called when the node enters the scene tree for the first time.
 func _init():	
 	seed(Globals.RAND_SEED)	
 		
-	# Initialize perlin matrix	
-	for x in Globals.WIDTH:
-		perlin_matrix.append([])
-		for y in Globals.HEIGHT:
-			perlin_matrix[x].append(0)
-	# Copy perlin matrix for modification		
-	geo_matrix = perlin_matrix.duplicate(true)
+	# Initialize matrices
+	Globals.init_2d_matrix(perlin_matrix,Globals.WIDTH,Globals.HEIGHT,0)
+	Globals.init_2d_matrix(geo_matrix,Globals.WIDTH,Globals.HEIGHT,0)	
 	
 	#Load entities into memory		
 	players.append(preload("res://character/player.tscn"))
 	bosses.append(preload("res://enemies/fungus_lord.tscn"))
 	
-func set_geo_matrix(clamp: int, test: bool):	
+func set_geo_matrix(clamp: int, test: bool):
+	var qual_passed: bool = false	
 	var invalid: int = 0
+	var invalid_limit: int = 6000
+	var valid_limit: int = 200000
+	var valid: int = 0
 	
-	for x in Globals.WIDTH:
-		for y in Globals.HEIGHT:
-			if (perlin_matrix[x][y] <= clamp):
-				geo_matrix[x][y] = 1 # Solid square tile
-	
-	if test:
-		# Test validity of initial geo_matrix if requested - rejection logic later
-		var testMatrix = geo_matrix.duplicate(true)
-		# Fill empty space starting at the spawn point
-		flood_fill(testMatrix,Globals.pick_spawn(testMatrix,40),255,false,false);
-		# Check for remaining 0 values
+	if not test:
 		for x in Globals.WIDTH:
 			for y in Globals.HEIGHT:
-				if (testMatrix[x][y] == 0):
-					invalid += 1
+				if (perlin_matrix[x][y] <= clamp):
+					geo_matrix[x][y] = 1 # Solid square tile
+				else:
+					geo_matrix[x][y] = 0 # Empty space
+	else:		
+		var test_spawn: Vector2i = Globals.pick_spawn(geo_matrix,40)
+		while not qual_passed:
+			valid = 0
+			invalid = 0
+			for x in Globals.WIDTH:
+				for y in Globals.HEIGHT:
+					if (perlin_matrix[x][y] <= map_clamp):
+						geo_matrix[x][y] = 1 # Solid square tile
+					else:
+						geo_matrix[x][y] = 0 # Empty space	
 		
-		print(invalid," invalid with clamp ", clamp, ".")			
-	
+			# Must duplicate the geo matrix to flood fill it
+			var test_matrix = geo_matrix.duplicate(true)
+			# Fill empty space starting at the spawn point
+			flood_fill(test_matrix,test_spawn,255,false,false);
+			# Check for remaining 0 values
+			for x in Globals.WIDTH:
+				for y in Globals.HEIGHT:
+					if (test_matrix[x][y] == 0):
+						invalid += 1
+					elif (test_matrix[x][y] == 255):
+						valid += 1
+		
+			print(invalid," invalid and, ", valid, " valid with clamp ", map_clamp, ".")
+			if  (invalid < invalid_limit) && (valid < valid_limit):
+				print("Map quality check passed.")
+				qual_passed = true				
+			elif (invalid >= invalid_limit):
+				print("Map has too many invalid cells. Retry with lesser clamp.")
+				map_clamp -= 1
+			elif (valid >= valid_limit):
+				print("Map has too many valid cells. Retry with greater clamp.")
+				map_clamp += 1				
+			else:
+				print("Quality check cannot complete. Pass by default.")
+				qual_passed = true			
+			
+	# Continue generation after quality validated (or not)
 	for x in Globals.WIDTH:
 		for y in Globals.HEIGHT:
 			# Fill in single block potholes
@@ -284,6 +313,7 @@ func respawn():
 	Globals.DEX = 5
 	Globals.INT = 5
 	Globals.WIS = 5	
+	Globals.init_player()
 	hud.update_hud()
 	
 func generate_spawn():	
@@ -323,7 +353,8 @@ func spawn_entity(entity: PackedScene, e_position: Vector2i):
 	return entity_node
 
 func set_background(pOffset: int, darken: float, layerNode: TextureRect, bgMap: TileMap, bgViewport: SubViewport):
-	set_geo_matrix(Globals.CLAMP + pOffset, false)		
+	print("Generating background with clamp: ", map_clamp + pOffset)
+	set_geo_matrix(map_clamp + pOffset, false)		
 	var bgImage: Image = Image.create(Globals.WIDTH * 16, Globals.HEIGHT * 16, false, Image.FORMAT_RGBA8)	
 	set_playfield_map(bgMap, 0,  0, 0)	
 	await RenderingServer.frame_post_draw
@@ -348,13 +379,14 @@ func set_rear_bg():
 	bgNode.texture = ImageTexture.create_from_image(bgImage)	
 
 func place_crystals():	
-	var edge_offset: int = 75
-	var num_crystals: int = randi_range(3,5)
+	var raycast_size: int = 6
+	var num_crystals: int = randi_range(3,6)
 	print("Placing ", num_crystals, " crystals.")
 	for i in num_crystals:
 		crystals.append(spawn_entity(crystal_scene,Vector2i(0,0)))
 		
 	for crystal in crystals:		
+		var edge_offset: int = pow(crystal.nodes * 100,Globals.AOE_SCALAR) / 16
 		var cry_spawn: Vector2i
 		var offset_const = crystal.nodes * 30
 		var spawn_offset: Vector2i
@@ -363,48 +395,56 @@ func place_crystals():
 		while not spawn_found:
 			tries += 1			
 			var curX = randi_range(edge_offset,Globals.WIDTH-edge_offset)
-			var curY = randi_range(edge_offset,Globals.HEIGHT-edge_offset)
+			var curY = randi_range(edge_offset,Globals.HEIGHT-edge_offset)					
 			var cur_index: Vector2i = Vector2i(curX,curY)
 			if check_geo_index(cur_index,1,6,6,1,1,1,1,1,6): # on the floor, pointed upward
-				crystal.set_rotation(randf_range(-PI/6,PI/6))
-				cry_spawn = Vector2i(curX,curY)
-				spawn_offset = Vector2i(0,-offset_const)
-				spawn_found = true
+				if Globals.raycast_cardinal(unmodified_geo_matrix,curX,curY-offset_const,crystal.nodes*raycast_size):
+					crystal.set_rotation(randf_range(-PI/6,PI/6))
+					cry_spawn = Vector2i(curX,curY)
+					spawn_offset = Vector2i(0,-offset_const)
+					spawn_found = true
 			elif check_geo_index(cur_index,1,1,1,1,7,7,7,1,1): # on the ceiling, pointed downward
-				crystal.set_rotation(randf_range(-PI/6,PI/6))
-				cry_spawn = Vector2i(curX,curY)
-				spawn_offset = Vector2i(0,offset_const)
-				spawn_found = true
+				if Globals.raycast_cardinal(unmodified_geo_matrix,curX,curY+offset_const,crystal.nodes*raycast_size):
+					crystal.set_rotation(randf_range(-PI/6,PI/6))
+					cry_spawn = Vector2i(curX,curY)
+					spawn_offset = Vector2i(0,offset_const)
+					spawn_found = true
 			elif check_geo_index(cur_index,1,1,8,8,8,1,1,1,1): # on the left wall, pointed rightward
-				crystal.set_rotation(randf_range(-PI/6,PI/6)+PI/2)
-				cry_spawn = Vector2i(curX,curY)
-				spawn_offset = Vector2i(offset_const,0)
-				spawn_found = true
+				if Globals.raycast_cardinal(unmodified_geo_matrix,curX+offset_const,curY,crystal.nodes*raycast_size):
+					crystal.set_rotation(randf_range(-PI/6,PI/6)+PI/2)
+					cry_spawn = Vector2i(curX,curY)
+					spawn_offset = Vector2i(offset_const,0)
+					spawn_found = true
 			elif check_geo_index(cur_index,1,1,1,1,1,1,9,9,9): # on the right wall, pointed leftward
-				crystal.set_rotation(randf_range(-PI/6,PI/6)-PI/2)
-				cry_spawn = Vector2i(curX,curY)
-				spawn_offset = Vector2i(-offset_const,0)
-				spawn_found = true
+				if Globals.raycast_cardinal(unmodified_geo_matrix,curX-offset_const,curY,crystal.nodes*raycast_size):
+					crystal.set_rotation(randf_range(-PI/6,PI/6)-PI/2)
+					cry_spawn = Vector2i(curX,curY)
+					spawn_offset = Vector2i(-offset_const,0)
+					spawn_found = true
 			elif check_geo_index(cur_index,2,IV,2,1,1,1,2,IV,IV): # lower right corner
-				crystal.set_rotation(randf_range(-PI/6,PI/6)-PI/4)
-				cry_spawn = Vector2i(curX,curY)
-				spawn_offset = Vector2i(-offset_const,-offset_const)
-				spawn_found = true
+				if Globals.raycast_cardinal(unmodified_geo_matrix,curX-offset_const,curY-offset_const,crystal.nodes*raycast_size):
+					crystal.set_rotation(randf_range(-PI/6,PI/6)-PI/4)
+					cry_spawn = Vector2i(curX,curY)
+					spawn_offset = Vector2i(-offset_const,-offset_const)
+					spawn_found = true
 			elif check_geo_index(cur_index,3,IV,IV,IV,3,1,1,1,3): # lower left corner
-				crystal.set_rotation(randf_range(-PI/6,PI/6)+PI/4)
-				cry_spawn = Vector2i(curX,curY)
-				spawn_offset = Vector2i(offset_const,-offset_const)
-				spawn_found = true
+				if Globals.raycast_cardinal(unmodified_geo_matrix,curX+offset_const,curY-offset_const,crystal.nodes*raycast_size):
+					crystal.set_rotation(randf_range(-PI/6,PI/6)+PI/4)
+					cry_spawn = Vector2i(curX,curY)
+					spawn_offset = Vector2i(offset_const,-offset_const)
+					spawn_found = true
 			elif check_geo_index(cur_index,4,1,4,IV,IV,IV,4,1,1): # upper left corner
-				crystal.set_rotation(randf_range(-PI/6,PI/6)-PI/4)
-				cry_spawn = Vector2i(curX,curY)
-				spawn_offset = Vector2i(offset_const,offset_const)
-				spawn_found = true
+				if Globals.raycast_cardinal(unmodified_geo_matrix,curX+offset_const,curY+offset_const,crystal.nodes*raycast_size):
+					crystal.set_rotation(randf_range(-PI/6,PI/6)-PI/4)
+					cry_spawn = Vector2i(curX,curY)
+					spawn_offset = Vector2i(offset_const,offset_const)
+					spawn_found = true
 			elif check_geo_index(cur_index,5,1,1,1,5,IV,IV,IV,5): # upper right corner
-				crystal.set_rotation(randf_range(-PI/6,PI/6)+PI/4)
-				cry_spawn = Vector2i(curX,curY)
-				spawn_offset = Vector2i(-offset_const,offset_const)
-				spawn_found = true
+				if Globals.raycast_cardinal(unmodified_geo_matrix,curX-offset_const,curY+offset_const,crystal.nodes*raycast_size):
+					crystal.set_rotation(randf_range(-PI/6,PI/6)+PI/4)
+					cry_spawn = Vector2i(curX,curY)
+					spawn_offset = Vector2i(-offset_const,offset_const)
+					spawn_found = true
 			
 		print("Crystal spawn found in ",tries," tries at: ", cry_spawn)		
 		cry_spawn *= 16 # Convert from map to screen space

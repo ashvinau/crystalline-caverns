@@ -3,9 +3,10 @@ extends Node
 # Game Constants
 const DAMAGE_COLOR: Color = Color(1,0.1,0.1,0.8)
 const NAV_SPEED: float = 0.5
+const AOE_SCALAR: float = 1.05
 
 # World Constants
-const RAND_SEED: int = 694327 # 42 for fast-loading debug level
+const RAND_SEED: int = 8654778 # 42 for fast-loading debug level
 const WIDTH: int = 512
 const HEIGHT: int = 512
 const CLAMP: int = 120
@@ -67,62 +68,44 @@ func init_player():
 	
 func calculate_stats():
 	player_max_health = calc_health(CON) # Ref val 1000
-	#print("Max Health: ", player_max_health)
-	
+	#print("Max Health: ", player_max_health)	
 	move_speed = calc_move_speed(DEX) # Ref val 500
-	#print("Move Speed: ", move_speed)
-	
+	#print("Move Speed: ", move_speed)	
 	speed_cap = calc_speed_cap(CON) # Ref val 800
-	#print("Speed Cap: ", speed_cap)
-	
+	#print("Speed Cap: ", speed_cap)	
 	inertia = calc_defense(STR, CON) # Ref val 2
-	#print("Inertia: ", inertia)
-	
+	#print("Inertia: ", inertia)	
 	faith = calc_defense(WIS, INT) # Ref val 2
-	#print("Faith: ", inertia)
-	
+	#print("Faith: ", inertia)	
 	jump_velocity = calc_jump_velocity(STR, DEX) # Ref val -400
-	#print("Jump velocity: ", jump_velocity)
-	
+	#print("Jump velocity: ", jump_velocity)	
 	dbl_jump_velocity = calc_double_jump_vel(DEX) # Ref val -300
-	#print("Double jump velocity: ", dbl_jump_velocity)
-	
+	#print("Double jump velocity: ", dbl_jump_velocity)	
 	slide = calc_slide(DEX, WIS) # Ref val 10
-	#print("Slide control: ", slide)
-	
+	#print("Slide control: ", slide)	
 	accel = calc_accel(DEX, CON) # Ref val 5
-	#print("Acceleration: ", accel)
-	
+	#print("Acceleration: ", accel)	
 	double_jumps = calc_double_jumps(DEX, INT) # Ref val 3
-	#print("Double jumps: ", double_jumps)
-	
+	#print("Double jumps: ", double_jumps)	
 	shot_spread = calc_shot_spread(WIS) # Ref val 10
-	#print("Shot Spread: ", shot_spread)
-	
+	#print("Shot Spread: ", shot_spread)	
 	shot_velocity = calc_shot_vel(INT, WIS) # Ref val 600
-	#print("Shot velocity: ", shot_velocity)
-		
+	#print("Shot velocity: ", shot_velocity)		
 	shot_weight = calc_shot_weight(INT) # Ref val 0.5
-	#print("Shot weight: ", shot_weight)
-	
+	#print("Shot weight: ", shot_weight)	
 	shot_life = calc_shot_life(WIS) # Ref val 7
-	#print("Shot life: ", shot_life)
-	
+	#print("Shot life: ", shot_life)	
 	shot_gcd = calc_shot_gcd(INT, DEX) # Ref val 0.75
-	#print("Shot gcd: ", shot_gcd)
-	
+	#print("Shot gcd: ", shot_gcd)	
 	melee_velocity = calc_melee_velocity(STR, DEX) # Ref val 900
 	#print("Melee velocity: ", melee_velocity)	
-	
 	melee_weight = calc_melee_weight(STR) # Ref val 0.5
-	#print("Melee weight: ", melee_weight)
-	
+	#print("Melee weight: ", melee_weight)	
 	melee_life = calc_melee_life(WIS) # Ref val 0.15
-	#print("Melee life: ", melee_life)
-	
+	#print("Melee life: ", melee_life)	
 	melee_gcd = calc_melee_gcd(CON, DEX) # Ref val 1
 	#print("Melee gcd: ", melee_gcd)
-	
+		
 func calc_health(con: float) -> float:
 	return 60 * log(pow(con,10) + 3.5) # y=60 ln(x^10+3.5)
 	
@@ -200,6 +183,12 @@ func calc_move_gcd(dex: float, wis: float) -> float:
 	
 func calc_alert_gcd(inte: float, wis: float) -> float:
 	return (4 * log(pow(inte+wis,3)+5)) / 6
+	
+func init_2d_matrix(matrix: Array, width: int, height: int, init_val: int):
+	for x in Globals.WIDTH:
+		matrix.append([])
+		for y in Globals.HEIGHT:
+			matrix[x].append(init_val)
 	
 # For using vector4 colors in shaders
 func color_to_vector(inColor: Color) -> Vector4:

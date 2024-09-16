@@ -30,7 +30,6 @@ var add_DEX: float
 var add_INT: float
 var add_WIS: float
 
-
 var max_health: float = 1
 var mob_health: float = 1
 var move_speed: int

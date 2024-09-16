@@ -101,7 +101,7 @@ func _init() -> void:
 		
 func _ready():
 	print("Setting AOE...")
-	aoe_range = pow(nodes * 100,1.01)
+	aoe_range = pow(nodes * 100,Globals.AOE_SCALAR)
 	get_node("AOE/Area").get_shape().radius = aoe_range
 	crystal_hp = nodes * 500	
 	print("Updating texture...")
