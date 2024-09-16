@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://bwe0riocsdbjg" path="res://art/character-sheet.png" id="3_bxiry"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_w4u0b"]
+resource_local_to_scene = true
 shader = ExtResource("2_mg3uh")
 shader_parameter/modulate = Vector4(1, 1, 1, 1)
 

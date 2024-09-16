@@ -42,7 +42,7 @@ amount = 200
 process_material = SubResource("ParticleProcessMaterial_my5dk")
 texture = ExtResource("1_231gb")
 randomness = 0.5
-visibility_rect = Rect2(-1000, -1000, 2000, 2000)
+visibility_rect = Rect2(-5000, -5000, 10000, 10000)
 script = ExtResource("7_7m6ry")
 
 [node name="ConnectionArea" type="Area2D" parent="."]

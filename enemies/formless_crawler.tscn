@@ -5,6 +5,7 @@
 [ext_resource type="Shader" path="res://art/midModulate.gdshader" id="2_5esm8"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_rb8pq"]
+resource_local_to_scene = true
 shader = ExtResource("2_5esm8")
 shader_parameter/modulate = Vector4(1, 1, 1, 1)
 

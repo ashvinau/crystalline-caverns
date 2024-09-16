@@ -9,8 +9,8 @@ var spark_scene = preload("res://effects/sparks.tscn")
 var liquid_scene = preload("res://effects/liquid_splash.tscn")
 var smash_scene = preload("res://effects/tilemap_smash.tscn")
 
-@onready var aura_node = get_node("AnimatedSprite2D/Aura")
-@onready var expiry_node = get_node("AnimatedSprite2D/Expiry")	
+@onready var aura_node = get_node("Aura")
+@onready var expiry_node = get_node("Expiry")	
 
 func set_bullet(life_time: float, coll_mask: int, color: Color, weight: float, shape: String, player: CharacterBody2D):
 	$LifeTimer.wait_time = life_time
@@ -20,6 +20,8 @@ func set_bullet(life_time: float, coll_mask: int, color: Color, weight: float, s
 	self.scale.y *= weight	
 	$AnimatedSprite2D.material.set_shader_parameter("modulate",Globals.color_to_vector(color))
 	$AnimatedSprite2D.modulate = color
+	aura_node.modulate = color
+	expiry_node.modulate = color
 	player_node = player
 	bullet_weight = weight
 	$AnimatedSprite2D.play(shape)
@@ -36,10 +38,9 @@ func expire():
 	$AnimatedSprite2D.visible = false
 	$CollisionShape2D.set_deferred("disabled", true)	
 	aura_node.emitting = false	
-	$AnimatedSprite2D.remove_child(expiry_node)
+	remove_child(expiry_node)
 	get_parent().add_child(expiry_node)
-	expiry_node.position = global_position
-	expiry_node.modulate = self_modulate
+	expiry_node.position = global_position	
 	expiry_node.one_shot = true
 	expiry_node.emitting = true		
 

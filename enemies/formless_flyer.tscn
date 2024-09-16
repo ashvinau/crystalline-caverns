@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://c0satayco5xgm" path="res://art/mob-sheet.png" id="3_8op8w"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_rb8pq"]
+resource_local_to_scene = true
 shader = ExtResource("2_jkr8x")
 shader_parameter/modulate = Vector4(1, 1, 1, 1)
 

@@ -5,7 +5,7 @@ const DAMAGE_COLOR: Color = Color(1,0.1,0.1,0.8)
 const NAV_SPEED: float = 0.5
 
 # World Constants
-const RAND_SEED: int = 44586543 # 42 for fast-loading debug level
+const RAND_SEED: int = 694327 # 42 for fast-loading debug level
 const WIDTH: int = 512
 const HEIGHT: int = 512
 const CLAMP: int = 120
@@ -18,7 +18,7 @@ var color_dict = {
 	CRYSTAL_TYPES.TITIAN: Color8(255,145,36,TRANSLUCENCY), # 1. Orange: Con + nodes
 	CRYSTAL_TYPES.XANTHOUS: Color8(255,248,36,TRANSLUCENCY), # 2. Yellow: Dex + nodes
 	CRYSTAL_TYPES.VIRIDIAN: Color8(48,255,25,TRANSLUCENCY), # 3. Green: Healing 10hp * nodes per second
-	CRYSTAL_TYPES.CERULEAN: Color8(33,48,255,TRANSLUCENCY), # 4. Blue: Int + nodes
+	CRYSTAL_TYPES.CERULEAN: Color8(48,56,255,TRANSLUCENCY), # 4. Blue: Int + nodes
 	CRYSTAL_TYPES.AMARANTHINE: Color8(225,25,228,TRANSLUCENCY) # 5. Purple: Wis + nodes
 }
 
