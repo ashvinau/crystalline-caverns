@@ -14,6 +14,8 @@ var bar_image: Image = Image.create(64,8,false, Image.FORMAT_RGBA8)
 var minions: Array = []
 var map_loc: Vector2i
 var tgt_map_loc: Vector2i
+var target_crystal: Area2D
+var fleeing: bool = false
 var mob_geo_matrix_original: Array = []
 var mob_geo_matrix: Array = []
 var cur_double_jumps: int # Required for compatibility with basic_melee.gd - not used
@@ -125,7 +127,7 @@ func calculate_stats():
 	move_speed = Globals.calc_move_speed(DEX)
 	speed_cap = Globals.calc_speed_cap(CON)	
 	detection_dist = Globals.calc_detection_dist(WIS) # ref value 900	
-	shot_dist = Globals.calc_shot_dist(INT,WIS) * 2 # ref value 700	
+	shot_dist = Globals.calc_shot_dist(INT,WIS) * 1.5# ref value 700	
 	melee_dist = Globals.calc_melee_dist(STR,DEX) # ref value 400	
 	accel = Globals.calc_accel(DEX,CON)
 	slide = Globals.calc_slide(DEX,WIS)
@@ -151,6 +153,8 @@ func change_stat(stat: String, amount: float):
 	print("STR: ", STR, " CON: ", CON, " DEX: ", DEX, " INT: ", INT, " WIS: ", WIS)
 	calculate_stats()
 	update_health_bar()
+	if amount > 0:
+		fleeing = false # Fleeing boss has reached a node that is not a healing crystal, this should recalc furthest crystal
 	
 func update_health_bar():	
 	var health_proportion: float = (float(mob_health) / float(max_health)) * 64.0	
@@ -331,6 +335,27 @@ func melee_attack(offset: Vector2i, direction: Vector2):
 func _on_move_timer_timeout() -> void:
 	direction = Vector2.ZERO # Reset movement direction	
 	
+	#Enable / Disable fleeing mode, find the furthest crystal location
+	if (mob_health <= max_health / 2) && (not fleeing) && (play_field_map.crystals.size() > 0):
+		fleeing = true
+		print(name, " is fleeing.")
+		# Find furthest crystal location
+		var furthest_crystal: Area2D
+		var furthest_dist: float = 0		
+		for crystal in play_field_map.crystals:
+			if crystal.type == Globals.CRYSTAL_TYPES.VIRIDIAN:
+				print("Viridian crystal found.")
+				furthest_crystal = crystal
+				break
+			var cur_dist: float = Globals.toroidal_matrix_dist(Globals.WIDTH*16,Globals.HEIGHT*16,self.global_position,crystal.global_position)
+			if cur_dist > furthest_dist:
+				furthest_dist = cur_dist
+				furthest_crystal = crystal
+		target_crystal = furthest_crystal
+	elif (mob_health > (max_health * 0.75)) && fleeing:
+		print(name, " is no longer fleeing.")
+		fleeing = false
+	
 	#identify the closest player in range
 	var closest_player: CharacterBody2D
 	var closest_dist: float = 999999 # Max float?
@@ -361,19 +386,25 @@ func _on_move_timer_timeout() -> void:
 	$ClearShot.target_position.y = tgt_player_loc.y - $ClearShot.global_position.y	
 	
 	if $ClearShot.is_colliding() || closest_dist >= detection_dist * detection_mult:
-		if navigation_ready && (not (is_on_wall() || is_on_ceiling() || is_on_floor())):
-			# Query map for values
+		if (navigation_ready || fleeing) && (not (is_on_wall() || is_on_ceiling() || is_on_floor())):
+			# Query map for values						
 			print("Following map...")
+			var nav_map: Array = []
 			var nav_array: Array = []
 			var nav_offset: int = 3
-			nav_array.append(Globals.get_mat_val(mob_geo_matrix, Vector2i(map_loc.x, map_loc.y - nav_offset)))	# [0] North
-			nav_array.append(Globals.get_mat_val(mob_geo_matrix, Vector2i(map_loc.x + nav_offset, map_loc.y - nav_offset))) # [1] Northeast
-			nav_array.append(Globals.get_mat_val(mob_geo_matrix, Vector2i(map_loc.x + nav_offset, map_loc.y))) # [2] East
-			nav_array.append(Globals.get_mat_val(mob_geo_matrix, Vector2i(map_loc.x + nav_offset, map_loc.y + nav_offset))) # [3] Southeast
-			nav_array.append(Globals.get_mat_val(mob_geo_matrix, Vector2i(map_loc.x, map_loc.y + nav_offset))) # [4] South
-			nav_array.append(Globals.get_mat_val(mob_geo_matrix, Vector2i(map_loc.x - nav_offset, map_loc.y + nav_offset))) # [5] Southwest
-			nav_array.append(Globals.get_mat_val(mob_geo_matrix, Vector2i(map_loc.x - nav_offset, map_loc.y))) # [6] West
-			nav_array.append(Globals.get_mat_val(mob_geo_matrix, Vector2i(map_loc.x - nav_offset, map_loc.y - nav_offset))) # [7] Northwest
+			
+			if fleeing && is_instance_valid(target_crystal):
+				nav_map = target_crystal.cry_geo_matrix
+			else:
+				nav_map = mob_geo_matrix
+			nav_array.append(Globals.get_mat_val(nav_map, Vector2i(map_loc.x, map_loc.y - nav_offset)))	# [0] North
+			nav_array.append(Globals.get_mat_val(nav_map, Vector2i(map_loc.x + nav_offset, map_loc.y - nav_offset))) # [1] Northeast
+			nav_array.append(Globals.get_mat_val(nav_map, Vector2i(map_loc.x + nav_offset, map_loc.y))) # [2] East
+			nav_array.append(Globals.get_mat_val(nav_map, Vector2i(map_loc.x + nav_offset, map_loc.y + nav_offset))) # [3] Southeast
+			nav_array.append(Globals.get_mat_val(nav_map, Vector2i(map_loc.x, map_loc.y + nav_offset))) # [4] South
+			nav_array.append(Globals.get_mat_val(nav_map, Vector2i(map_loc.x - nav_offset, map_loc.y + nav_offset))) # [5] Southwest
+			nav_array.append(Globals.get_mat_val(nav_map, Vector2i(map_loc.x - nav_offset, map_loc.y))) # [6] West
+			nav_array.append(Globals.get_mat_val(nav_map, Vector2i(map_loc.x - nav_offset, map_loc.y - nav_offset))) # [7] Northwest
 			
 			# Find the index of the lowest value
 			var lowest_value: int = 999999
@@ -413,12 +444,12 @@ func _on_move_timer_timeout() -> void:
 			navigating = true
 	else:		
 		# Range state machine
-		if (closest_dist < (detection_dist * detection_mult)) && (closest_dist >= shot_dist): # Within detection range, but not too close
+		if (closest_dist < (detection_dist * detection_mult)) && (closest_dist >= shot_dist) && (not fleeing): # Within detection range, but not too close
 			direction = self.position.direction_to(tgt_player_loc).normalized() # move toward
-		elif (closest_dist < shot_dist): # if we are too close
+		elif (closest_dist < shot_dist) && (not fleeing): # if we are too close
 			direction = -self.position.direction_to(tgt_player_loc).normalized() # move back
 			
-	if (closest_dist < shot_dist): # Within projectile range
+	if (closest_dist < shot_dist) && not $ClearShot.is_colliding(): # Within projectile range
 		var shot_direction: Vector2 = self.position.direction_to(tgt_player_loc)
 		shot_direction.y -= closest_dist * 0.00033 # aim up a bit for distant targets - replace with correct math later
 		range_attack(shot_direction * 20, shot_direction)

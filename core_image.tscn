@@ -1,15 +1,8 @@
-[gd_scene load_steps=21 format=3 uid="uid://bludfkgikkhcc"]
+[gd_scene load_steps=17 format=3 uid="uid://b01uhoqdmeb85"]
 
-[ext_resource type="Texture2D" uid="uid://cbq8uf58touw2" path="res://art/crystal_sheet.png" id="1_xjhkq"]
-[ext_resource type="Script" path="res://levels/crystal_core.gd" id="2_2dyci"]
-[ext_resource type="Texture2D" uid="uid://ekpk5p5g7pqb" path="res://art/sparkle_particle.png" id="2_xj1ds"]
-[ext_resource type="Script" path="res://levels/crystal_hit.gd" id="4_3tjar"]
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_177x0"]
-resource_local_to_scene = true
-bounce = 0.5
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_jdu5g"]
+[ext_resource type="Script" path="res://core_image.gd" id="1_sqd5o"]
+[ext_resource type="Texture2D" uid="uid://ekpk5p5g7pqb" path="res://art/sparkle_particle.png" id="2_5y5mx"]
+[ext_resource type="Texture2D" uid="uid://cbq8uf58touw2" path="res://art/crystal_sheet.png" id="3_r3rku"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_v8hke"]
 particles_animation = true
@@ -35,43 +28,43 @@ anim_speed_min = 1.0
 anim_speed_max = 2.0
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_gmpg2"]
-atlas = ExtResource("1_xjhkq")
+atlas = ExtResource("3_r3rku")
 region = Rect2(0, 32, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_l6oy4"]
-atlas = ExtResource("1_xjhkq")
+atlas = ExtResource("3_r3rku")
 region = Rect2(0, 0, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_nxybe"]
-atlas = ExtResource("1_xjhkq")
+atlas = ExtResource("3_r3rku")
 region = Rect2(32, 0, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_2i1pc"]
-atlas = ExtResource("1_xjhkq")
+atlas = ExtResource("3_r3rku")
 region = Rect2(64, 0, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_yjfat"]
-atlas = ExtResource("1_xjhkq")
+atlas = ExtResource("3_r3rku")
 region = Rect2(96, 0, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_wovnw"]
-atlas = ExtResource("1_xjhkq")
+atlas = ExtResource("3_r3rku")
 region = Rect2(128, 0, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_cain6"]
-atlas = ExtResource("1_xjhkq")
+atlas = ExtResource("3_r3rku")
 region = Rect2(160, 0, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ax355"]
-atlas = ExtResource("1_xjhkq")
+atlas = ExtResource("3_r3rku")
 region = Rect2(192, 0, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_pdj6u"]
-atlas = ExtResource("1_xjhkq")
+atlas = ExtResource("3_r3rku")
 region = Rect2(224, 0, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_wsv47"]
-atlas = ExtResource("1_xjhkq")
+atlas = ExtResource("3_r3rku")
 region = Rect2(0, 0, 32, 32)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_3134g"]
@@ -113,19 +106,10 @@ animations = [{
 "speed": 12.0
 }]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_t6t30"]
-
-[node name="CrystalRigid" type="RigidBody2D"]
+[node name="CoreImage" type="Area2D"]
 collision_layer = 32768
 collision_mask = 32768
-mass = 5.0
-physics_material_override = SubResource("PhysicsMaterial_177x0")
-script = ExtResource("2_2dyci")
-
-[node name="CrystalCollision" type="CollisionShape2D" parent="."]
-rotation = 0.785398
-scale = Vector2(1.1, 1.1)
-shape = SubResource("RectangleShape2D_jdu5g")
+script = ExtResource("1_sqd5o")
 
 [node name="GPUParticles2D" type="GPUParticles2D" parent="."]
 self_modulate = Color(1, 1, 1, 0.501961)
@@ -133,7 +117,7 @@ z_index = 3
 material = SubResource("CanvasItemMaterial_v8hke")
 amount = 16
 process_material = SubResource("ParticleProcessMaterial_qy6dl")
-texture = ExtResource("2_xj1ds")
+texture = ExtResource("2_5y5mx")
 visibility_rect = Rect2(-1000, -1000, 2000, 2000)
 
 [node name="CrystalCore" type="AnimatedSprite2D" parent="."]
@@ -143,21 +127,7 @@ sprite_frames = SubResource("SpriteFrames_3134g")
 autoplay = "default"
 frame_progress = 0.0825165
 
-[node name="PickupCollision" type="Area2D" parent="CrystalCore"]
-collision_layer = 2048
-collision_mask = 16384
-script = ExtResource("4_3tjar")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="CrystalCore/PickupCollision"]
-rotation = 0.785398
-shape = SubResource("RectangleShape2D_t6t30")
-
 [node name="ColorTimer" type="Timer" parent="."]
 autostart = true
 
-[node name="ExpiryTimer" type="Timer" parent="."]
-one_shot = true
-
-[connection signal="body_entered" from="CrystalCore/PickupCollision" to="." method="_on_pickup_collision_body_entered"]
 [connection signal="timeout" from="ColorTimer" to="." method="_on_color_timer_timeout"]
-[connection signal="timeout" from="ExpiryTimer" to="." method="_on_expiry_timer_timeout"]

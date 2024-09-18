@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=3 uid="uid://bysha1ko78mab"]
+[gd_scene load_steps=6 format=3 uid="uid://bysha1ko78mab"]
 
 [ext_resource type="Script" path="res://hud.gd" id="1_3x2kj"]
 [ext_resource type="FontFile" uid="uid://dia5gtcmuobst" path="res://art/Absans-Regular.otf" id="2_kmy42"]
 [ext_resource type="PackedScene" uid="uid://cyeb5tk8q6j2n" path="res://levels/level_preview.tscn" id="3_pxia0"]
+[ext_resource type="PackedScene" uid="uid://b01uhoqdmeb85" path="res://core_image.tscn" id="4_ssgyg"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_b5htj"]
 font = ExtResource("2_kmy42")
@@ -36,3 +37,13 @@ offset_top = 57.0
 offset_right = -51.0
 offset_bottom = 313.0
 grow_horizontal = 0
+
+[node name="CoreImage" parent="." instance=ExtResource("4_ssgyg")]
+position = Vector2(65, 152)
+
+[node name="CrystalCores" type="Label" parent="."]
+offset_left = 94.0
+offset_top = 135.0
+offset_right = 565.0
+offset_bottom = 168.0
+label_settings = SubResource("LabelSettings_b5htj")

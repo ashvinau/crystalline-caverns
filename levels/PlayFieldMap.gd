@@ -11,6 +11,7 @@ const AV = 998 # Match any value other than 0 for processing geo_matrix
 @onready var hud = get_node("../../../../HUD")
 @onready var crystal_scene = preload("res://levels/crystal.tscn")
 
+var core_scene = preload("res://levels/crystal_core.tscn")
 
 var hud_scene = preload("res://hud.tscn")
 var players: Array = []
@@ -25,8 +26,8 @@ var crystals: Array = []
 var map_clamp: int = Globals.CLAMP
 
 func save_boss_map():
-	Globals.save_map_file(boss_nodes[0].mob_geo_matrix, "boss_nav_map.csv")	
-	#Globals.save_map_file(crystals[0].cry_geo_matrix, "crystal_nav_map.csv")
+	Globals.save_map_file(boss_nodes[0].mob_geo_matrix, "boss_nav_map.csv")
+	#Globals.save_map_file(crystals[0].cry_geo_matrix, "crystal_nav_map.csv")	
 	
 # Called when the node enters the scene tree for the first time.
 func _init():	
@@ -304,7 +305,7 @@ func flood_fill(matrix, start_pos: Vector2i, replacement_value, sniff_map: bool,
 	
 func respawn():
 	player_nodes[0].queue_free()
-	player_nodes[0] = spawn_entity(players[0], spawn_loc * 16)
+	player_nodes[0] = Globals.spawn_entity(players[0],play_field, spawn_loc * 16)
 	player_nodes[0].set_player(Globals.player_color)
 	player_nodes[0].name = "Player"
 	Globals.player_health = Globals.player_max_health
@@ -326,7 +327,7 @@ func generate_spawn():
 	for xi in range(spawn_loc.x-5, spawn_loc.x+5):
 		set_cell(0, Globals.safe_index(Vector2i(xi, spawn_loc.y+22)), 1, Vector2i(0,0), 0)	
 	
-	player_nodes.append(spawn_entity(players[0], adj_spawn_loc))
+	player_nodes.append(Globals.spawn_entity(players[0],play_field, adj_spawn_loc))
 	player_nodes[0].set_player(Globals.player_color)
 	
 func spawn_boss(boss_scene: PackedScene):
@@ -342,16 +343,10 @@ func spawn_boss(boss_scene: PackedScene):
 		
 	print("Boss spawn location found at ", boss_spawn_loc, " in ", tries, " tries, ", distance, " cells from the player spawn at: ", spawn_loc)
 	
-	boss_nodes.append(spawn_entity(boss_scene, Vector2i(boss_spawn_loc.x*16,boss_spawn_loc.y*16)))
+	boss_nodes.append(Globals.spawn_entity(boss_scene, play_field, Vector2i(boss_spawn_loc.x*16,boss_spawn_loc.y*16)))
 	boss_nodes[0].set_mob(player_nodes,Color.LAWN_GREEN,3,3,3,3,3)
 	boss_nodes[0].process_more_nav_map.connect(_on_process_more_nav)
 		
-func spawn_entity(entity: PackedScene, e_position: Vector2i):
-	var entity_node = entity.instantiate()
-	entity_node.position = e_position	
-	play_field.add_child.call_deferred(entity_node)
-	return entity_node
-
 func set_background(pOffset: int, darken: float, layerNode: TextureRect, bgMap: TileMap, bgViewport: SubViewport):
 	print("Generating background with clamp: ", map_clamp + pOffset)
 	set_geo_matrix(map_clamp + pOffset, false)		
@@ -383,7 +378,7 @@ func place_crystals():
 	var num_crystals: int = randi_range(3,6)
 	print("Placing ", num_crystals, " crystals.")
 	for i in num_crystals:
-		crystals.append(spawn_entity(crystal_scene,Vector2i(0,0)))
+		crystals.append(Globals.spawn_entity(crystal_scene,play_field,Vector2i(0,0)))
 		
 	for crystal in crystals:		
 		var edge_offset: int = pow(crystal.nodes * 100,Globals.AOE_SCALAR) / 16

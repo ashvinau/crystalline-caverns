@@ -31,6 +31,8 @@ func _physics_process(delta):
 	position.y += velocity.y * delta	
 	velocity.y += (Globals.GRAVITY * delta) * bullet_weight # effect of gravity
 	rotation_degrees += 100 * delta
+	if expiring:
+		expiry_node.modulate.a -= delta / 1.7
 	check_bullet_loc()
 
 func expire():

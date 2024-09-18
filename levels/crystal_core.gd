@@ -11,9 +11,13 @@ Globals.color_dict[Globals.CRYSTAL_TYPES.AMARANTHINE]
 ]
 var cur_index: int = randi_range(0,5)
 var cur_color: Color = color_array[cur_index]
+var expiring: bool = false
 
 @onready var collision_node = $CrystalCollision
 @onready var core_node = $CrystalCore
+@onready var core_collect_scene = preload("res://effects/core_collect.tscn")
+@onready var hud_node = get_node("/root/GameCanvas/HUD")
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:	
@@ -22,8 +26,11 @@ func _ready() -> void:
 	core_node.self_modulate = cur_color
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
+func _process(delta: float) -> void:	
 	check_core_loc()
+	if expiring:
+		core_node.self_modulate.a -= delta * 4	
+		
 	if core_node.self_modulate.r > cur_color.r:
 		core_node.self_modulate.r -= delta
 	elif core_node.self_modulate.r < cur_color.r:
@@ -84,3 +91,17 @@ func _on_color_timer_timeout() -> void:
 	if cur_index > 5:
 		cur_index = 0
 	cur_color = color_array[cur_index]
+
+func _on_expiry_timer_timeout() -> void:
+	call_deferred("queue_free")
+
+func _on_pickup_collision_body_entered(body: Node2D) -> void:
+	if body.has_method("set_player") && not expiring:
+		Globals.cores += 1
+		hud_node.update_hud()
+		expiring = true
+		$GPUParticles2D.emitting = false
+		var collect_inst = Globals.spawn_entity(core_collect_scene,body,Vector2.ZERO)
+		collect_inst.emitting = true
+		$ExpiryTimer.start()
+				

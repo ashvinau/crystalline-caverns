@@ -6,7 +6,7 @@ const NAV_SPEED: float = 0.5
 const AOE_SCALAR: float = 1.05
 
 # World Constants
-const RAND_SEED: int = 8654778 # 42 for fast-loading debug level
+const RAND_SEED: int = 138846 # 42 for fast-loading debug level
 const WIDTH: int = 512
 const HEIGHT: int = 512
 const CLAMP: int = 120
@@ -27,11 +27,12 @@ var color_dict = {
 const PLAYER_COLOR: Color = Color.FUCHSIA
 
 # Player Stat Variables
-var STR: float = 5
-var CON: float = 5
-var DEX: float = 5
-var INT: float = 5
-var WIS: float = 5
+var STR: float = 10
+var CON: float = 10
+var DEX: float = 10
+var INT: float = 10
+var WIS: float = 10
+var cores: int = 0
 
 # Derived Stat Variables
 var player_max_health: int
@@ -189,6 +190,12 @@ func init_2d_matrix(matrix: Array, width: int, height: int, init_val: int):
 		matrix.append([])
 		for y in Globals.HEIGHT:
 			matrix[x].append(init_val)
+			
+func spawn_entity(entity: PackedScene, parent, e_position: Vector2i):
+	var entity_node = entity.instantiate()
+	entity_node.position = e_position	
+	parent.add_child.call_deferred(entity_node)
+	return entity_node
 	
 # For using vector4 colors in shaders
 func color_to_vector(inColor: Color) -> Vector4:

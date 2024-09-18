@@ -191,6 +191,7 @@ func expire():
 		core_inst.position = global_position
 		play_field_map_node.call_deferred("add_child",core_inst)
 	hud_node.add_map_indicator("destroyed", position / 16)
+	play_field_map_node.crystals.erase(self)
 	$ExpiryTimer.start()	
 	
 func spawn_coll_diamond(loc: Vector2i):		

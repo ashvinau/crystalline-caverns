@@ -6,6 +6,7 @@ var bar_image: Image = Image.create(HEALTH_BAR_SIZE.x,HEALTH_BAR_SIZE.y,false, I
 var player_indicator: AnimatedSprite2D
 var boss_indicator: AnimatedSprite2D
 @onready var health_text = $Health
+@onready var cores_text = $CrystalCores
 @onready var play_field_map = get_node("../CenterViewportContainer/CenterViewport/PlayField/PlayFieldMap")
 
 var bar_color = Color.DARK_RED
@@ -26,7 +27,7 @@ func update_hud():
 				bar_image.set_pixel(x,y,bar_color)
 			else:
 				bar_image.set_pixel(x,y,bar_negative)
-				
+	cores_text.text = str(Globals.cores)
 	$LifeBar.texture.update(bar_image)
 	
 func display_preview(geo_matrix, spawn_loc: Vector2i):
