@@ -363,6 +363,8 @@ func change_stat(stat: String, amount: float):
 		print("Invalid stat.")
 	print("STR: ", Globals.STR, " CON: ", Globals.CON, " DEX: ", Globals.DEX, " INT: ", Globals.INT, " WIS: ", Globals.WIS)
 	Globals.calculate_stats()
+	var scale_fac = Globals.inertia / 2
+	self.scale = Vector2(scale_fac,scale_fac)	
 	hud_node.update_hud()
 	
 func align_attack(direction: Vector2):
@@ -408,7 +410,11 @@ func heal(from_node, magnitude: float):
 	cure_inst.set_dmg_disp(cured, Color.GREEN)	
 
 func hit(from_node, magnitude: float):
-	var damage = abs(magnitude) / float(Globals.inertia)
+	var damage: float = 0
+	if (from_node.has_method("set_slash")):
+		damage = abs(magnitude) / float(Globals.inertia)
+	elif (from_node.has_method("set_bullet")):
+		damage = abs(magnitude) / float(Globals.faith)
 	Globals.player_health -= damage
 	hud_node.update_hud()
 	var dmg_inst = dmg_scene.instantiate()

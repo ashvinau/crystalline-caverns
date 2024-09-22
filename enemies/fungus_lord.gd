@@ -44,7 +44,8 @@ var shot_dist: int
 var melee_dist: int
 var player_nodes: Array = []
 var mob_color: Color
-var e_inertia: float
+var inertia: float
+var faith: float
 var shot_life: float
 var shot_weight: float
 var shot_velocity: float
@@ -131,11 +132,16 @@ func calculate_stats():
 	melee_dist = Globals.calc_melee_dist(STR,DEX) # ref value 400	
 	accel = Globals.calc_accel(DEX,CON)
 	slide = Globals.calc_slide(DEX,WIS)
-	e_inertia = Globals.calc_defense(STR,CON) * 2
+	inertia = Globals.calc_defense(STR,CON) * 2
+	faith = Globals.calc_defense(WIS, INT) * 2
 	$MoveTimer.wait_time = Globals.calc_move_gcd(DEX,WIS) # ref value 1	
 	$RangeTimer.wait_time = Globals.calc_shot_gcd(INT,DEX)	
 	$MeleeTimer.wait_time = Globals.calc_melee_gcd(CON,DEX)	
-	$AlertTimer.wait_time = Globals.calc_alert_gcd(INT,WIS)# ref value 5	
+	$AlertTimer.wait_time = Globals.calc_alert_gcd(INT,WIS)# ref value 5
+	var scale_fac = inertia / 2
+	self.scale = Vector2(scale_fac,scale_fac)
+	var hb_scale_fac = 1 / scale_fac
+	$HealthBar.scale = Vector2(hb_scale_fac,hb_scale_fac)
 	
 func change_stat(stat: String, amount: float):
 	if stat == "STR":
@@ -249,7 +255,11 @@ func heal(from_node, magnitude: float):
 func hit(from_node, magnitude: float):	
 	animation_locked = true
 	$AnimatedSprite2D.play("hit")	
-	var damage = abs(magnitude) / float(e_inertia)	
+	var damage: float = 0
+	if (from_node.has_method("set_slash")):
+		damage = abs(magnitude) / float(inertia)
+	elif (from_node.has_method("set_bullet")):
+		damage = abs(magnitude) / float(faith)	
 	mob_health -= damage
 	if mob_health <= 0:
 		mob_health = 0
@@ -311,9 +321,9 @@ func range_attack(offset: Vector2i, direction: Vector2):
 		play_field.add_child(bullet_inst)
 		bullet_inst.set_bullet(shot_life,1,self_modulate,shot_weight,"oval",self)
 		bullet_inst.velocity.x = (direction.x * shot_velocity) + randi_range(-shot_spread,shot_spread) 
-		self.velocity.x += -direction.x * ((shot_weight * shot_velocity) / e_inertia)
+		self.velocity.x += -direction.x * ((shot_weight * shot_velocity) / inertia)
 		bullet_inst.velocity.y = (direction.y * shot_velocity) + randi_range(-shot_spread,shot_spread)
-		self.velocity.y += -direction.y * ((shot_weight * shot_velocity) / e_inertia)
+		self.velocity.y += -direction.y * ((shot_weight * shot_velocity) / inertia)
 		shot_lock = true
 		$RangeTimer.start()
 		
@@ -385,8 +395,8 @@ func _on_move_timer_timeout() -> void:
 	$ClearShot.target_position.x = tgt_player_loc.x - $ClearShot.global_position.x
 	$ClearShot.target_position.y = tgt_player_loc.y - $ClearShot.global_position.y	
 	
-	if $ClearShot.is_colliding() || closest_dist >= detection_dist * detection_mult:
-		if (navigation_ready || fleeing) && (not (is_on_wall() || is_on_ceiling() || is_on_floor())):
+	if $ClearShot.is_colliding() || closest_dist >= detection_dist * detection_mult || fleeing:
+		if (navigation_ready) && (not (is_on_wall() || is_on_ceiling() || is_on_floor())):
 			# Query map for values						
 			print("Following map...")
 			var nav_map: Array = []
@@ -444,9 +454,9 @@ func _on_move_timer_timeout() -> void:
 			navigating = true
 	else:		
 		# Range state machine
-		if (closest_dist < (detection_dist * detection_mult)) && (closest_dist >= shot_dist) && (not fleeing): # Within detection range, but not too close
+		if (closest_dist < (detection_dist * detection_mult)) && (closest_dist >= shot_dist): # Within detection range, but not too close
 			direction = self.position.direction_to(tgt_player_loc).normalized() # move toward
-		elif (closest_dist < shot_dist) && (not fleeing): # if we are too close
+		elif (closest_dist < shot_dist): # if we are too close
 			direction = -self.position.direction_to(tgt_player_loc).normalized() # move back
 			
 	if (closest_dist < shot_dist) && not $ClearShot.is_colliding(): # Within projectile range

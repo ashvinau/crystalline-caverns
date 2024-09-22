@@ -27,7 +27,8 @@ var shot_dist: int
 var melee_dist: int
 var player_nodes: Array = []
 var mob_color: Color
-var e_inertia: float
+var inertia: float
+var faith: float
 var shot_life: float
 var shot_weight: float
 var shot_velocity: float
@@ -97,11 +98,16 @@ func calculate_stats():
 	melee_dist = Globals.calc_melee_dist(STR,DEX) # ref value 400	
 	accel = Globals.calc_accel(DEX,CON)
 	slide = Globals.calc_slide(DEX,WIS)
-	e_inertia = Globals.calc_defense(STR,CON)
+	inertia = Globals.calc_defense(STR,CON)
+	faith = Globals.calc_defense(WIS, INT) # Ref val 2
 	$MoveTimer.wait_time = Globals.calc_move_gcd(DEX,WIS) # ref value 1	
 	$RangeTimer.wait_time = Globals.calc_shot_gcd(INT,DEX)
 	$MeleeTimer.wait_time = Globals.calc_melee_gcd(CON,DEX)
 	$AlertTimer.wait_time = Globals.calc_alert_gcd(INT,WIS)# ref value 5
+	var scale_fac = inertia / 2
+	self.scale = Vector2(scale_fac,scale_fac)
+	var hb_scale_fac = 1 / scale_fac
+	$HealthBar.scale = Vector2(hb_scale_fac,hb_scale_fac)
 	
 func change_stat(stat: String, amount: float):
 	if stat == "STR":
@@ -200,7 +206,11 @@ func heal(from_node, magnitude: float):
 func hit(from_node, magnitude: float):	
 	$AnimatedSprite2D.play("hit")
 	animation_locked = true
-	var damage = abs(magnitude) / float(e_inertia)	
+	var damage: float = 0
+	if (from_node.has_method("set_slash")):
+		damage = abs(magnitude) / float(inertia)
+	elif (from_node.has_method("set_bullet")):
+		damage = abs(magnitude) / float(faith)
 	mob_health -= damage
 	if mob_health <= 0:
 		mob_health = 0
@@ -262,9 +272,9 @@ func range_attack(offset: Vector2i, direction: Vector2):
 		play_field.add_child(bullet_inst)
 		bullet_inst.set_bullet(shot_life,1,self_modulate,shot_weight,"oval",self)
 		bullet_inst.velocity.x = (direction.x * shot_velocity) + randi_range(-shot_spread,shot_spread) 
-		self.velocity.x += -direction.x * ((shot_weight * shot_velocity) / e_inertia)
+		self.velocity.x += -direction.x * ((shot_weight * shot_velocity) / inertia)
 		bullet_inst.velocity.y = (direction.y * shot_velocity) + randi_range(-shot_spread,shot_spread)
-		self.velocity.y += -direction.y * ((shot_weight * shot_velocity) / e_inertia)
+		self.velocity.y += -direction.y * ((shot_weight * shot_velocity) / inertia)
 		shot_lock = true
 		$RangeTimer.start()
 		

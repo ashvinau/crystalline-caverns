@@ -24,6 +24,7 @@ var unmodified_geo_matrix: Array = []
 var spawn_loc: Vector2i
 var crystals: Array = []
 var map_clamp: int = Globals.CLAMP
+var map_seed: int = Globals.RAND_SEED
 
 func save_boss_map():
 	Globals.save_map_file(boss_nodes[0].mob_geo_matrix, "boss_nav_map.csv")
@@ -31,7 +32,7 @@ func save_boss_map():
 	
 # Called when the node enters the scene tree for the first time.
 func _init():	
-	seed(Globals.RAND_SEED)	
+	seed(map_seed)	
 		
 	# Initialize matrices
 	Globals.init_2d_matrix(perlin_matrix,Globals.WIDTH,Globals.HEIGHT,0)
@@ -57,7 +58,9 @@ func set_geo_matrix(clamp: int, test: bool):
 					geo_matrix[x][y] = 0 # Empty space
 	else:		
 		var test_spawn: Vector2i = Globals.pick_spawn(geo_matrix,40)
+		var map_attempts: int = 0
 		while not qual_passed:
+			map_attempts += 1
 			valid = 0
 			invalid = 0
 			for x in Globals.WIDTH:
@@ -92,6 +95,16 @@ func set_geo_matrix(clamp: int, test: bool):
 			else:
 				print("Quality check cannot complete. Pass by default.")
 				qual_passed = true			
+			
+			if map_attempts >= 30:
+				print(map_seed, " is an invalid seed, next seed...")
+				map_attempts = 0
+				map_clamp = Globals.CLAMP
+				map_seed += 1
+				#map_seed = randi_range(0,999999)
+				Globals.init_2d_matrix(perlin_matrix,Globals.WIDTH,Globals.HEIGHT,0)
+				Globals.init_2d_matrix(geo_matrix,Globals.WIDTH,Globals.HEIGHT,0)	
+				fill_perlin_matrix(perlin_matrix)
 			
 	# Continue generation after quality validated (or not)
 	for x in Globals.WIDTH:
@@ -252,14 +265,14 @@ func set_playfield_map(curMap: TileMap, source, offsetX, offsetY):
 					curMap.set_cell(0, Vector2i(x+offsetX,y+offsetY), source, Vector2i(3,2), 0)
 			
 func fill_perlin_matrix(matrix):
-	perlin_node.CPerlinGraph(Globals.WIDTH, Globals.HEIGHT, Globals.RAND_SEED, 0.1, 2, 6, 0.4)
+	perlin_node.CPerlinGraph(Globals.WIDTH, Globals.HEIGHT, map_seed, 0.1, 2, 6, 0.4)
 	var flatperlin_matrix = perlin_node.getPerlinMatrix()
 	var curIndex = 0;
 	for x in Globals.WIDTH:
 		for y in Globals.HEIGHT:			
 			matrix[x][y] = flatperlin_matrix[curIndex]
 			curIndex += 1
-	print("Debug indexes: ", curIndex)
+	print("Perlin matrix indexes: ", curIndex, ". PRNG seed: ", map_seed)
 	
 func flood_fill(matrix, start_pos: Vector2i, replacement_value, sniff_map: bool, thread: bool):
 	var target_value = matrix[start_pos.x][start_pos.y]
@@ -454,7 +467,7 @@ func debug_level():
 	set_playfield_map(self, 1,0,0)
 	
 func _ready():
-	if (Globals.RAND_SEED == 42): # Debug/Test Level
+	if (map_seed == 42): # Debug/Test Level
 		print("Debug seed mode.")
 		print("Generating perlin matrix...")
 		fill_perlin_matrix(perlin_matrix)
@@ -484,8 +497,8 @@ func _ready():
 		print("Generating preview...")
 		hud.display_preview(geo_matrix, spawn_loc)
 		print("Generating backgrounds...")	
-		set_background(10, 0.7, $Background/Parallax1/Layer1,get_node("../BGViewContainer/BGViewport1/BackgroundMap1"),get_node("../BGViewContainer/BGViewport1"))	
-		set_background(20, 0.5, $Background/Parallax2/Layer2,get_node("../BGViewContainer/BGViewport2/BackgroundMap2"),get_node("../BGViewContainer/BGViewport2"))
+		set_background(20, 0.7, $Background/Parallax1/Layer1,get_node("../BGViewContainer/BGViewport1/BackgroundMap1"),get_node("../BGViewContainer/BGViewport1"))	
+		set_background(40, 0.5, $Background/Parallax2/Layer2,get_node("../BGViewContainer/BGViewport2/BackgroundMap2"),get_node("../BGViewContainer/BGViewport2"))
 				
 	set_rear_bg()	
 	print("PlayField ready.")

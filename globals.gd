@@ -6,7 +6,7 @@ const NAV_SPEED: float = 0.5
 const AOE_SCALAR: float = 1.05
 
 # World Constants
-const RAND_SEED: int = 138846 # 42 for fast-loading debug level
+const RAND_SEED: int = 1 # 42 for fast-loading debug level
 const WIDTH: int = 512
 const HEIGHT: int = 512
 const CLAMP: int = 120
@@ -27,11 +27,11 @@ var color_dict = {
 const PLAYER_COLOR: Color = Color.FUCHSIA
 
 # Player Stat Variables
-var STR: float = 10
-var CON: float = 10
-var DEX: float = 10
-var INT: float = 10
-var WIS: float = 10
+var STR: float = 5
+var CON: float = 5
+var DEX: float = 5
+var INT: float = 5
+var WIS: float = 5
 var cores: int = 0
 
 # Derived Stat Variables
@@ -186,6 +186,7 @@ func calc_alert_gcd(inte: float, wis: float) -> float:
 	return (4 * log(pow(inte+wis,3)+5)) / 6
 	
 func init_2d_matrix(matrix: Array, width: int, height: int, init_val: int):
+	matrix.clear()
 	for x in Globals.WIDTH:
 		matrix.append([])
 		for y in Globals.HEIGHT:
