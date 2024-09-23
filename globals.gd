@@ -6,7 +6,7 @@ const NAV_SPEED: float = 0.5
 const AOE_SCALAR: float = 1.05
 
 # World Constants
-const RAND_SEED: int = 1 # 42 for fast-loading debug level
+const RAND_SEED: int = 42891 # 42 for fast-loading debug level
 const WIDTH: int = 512
 const HEIGHT: int = 512
 const CLAMP: int = 120
@@ -32,7 +32,10 @@ var CON: float = 5
 var DEX: float = 5
 var INT: float = 5
 var WIS: float = 5
+
+# Player Persistent Variables
 var cores: int = 0
+var skins: int = 0
 
 # Derived Stat Variables
 var player_max_health: int

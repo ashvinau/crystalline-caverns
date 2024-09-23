@@ -1,9 +1,10 @@
-[gd_scene load_steps=6 format=3 uid="uid://bysha1ko78mab"]
+[gd_scene load_steps=9 format=3 uid="uid://bysha1ko78mab"]
 
 [ext_resource type="Script" path="res://hud.gd" id="1_3x2kj"]
 [ext_resource type="FontFile" uid="uid://dia5gtcmuobst" path="res://art/Absans-Regular.otf" id="2_kmy42"]
 [ext_resource type="PackedScene" uid="uid://cyeb5tk8q6j2n" path="res://levels/level_preview.tscn" id="3_pxia0"]
 [ext_resource type="PackedScene" uid="uid://b01uhoqdmeb85" path="res://core_image.tscn" id="4_ssgyg"]
+[ext_resource type="Texture2D" uid="uid://c0nil1irsyjv4" path="res://art/icon_sheet.png" id="5_7y6gn"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_b5htj"]
 font = ExtResource("2_kmy42")
@@ -11,8 +12,19 @@ font_size = 24
 outline_size = 3
 outline_color = Color(0, 0, 0, 1)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_on3t7"]
+resource_local_to_scene = true
+atlas = ExtResource("5_7y6gn")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_37avd"]
+atlas = ExtResource("5_7y6gn")
+region = Rect2(32, 0, 32, 32)
+
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_3x2kj")
+metadata/_edit_horizontal_guides_ = [80.0]
+metadata/_edit_vertical_guides_ = [665.0]
 
 [node name="LifeBar" type="TextureRect" parent="."]
 offset_left = 46.0
@@ -21,10 +33,10 @@ offset_right = 646.0
 offset_bottom = 80.0
 
 [node name="Health" type="Label" parent="."]
-offset_left = 46.0
-offset_top = 90.0
-offset_right = 646.0
-offset_bottom = 120.0
+offset_left = 659.0
+offset_top = 49.0
+offset_right = 1259.0
+offset_bottom = 82.0
 label_settings = SubResource("LabelSettings_b5htj")
 
 [node name="levelPreview" parent="." instance=ExtResource("3_pxia0")]
@@ -39,11 +51,41 @@ offset_bottom = 313.0
 grow_horizontal = 0
 
 [node name="CoreImage" parent="." instance=ExtResource("4_ssgyg")]
-position = Vector2(65, 152)
+position = Vector2(65, 109)
 
 [node name="CrystalCores" type="Label" parent="."]
-offset_left = 94.0
-offset_top = 135.0
-offset_right = 565.0
-offset_bottom = 168.0
+offset_left = 95.0
+offset_top = 93.0
+offset_right = 228.0
+offset_bottom = 126.0
+label_settings = SubResource("LabelSettings_b5htj")
+
+[node name="WaterSkinImage" type="TextureRect" parent="."]
+offset_left = 257.0
+offset_top = 93.0
+offset_right = 289.0
+offset_bottom = 125.0
+pivot_offset = Vector2(16, 16)
+texture = SubResource("AtlasTexture_on3t7")
+
+[node name="WaterSkins" type="Label" parent="."]
+offset_left = 308.0
+offset_top = 93.0
+offset_right = 441.0
+offset_bottom = 126.0
+label_settings = SubResource("LabelSettings_b5htj")
+
+[node name="DblJumpsImage" type="TextureRect" parent="."]
+offset_left = 471.0
+offset_top = 93.0
+offset_right = 503.0
+offset_bottom = 125.0
+pivot_offset = Vector2(16, 16)
+texture = SubResource("AtlasTexture_37avd")
+
+[node name="DblJumps" type="Label" parent="."]
+offset_left = 522.0
+offset_top = 93.0
+offset_right = 655.0
+offset_bottom = 126.0
 label_settings = SubResource("LabelSettings_b5htj")

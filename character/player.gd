@@ -15,7 +15,7 @@ var direction: Vector2 = Vector2.ZERO
 var was_in_air: bool = false
 var crouched: bool = false
 var attack_direction: Vector2 = Vector2.ZERO
-var e_inertia: float = Globals.inertia
+var inertia: float = Globals.inertia
 
 var camera_offset_x: int = 0
 var camera_offset_y: int = 0
@@ -36,10 +36,12 @@ var freelook: bool = false
 @onready var LRCam = get_node("../../../../LRViewportContainer/LRViewport/LRCamera")
 @onready var play_field: Node2D = get_node("..") # parent node: PlayField
 
+var core_collect_scene = preload("res://effects/core_collect.tscn")
 var spark_scene = preload("res://effects/sparks.tscn")
 var basic_bullet = preload("res://attacks/basic_bullet.tscn")
 var basic_melee = preload("res://attacks/basic_melee.tscn")
 var dmg_scene = preload("res://damage_display.tscn")
+var liquid_scene = preload("res://effects/liquid_splash.tscn")
 
 func set_player(color: Color):
 	$AnimatedSprite2D.material.set_shader_parameter("modulate",Globals.color_to_vector(color))
@@ -48,8 +50,8 @@ func set_player(color: Color):
 	$MeleeCDTimer.wait_time = Globals.melee_gcd
 
 func _ready():
-	pass
-	#print("Player spawned, name: ", self.name)	
+	hud_node.update_hud()
+	pass	
 	
 func _physics_process(delta):	
 	var view_btn_pressed: bool = false
@@ -172,8 +174,10 @@ func _physics_process(delta):
 	if Input.is_action_just_pressed("save_nav"): # M
 		get_node("../PlayFieldMap").save_boss_map()
 		
-	if Input.is_action_just_pressed("debug heal"):
-		heal(self, 50)
+	if Input.is_action_just_pressed("use waterskin"):
+		if (Globals.skins > 0):
+			inc_dec_skins(-1)
+			heal(self, 50)
 				
 	# Respawn
 	if Input.is_action_pressed("respawn"):
@@ -186,6 +190,7 @@ func _physics_process(delta):
 			jump()
 		elif cur_double_jumps < Globals.double_jumps:
 			double_jump()
+		
 			
 	if Input.is_action_just_released("jump"):
 		if not is_on_floor():
@@ -456,6 +461,17 @@ func range_attack(offset: Vector2i, direction: Vector2):
 			self.velocity.y += -direction.y * ((Globals.shot_weight * Globals.shot_velocity) / Globals.inertia)
 		shot_lock = true
 		$RangeCDTimer.start()
+		
+func inc_dec_skins(amount: int):
+	Globals.skins += amount
+	if (amount > 0):
+		var collect_inst = Globals.spawn_entity(core_collect_scene,self,Vector2.ZERO)
+		collect_inst.emitting = true
+	elif (amount < 0):
+		var drink_inst = Globals.spawn_entity(liquid_scene,self,Vector2.ZERO)
+		drink_inst.modulate = Color8(150,255,255,32)
+		drink_inst.emitting = true
+	hud_node.update_hud()
 
 func jump():
 	velocity.y = Globals.jump_velocity
@@ -468,15 +484,17 @@ func unjump():
 	
 func land():
 	animated_sprite.play("jump_end")
-	animation_locked = true
+	animation_locked = true	
 	cur_double_jumps = 0
+	hud_node.update_hud()
 	
 func double_jump():
 	velocity.y = Globals.dbl_jump_velocity
 	animated_sprite.play("jump_double")
-	animation_locked = true
+	animation_locked = true	
 	cur_double_jumps += 1
-
+	hud_node.update_hud()
+	
 func update_facing_direction():	
 	if direction.x > 0:
 		animated_sprite.flip_h = false

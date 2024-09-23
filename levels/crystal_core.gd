@@ -15,7 +15,6 @@ var expiring: bool = false
 
 @onready var collision_node = $CrystalCollision
 @onready var core_node = $CrystalCore
-@onready var core_collect_scene = preload("res://effects/core_collect.tscn")
 @onready var hud_node = get_node("/root/GameCanvas/HUD")
 
 
@@ -98,10 +97,8 @@ func _on_expiry_timer_timeout() -> void:
 func _on_pickup_collision_body_entered(body: Node2D) -> void:
 	if body.has_method("set_player") && not expiring:
 		Globals.cores += 1
-		hud_node.update_hud()
+		body.inc_dec_skins(1)		
 		expiring = true
-		$GPUParticles2D.emitting = false
-		var collect_inst = Globals.spawn_entity(core_collect_scene,body,Vector2.ZERO)
-		collect_inst.emitting = true
+		$GPUParticles2D.emitting = false		
 		$ExpiryTimer.start()
 				

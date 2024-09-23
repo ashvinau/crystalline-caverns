@@ -9,6 +9,7 @@ script = ExtResource("1_esfqn")
 
 [node name="HUD" parent="." instance=ExtResource("2_dxj87")]
 layer = 3
+metadata/_edit_horizontal_guides_ = [152.0]
 
 [node name="CenterViewportContainer" type="SubViewportContainer" parent="."]
 anchors_preset = 15

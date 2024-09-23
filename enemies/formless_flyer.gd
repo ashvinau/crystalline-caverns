@@ -7,7 +7,6 @@ var shot_lock: bool = false
 var melee_lock: bool = false
 var direction: Vector2 = Vector2.ZERO
 var bar_image: Image = Image.create(32,8,false, Image.FORMAT_RGBA8)
-var cur_double_jumps: int # Required for compatibility with basic_melee.gd - not used
 
 var STR: float
 var CON: float
@@ -226,6 +225,7 @@ func hit(from_node, magnitude: float):
 	dmg_inst.set_dmg_disp(damage, Globals.DAMAGE_COLOR)
 	
 func expire():
+	player_nodes[0].inc_dec_skins(1)
 	var chunk_inst = chunk_scene.instantiate()
 	chunk_inst.scale *= 4
 	chunk_inst.position = self.global_position

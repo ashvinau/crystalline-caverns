@@ -7,6 +7,8 @@ var player_indicator: AnimatedSprite2D
 var boss_indicator: AnimatedSprite2D
 @onready var health_text = $Health
 @onready var cores_text = $CrystalCores
+@onready var skins_text = $WaterSkins
+@onready var jumps_text = $DblJumps
 @onready var play_field_map = get_node("../CenterViewportContainer/CenterViewport/PlayField/PlayFieldMap")
 
 var bar_color = Color.DARK_RED
@@ -15,12 +17,12 @@ var bar_negative = Color(0.6,0,0,0.3) # Translucent dark red
 
 var indicator_scene = preload("res://indicator.tscn")
 
-func update_hud():
+func update_hud():	
 	if Globals.player_health < 0:
 		Globals.player_health = 0
 	health_text.text = str(Globals.player_health,"/",Globals.player_max_health)	
 	var health_percentage: float = (float(Globals.player_health) / float(Globals.player_max_health)) * 100.0
-	var health_width: int = int(health_percentage) * 6 # 100 * 6 = 600 px wide	
+	var health_width: int = int(health_percentage) * 6 # 100 * 6 = 600 px wide
 	for x in HEALTH_BAR_SIZE.x:
 		for y in HEALTH_BAR_SIZE.y:
 			if x <= health_width:
@@ -28,6 +30,10 @@ func update_hud():
 			else:
 				bar_image.set_pixel(x,y,bar_negative)
 	cores_text.text = str(Globals.cores)
+	if play_field_map.player_nodes.size() > 0:
+		var player_node = play_field_map.player_nodes[0]
+		jumps_text.text = str(Globals.double_jumps - player_node.cur_double_jumps, "/", Globals.double_jumps)
+	skins_text.text = str(Globals.skins)
 	$LifeBar.texture.update(bar_image)
 	
 func display_preview(geo_matrix, spawn_loc: Vector2i):

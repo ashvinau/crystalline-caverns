@@ -3,7 +3,7 @@ extends Area2D
 const BLOOD_COLOR: Color = Color8(255,247,99,200)
 
 var emitter_node: CharacterBody2D
-var e_inertia: float
+var inertia: float
 var expiring: bool = false
 var slash_color: Color
 var transparency: float = 1
@@ -29,7 +29,7 @@ func set_slash(life_time: float, coll_mask: int, color: Color, weight: float, di
 	$AnimatedSprite2D.material.set_shader_parameter("modulate",Globals.color_to_vector(color))
 	$AnimatedSprite2D.modulate = color	
 	emitter_node = emitter
-	e_inertia = emitter_node.e_inertia
+	inertia = emitter_node.inertia
 	
 func _physics_process(delta):
 	position.x += velocity.x * delta
@@ -41,15 +41,17 @@ func _physics_process(delta):
 		$AnimatedSprite2D.material.set_shader_parameter("modulate",Globals.color_to_vector(modulate))
 				
 func _on_area_entered(area: Area2D) -> void:
-	melee_force = (velocity.length() * slash_weight) / e_inertia
+	melee_force = (velocity.length() * slash_weight) / inertia
 	if (not knockback) && (is_instance_valid(emitter_node)):
 		if abs(slash_direction.x) > abs(slash_direction.y):
 			emitter_node.velocity.x = -(slash_direction.x * melee_force)	
 		else:
 			emitter_node.velocity.y = -(slash_direction.y * melee_force)
 		
-		if emitter_node.cur_double_jumps > 0:
+		if emitter_node.has_method("set_player") && emitter_node.cur_double_jumps > 0:
 			emitter_node.cur_double_jumps -= 1
+			emitter_node.inc_dec_skins(0)
+			
 		knockback = true
 	area.hit(self,melee_force)
 		
@@ -63,15 +65,16 @@ func hit(from_node, magnitude: float):
 	queue_free()
 
 func _on_body_entered(body):	
-	melee_force = (velocity.length() * slash_weight) / e_inertia
+	melee_force = (velocity.length() * slash_weight) / inertia
 	if (not knockback) && (is_instance_valid(emitter_node)):
 		if abs(slash_direction.x) > abs(slash_direction.y):
 			emitter_node.velocity.x = -(slash_direction.x * melee_force)	
 		else:
 			emitter_node.velocity.y = -(slash_direction.y * melee_force)
 		
-		if emitter_node.cur_double_jumps > 0:
+		if emitter_node.has_method("set_player") && emitter_node.cur_double_jumps > 0:
 			emitter_node.cur_double_jumps -= 1
+			emitter_node.inc_dec_skins(0)
 		knockback = true
 			
 	if not hit_list.has(body.name):			

@@ -163,7 +163,10 @@ offset_left = -32.0
 offset_top = -41.0
 offset_right = 32.0
 offset_bottom = -33.0
-stretch_mode = 2
+pivot_offset = Vector2(32, 4)
+size_flags_horizontal = 4
+expand_mode = 1
+stretch_mode = 3
 
 [connection signal="animation_finished" from="AnimatedSprite2D" to="." method="_on_animated_sprite_2d_animation_finished"]
 [connection signal="timeout" from="MoveTimer" to="." method="_on_move_timer_timeout"]

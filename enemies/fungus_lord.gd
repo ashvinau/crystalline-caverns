@@ -18,7 +18,7 @@ var target_crystal: Area2D
 var fleeing: bool = false
 var mob_geo_matrix_original: Array = []
 var mob_geo_matrix: Array = []
-var cur_double_jumps: int # Required for compatibility with basic_melee.gd - not used
+var invalid_crystals: Array = []
 
 var STR: float
 var CON: float
@@ -161,9 +161,10 @@ func change_stat(stat: String, amount: float):
 	update_health_bar()
 	if amount > 0:
 		fleeing = false # Fleeing boss has reached a node that is not a healing crystal, this should recalc furthest crystal
+		print("FungusLord has reached a crystal, no longer fleeing.")
 	
 func update_health_bar():	
-	var health_proportion: float = (float(mob_health) / float(max_health)) * 64.0	
+	var health_proportion: float = (float(mob_health) / float(max_health)) * 64.0
 	for x in 64:
 		for y in 8:
 			if x <= health_proportion:
@@ -187,6 +188,7 @@ func _ready():
 	update_health_bar()
 	$NavTimer.start()
 	$AddTimer.start()
+	
 	
 func _process(delta):
 	for i in 256:
@@ -267,6 +269,7 @@ func hit(from_node, magnitude: float):
 	detection_mult = 4
 	update_health_bar()
 	$AlertTimer.start()
+	print("FungusLord health: ", mob_health, "/", max_health)
 	# Damage number display
 	var dmg_inst = dmg_scene.instantiate()
 	dmg_inst.position.x = self.position.x - 64
@@ -344,26 +347,32 @@ func melee_attack(offset: Vector2i, direction: Vector2):
 	
 func _on_move_timer_timeout() -> void:
 	direction = Vector2.ZERO # Reset movement direction	
-	
+		
 	#Enable / Disable fleeing mode, find the furthest crystal location
-	if (mob_health <= max_health / 2) && (not fleeing) && (play_field_map.crystals.size() > 0):
+	if (mob_health <= max_health / 2) && (not fleeing) && (play_field_map.crystals.size() - invalid_crystals.size() > 0):
 		fleeing = true
 		print(name, " is fleeing.")
 		# Find furthest crystal location
 		var furthest_crystal: Area2D
 		var furthest_dist: float = 0		
-		for crystal in play_field_map.crystals:
-			if crystal.type == Globals.CRYSTAL_TYPES.VIRIDIAN:
-				print("Viridian crystal found.")
-				furthest_crystal = crystal
-				break
-			var cur_dist: float = Globals.toroidal_matrix_dist(Globals.WIDTH*16,Globals.HEIGHT*16,self.global_position,crystal.global_position)
-			if cur_dist > furthest_dist:
-				furthest_dist = cur_dist
-				furthest_crystal = crystal
+		for crystal in play_field_map.crystals:			
+			if (crystal.cry_geo_matrix[map_loc.x][map_loc.y] != 0):
+				if crystal.type == Globals.CRYSTAL_TYPES.VIRIDIAN:
+					print("Viridian crystal found.")
+					furthest_crystal = crystal
+					break
+				var cur_dist: float = Globals.toroidal_matrix_dist(Globals.WIDTH*16,Globals.HEIGHT*16,self.global_position,crystal.global_position)						
+				if (cur_dist > furthest_dist):
+					furthest_dist = cur_dist
+					furthest_crystal = crystal
+			else:
+				print("Crystal inaccessable, skipping.")
+				if not invalid_crystals.has(crystal):
+					invalid_crystals.append(crystal)
+		
 		target_crystal = furthest_crystal
 	elif (mob_health > (max_health * 0.75)) && fleeing:
-		print(name, " is no longer fleeing.")
+		print(name, " has healed and is no longer fleeing.")
 		fleeing = false
 	
 	#identify the closest player in range
@@ -404,7 +413,7 @@ func _on_move_timer_timeout() -> void:
 			var nav_offset: int = 3
 			
 			if fleeing && is_instance_valid(target_crystal):
-				nav_map = target_crystal.cry_geo_matrix
+				nav_map = target_crystal.cry_geo_matrix				
 			else:
 				nav_map = mob_geo_matrix
 			nav_array.append(Globals.get_mat_val(nav_map, Vector2i(map_loc.x, map_loc.y - nav_offset)))	# [0] North
