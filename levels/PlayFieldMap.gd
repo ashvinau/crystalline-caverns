@@ -236,33 +236,33 @@ func check_geo_index(index : Vector2i, target, n, ne, e, se, s, sw, w, nw) -> bo
 func set_playfield_map(curMap: TileMap, source, offsetX, offsetY):
 		for x in Globals.WIDTH:
 			for y in Globals.HEIGHT:
-				if (geo_matrix[x][y] == 1): # Solid block
-					var randY = randi_range(0,1)
+				var randY = randi_range(0,1)
+				if (geo_matrix[x][y] == 1): # Solid block					
 					curMap.set_cell(0, Vector2i(x+offsetX,y+offsetY), source, Vector2i(0,randY), 0)	
 				elif (geo_matrix[x][y] == 2): # LR triangle
-					curMap.set_cell(0, Vector2i(x+offsetX,y+offsetY), source, Vector2i(1,0), 0)
+					curMap.set_cell(0, Vector2i(x+offsetX,y+offsetY), source, Vector2i(1,randY), 0)
 				elif (geo_matrix[x][y] == 3): # LL triangle
-					curMap.set_cell(0, Vector2i(x+offsetX,y+offsetY), source, Vector2i(2,0), 0)
-				elif (geo_matrix[x][y] == 4): # UL triangle
-					curMap.set_cell(0, Vector2i(x+offsetX,y+offsetY), source, Vector2i(4,0), 0)
+					curMap.set_cell(0, Vector2i(x+offsetX,y+offsetY), source, Vector2i(2,randY), 0)
 				elif (geo_matrix[x][y] == 5): # UR triangle
-					curMap.set_cell(0, Vector2i(x+offsetX,y+offsetY), source, Vector2i(3,0), 0)
+					curMap.set_cell(0, Vector2i(x+offsetX,y+offsetY), source, Vector2i(3,randY), 0)
+				elif (geo_matrix[x][y] == 4): # UL triangle
+					curMap.set_cell(0, Vector2i(x+offsetX,y+offsetY), source, Vector2i(4,randY), 0)
 				elif (geo_matrix[x][y] == 6): # top
-					curMap.set_cell(0, Vector2i(x+offsetX,y+offsetY), source, Vector2i(1,1), 0)
+					curMap.set_cell(0, Vector2i(x+offsetX,y+offsetY), source, Vector2i(5,randY), 0)
 				elif (geo_matrix[x][y] == 7): # bottom
-					curMap.set_cell(0, Vector2i(x+offsetX,y+offsetY), source, Vector2i(2,1), 0)
+					curMap.set_cell(0, Vector2i(x+offsetX,y+offsetY), source, Vector2i(6,randY), 0)
 				elif (geo_matrix[x][y] == 8): # left
-					curMap.set_cell(0, Vector2i(x+offsetX,y+offsetY), source, Vector2i(3,1), 0)
+					curMap.set_cell(0, Vector2i(x+offsetX,y+offsetY), source, Vector2i(7,randY), 0)
 				elif (geo_matrix[x][y] == 9): # right
-					curMap.set_cell(0, Vector2i(x+offsetX,y+offsetY), source, Vector2i(4,1), 0)
+					curMap.set_cell(0, Vector2i(x+offsetX,y+offsetY), source, Vector2i(8,randY), 0)
 				elif (geo_matrix[x][y] == 10): # LR
-					curMap.set_cell(0, Vector2i(x+offsetX,y+offsetY), source, Vector2i(0,2), 0)
+					curMap.set_cell(0, Vector2i(x+offsetX,y+offsetY), source, Vector2i(9,randY), 0)
 				elif (geo_matrix[x][y] == 11): # LL
-					curMap.set_cell(0, Vector2i(x+offsetX,y+offsetY), source, Vector2i(1,2), 0)
+					curMap.set_cell(0, Vector2i(x+offsetX,y+offsetY), source, Vector2i(10,randY), 0)
 				elif (geo_matrix[x][y] == 12): # UR
-					curMap.set_cell(0, Vector2i(x+offsetX,y+offsetY), source, Vector2i(2,2), 0)
+					curMap.set_cell(0, Vector2i(x+offsetX,y+offsetY), source, Vector2i(11,randY), 0)
 				elif (geo_matrix[x][y] == 13): # UL
-					curMap.set_cell(0, Vector2i(x+offsetX,y+offsetY), source, Vector2i(3,2), 0)
+					curMap.set_cell(0, Vector2i(x+offsetX,y+offsetY), source, Vector2i(12,randY), 0)
 			
 func fill_perlin_matrix(matrix):
 	perlin_node.CPerlinGraph(Globals.WIDTH, Globals.HEIGHT, map_seed, 0.1, 2, 6, 0.4)

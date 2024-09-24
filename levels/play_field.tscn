@@ -1,10 +1,95 @@
-[gd_scene load_steps=10 format=3 uid="uid://b67ooeti8v4je"]
+[gd_scene load_steps=23 format=3 uid="uid://b67ooeti8v4je"]
 
-[ext_resource type="TileSet" path="/home/ashvinau/Desktop/play_field.tres" id="1_8o81j"]
-[ext_resource type="Texture2D" uid="uid://dg3hfo34h47oh" path="res://art/tileset.png" id="1_neqad"]
+[ext_resource type="Texture2D" uid="uid://bbad4tstduey5" path="res://art/nature-tile-sheet.png" id="1_3w2qv"]
 [ext_resource type="Script" path="res://levels/PlayFieldMap.gd" id="3_iq378"]
 [ext_resource type="Script" path="res://PerlinGraph.cs" id="3_y3bka"]
 [ext_resource type="Shader" path="res://art/midModulate.gdshader" id="4_dp156"]
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_6hehj"]
+polygon = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_b3unw"]
+polygon = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_x5i8u"]
+polygon = PackedVector2Array(-8, 8, 8, -8, 8, 8)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_sgkml"]
+polygon = PackedVector2Array(-8, 8, 8, -8, 8, 8)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_jrqym"]
+polygon = PackedVector2Array(-8, -8, 8, 8, -8, 8)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_mcctd"]
+polygon = PackedVector2Array(-8, -8, 8, 8, -8, 8)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_qx36w"]
+polygon = PackedVector2Array(-8, -8, 8, 8, 8, -8)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_gl0j0"]
+polygon = PackedVector2Array(-8, -8, 8, 8, 8, -8)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_kotmw"]
+polygon = PackedVector2Array(-8, -8, 8, -8, -8, 8)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_hrcod"]
+polygon = PackedVector2Array(-8, -8, 8, -8, -8, 8)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tgg4v"]
+texture = ExtResource("1_3w2qv")
+0:0/0 = 0
+0:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_6hehj")
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+1:0/0 = 0
+1:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_x5i8u")
+1:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, 8, 8, -8, 8, 8)
+2:0/0 = 0
+2:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_jrqym")
+2:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, 8, -8, 8)
+3:0/0 = 0
+3:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_qx36w")
+3:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, 8, 8, -8)
+4:0/0 = 0
+4:0/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_kotmw")
+4:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, -8, 8)
+5:0/0 = 0
+6:0/0 = 0
+7:0/0 = 0
+8:0/0 = 0
+9:0/0 = 0
+10:0/0 = 0
+11:0/0 = 0
+12:0/0 = 0
+0:1/0 = 0
+0:1/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_b3unw")
+0:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+1:1/0 = 0
+1:1/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_sgkml")
+1:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, 8, 8, -8, 8, 8)
+2:1/0 = 0
+2:1/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_mcctd")
+2:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, 8, -8, 8)
+3:1/0 = 0
+3:1/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_gl0j0")
+3:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, 8, 8, -8)
+4:1/0 = 0
+4:1/0/occlusion_layer_0/polygon = SubResource("OccluderPolygon2D_hrcod")
+4:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, 8, -8, -8, 8, -8)
+5:1/0 = 0
+6:1/0 = 0
+7:1/0 = 0
+8:1/0 = 0
+9:1/0 = 0
+10:1/0 = 0
+11:1/0 = 0
+12:1/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_sqsad"]
+resource_local_to_scene = true
+occlusion_layer_0/light_mask = 1
+physics_layer_0/collision_layer = 34819
+physics_layer_0/collision_mask = 32771
+sources/1 = SubResource("TileSetAtlasSource_tgg4v")
 
 [sub_resource type="ImageTexture" id="ImageTexture_72gjw"]
 
@@ -12,32 +97,76 @@
 shader = ExtResource("4_dp156")
 shader_parameter/modulate = Vector4(1, 1, 1.5, 1)
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_x08et"]
-texture = ExtResource("1_neqad")
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_a11kt"]
+texture = ExtResource("1_3w2qv")
 0:0/0 = 0
 1:0/0 = 0
 2:0/0 = 0
 3:0/0 = 0
 4:0/0 = 0
+5:0/0 = 0
+6:0/0 = 0
+7:0/0 = 0
+8:0/0 = 0
+9:0/0 = 0
+10:0/0 = 0
+11:0/0 = 0
+12:0/0 = 0
 0:1/0 = 0
 1:1/0 = 0
 2:1/0 = 0
 3:1/0 = 0
 4:1/0 = 0
-0:2/0 = 0
-1:2/0 = 0
-2:2/0 = 0
-3:2/0 = 0
+5:1/0 = 0
+6:1/0 = 0
+7:1/0 = 0
+8:1/0 = 0
+9:1/0 = 0
+10:1/0 = 0
+11:1/0 = 0
+12:1/0 = 0
 
-[sub_resource type="TileSet" id="TileSet_rruwu"]
-sources/0 = SubResource("TileSetAtlasSource_x08et")
+[sub_resource type="TileSet" id="TileSet_cbr0q"]
+sources/0 = SubResource("TileSetAtlasSource_a11kt")
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_02gco"]
+texture = ExtResource("1_3w2qv")
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+4:0/0 = 0
+5:0/0 = 0
+6:0/0 = 0
+7:0/0 = 0
+8:0/0 = 0
+9:0/0 = 0
+10:0/0 = 0
+11:0/0 = 0
+12:0/0 = 0
+0:1/0 = 0
+1:1/0 = 0
+2:1/0 = 0
+3:1/0 = 0
+4:1/0 = 0
+5:1/0 = 0
+6:1/0 = 0
+7:1/0 = 0
+8:1/0 = 0
+9:1/0 = 0
+10:1/0 = 0
+11:1/0 = 0
+12:1/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_l8uy0"]
+sources/0 = SubResource("TileSetAtlasSource_02gco")
 
 [node name="PlayField" type="Node2D"]
 
 [node name="PlayFieldMap" type="TileMap" parent="."]
 z_index = 5
 z_as_relative = false
-tile_set = ExtResource("1_8o81j")
+tile_set = SubResource("TileSet_sqsad")
 format = 2
 layer_0/name = "Ground"
 script = ExtResource("3_iq378")
@@ -107,7 +236,7 @@ render_target_update_mode = 4
 
 [node name="BackgroundMap1" type="TileMap" parent="BGViewContainer/BGViewport1"]
 show_behind_parent = true
-tile_set = SubResource("TileSet_rruwu")
+tile_set = SubResource("TileSet_cbr0q")
 format = 2
 
 [node name="BGViewport2" type="SubViewport" parent="BGViewContainer"]
@@ -118,5 +247,5 @@ render_target_update_mode = 4
 
 [node name="BackgroundMap2" type="TileMap" parent="BGViewContainer/BGViewport2"]
 show_behind_parent = true
-tile_set = SubResource("TileSet_rruwu")
+tile_set = SubResource("TileSet_l8uy0")
 format = 2
