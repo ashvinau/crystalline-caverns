@@ -158,6 +158,7 @@ script = ExtResource("1_mn4mn")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 z_index = 2
+z_as_relative = false
 material = SubResource("ShaderMaterial_tfg03")
 sprite_frames = SubResource("SpriteFrames_uvxd4")
 animation = &"oval"

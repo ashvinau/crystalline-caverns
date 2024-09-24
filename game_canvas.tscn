@@ -8,7 +8,7 @@
 script = ExtResource("1_esfqn")
 
 [node name="HUD" parent="." instance=ExtResource("2_dxj87")]
-layer = 3
+layer = 10
 metadata/_edit_horizontal_guides_ = [152.0]
 
 [node name="CenterViewportContainer" type="SubViewportContainer" parent="."]
@@ -26,6 +26,7 @@ size = Vector2i(1920, 1080)
 render_target_update_mode = 4
 
 [node name="PlayField" parent="CenterViewportContainer/CenterViewport" instance=ExtResource("1_jxcr8")]
+z_index = 2
 
 [node name="CenterCamera" type="Camera2D" parent="CenterViewportContainer/CenterViewport"]
 process_callback = 0

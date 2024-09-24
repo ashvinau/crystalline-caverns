@@ -111,8 +111,6 @@ collision_mask = 2048
 script = ExtResource("1_exdix")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
-z_index = 2
-z_as_relative = false
 material = SubResource("ShaderMaterial_awplc")
 position = Vector2(1, 0)
 sprite_frames = SubResource("SpriteFrames_o6bgg")

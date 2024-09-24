@@ -1,82 +1,10 @@
-[gd_scene load_steps=17 format=3 uid="uid://b67ooeti8v4je"]
+[gd_scene load_steps=10 format=3 uid="uid://b67ooeti8v4je"]
 
+[ext_resource type="TileSet" path="/home/ashvinau/Desktop/play_field.tres" id="1_8o81j"]
 [ext_resource type="Texture2D" uid="uid://dg3hfo34h47oh" path="res://art/tileset.png" id="1_neqad"]
 [ext_resource type="Script" path="res://levels/PlayFieldMap.gd" id="3_iq378"]
 [ext_resource type="Script" path="res://PerlinGraph.cs" id="3_y3bka"]
 [ext_resource type="Shader" path="res://art/midModulate.gdshader" id="4_dp156"]
-
-[sub_resource type="NavigationPolygon" id="NavigationPolygon_otmph"]
-vertices = PackedVector2Array(8, 8, -8, 8, -8, -8, 8, -8)
-polygons = Array[PackedInt32Array]([PackedInt32Array(0, 1, 2, 3)])
-outlines = Array[PackedVector2Array]([PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)])
-agent_radius = 0.0
-
-[sub_resource type="NavigationPolygon" id="NavigationPolygon_jasdw"]
-vertices = PackedVector2Array(8, 8, -8, 8, -8, -8, 8, -8)
-polygons = Array[PackedInt32Array]([PackedInt32Array(0, 1, 2, 3)])
-outlines = Array[PackedVector2Array]([PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)])
-agent_radius = 0.0
-
-[sub_resource type="NavigationPolygon" id="NavigationPolygon_6yi4u"]
-vertices = PackedVector2Array(8, 8, -8, 8, 8, -8)
-polygons = Array[PackedInt32Array]([PackedInt32Array(0, 1, 2)])
-outlines = Array[PackedVector2Array]([PackedVector2Array(8, 8, -8, 8, 8, -8)])
-agent_radius = 0.0
-
-[sub_resource type="NavigationPolygon" id="NavigationPolygon_45qqq"]
-vertices = PackedVector2Array(8, 8, -8, 8, -8, -8)
-polygons = Array[PackedInt32Array]([PackedInt32Array(0, 1, 2)])
-outlines = Array[PackedVector2Array]([PackedVector2Array(-8, -8, 8, 8, -8, 8)])
-agent_radius = 0.0
-
-[sub_resource type="NavigationPolygon" id="NavigationPolygon_54p8m"]
-vertices = PackedVector2Array(8, 8, -8, -8, 8, -8)
-polygons = Array[PackedInt32Array]([PackedInt32Array(0, 1, 2)])
-outlines = Array[PackedVector2Array]([PackedVector2Array(-8, -8, 8, 8, 8, -8)])
-agent_radius = 0.0
-
-[sub_resource type="NavigationPolygon" id="NavigationPolygon_55qgf"]
-vertices = PackedVector2Array(-8, 8, -8, -8, 8, -8)
-polygons = Array[PackedInt32Array]([PackedInt32Array(0, 1, 2)])
-outlines = Array[PackedVector2Array]([PackedVector2Array(-8, 8, -8, -8, 8, -8)])
-agent_radius = 0.0
-
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_vvbw8"]
-texture = ExtResource("1_neqad")
-0:0/next_alternative_id = 5
-0:0/0 = 0
-0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-0:0/0/navigation_layer_0/polygon = SubResource("NavigationPolygon_otmph")
-1:0/0 = 0
-1:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, 8, 8, -8, 8, -8, 8, 8)
-1:0/0/navigation_layer_0/polygon = SubResource("NavigationPolygon_6yi4u")
-2:0/0 = 0
-2:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, 8, -8, 8)
-2:0/0/navigation_layer_0/polygon = SubResource("NavigationPolygon_45qqq")
-3:0/0 = 0
-3:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, 8, 8, -8)
-3:0/0/navigation_layer_0/polygon = SubResource("NavigationPolygon_54p8m")
-4:0/0 = 0
-4:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, 8, -8, -8, 8, -8)
-4:0/0/navigation_layer_0/polygon = SubResource("NavigationPolygon_55qgf")
-0:1/next_alternative_id = 2
-0:1/0 = 0
-0:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-0:1/0/navigation_layer_0/polygon = SubResource("NavigationPolygon_jasdw")
-1:1/0 = 0
-2:1/0 = 0
-3:1/0 = 0
-0:2/0 = 0
-1:2/0 = 0
-2:2/0 = 0
-3:2/0 = 0
-4:1/0 = 0
-
-[sub_resource type="TileSet" id="TileSet_u8d8u"]
-physics_layer_0/collision_layer = 34819
-physics_layer_0/collision_mask = 32771
-navigation_layer_0/layers = 0
-sources/1 = SubResource("TileSetAtlasSource_vvbw8")
 
 [sub_resource type="ImageTexture" id="ImageTexture_72gjw"]
 
@@ -105,13 +33,11 @@ texture = ExtResource("1_neqad")
 sources/0 = SubResource("TileSetAtlasSource_x08et")
 
 [node name="PlayField" type="Node2D"]
-z_index = 4
-z_as_relative = false
 
 [node name="PlayFieldMap" type="TileMap" parent="."]
-z_index = 4
+z_index = 5
 z_as_relative = false
-tile_set = SubResource("TileSet_u8d8u")
+tile_set = ExtResource("1_8o81j")
 format = 2
 layer_0/name = "Ground"
 script = ExtResource("3_iq378")
@@ -120,10 +46,11 @@ script = ExtResource("3_iq378")
 script = ExtResource("3_y3bka")
 
 [node name="Background" type="ParallaxBackground" parent="PlayFieldMap"]
+layer = -1
 follow_viewport_scale = 0.0
 
 [node name="Parallax1" type="ParallaxLayer" parent="PlayFieldMap/Background"]
-z_as_relative = false
+z_index = 3
 scale = Vector2(0.9, 0.9)
 motion_scale = Vector2(0.9, 0.9)
 motion_offset = Vector2(128, 128)
@@ -138,13 +65,12 @@ texture = SubResource("ImageTexture_72gjw")
 stretch_mode = 1
 
 [node name="Parallax2" type="ParallaxLayer" parent="PlayFieldMap/Background"]
-z_index = -1
+z_index = 2
 scale = Vector2(0.8, 0.8)
 motion_scale = Vector2(0.8, 0.8)
 motion_offset = Vector2(256, 256)
 
 [node name="Layer2" type="TextureRect" parent="PlayFieldMap/Background/Parallax2"]
-z_index = -1
 offset_left = -8192.0
 offset_top = -8192.0
 offset_right = 16384.0
@@ -155,12 +81,11 @@ stretch_mode = 1
 
 [node name="Parallax3" type="ParallaxLayer" parent="PlayFieldMap/Background"]
 modulate = Color(0.414059, 0.685038, 0.999998, 1)
-z_index = -2
+z_index = 1
 scale = Vector2(0.7, 0.7)
 motion_scale = Vector2(0.7, 0.7)
 
 [node name="Layer3" type="TextureRect" parent="PlayFieldMap/Background/Parallax3"]
-z_index = -2
 material = SubResource("ShaderMaterial_ckru7")
 offset_left = -8192.0
 offset_top = -8192.0

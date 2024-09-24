@@ -13,7 +13,8 @@ shadow_size = 4
 shadow_color = Color(0, 0, 0, 0.85098)
 
 [node name="DamageDisplay" type="Label"]
-z_index = 4
+z_index = 9
+z_as_relative = false
 offset_left = -32.0
 offset_top = -20.0
 offset_right = 32.0
