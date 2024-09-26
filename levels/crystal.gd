@@ -100,9 +100,9 @@ func _init() -> void:
 		spawn_coll_diamond(location)
 		
 func _ready():
-	$CrystalLight.texture_scale = nodes * 8
+	$CrystalLight.texture_scale = nodes * 4
 	$CrystalLight.color = BLOOD_COLOR
-	$CrystalBackLight.texture_scale = nodes * 8
+	$CrystalBackLight.texture_scale = nodes * 4
 	$CrystalBackLight.color = BLOOD_COLOR
 	print("Setting AOE...")
 	aoe_range = pow(nodes * 100,Globals.AOE_SCALAR)

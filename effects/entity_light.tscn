@@ -1,0 +1,37 @@
+[gd_scene load_steps=5 format=3 uid="uid://cscope0gfmej6"]
+
+[sub_resource type="Gradient" id="Gradient_twqtg"]
+offsets = PackedFloat32Array(0.0443686, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_bd4vw"]
+resource_local_to_scene = true
+gradient = SubResource("Gradient_twqtg")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.15, 0.15)
+
+[sub_resource type="Gradient" id="Gradient_poem5"]
+offsets = PackedFloat32Array(0.0409556, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_0veuc"]
+resource_local_to_scene = true
+gradient = SubResource("Gradient_poem5")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.15, 0.15)
+
+[node name="EntityLight" type="PointLight2D"]
+range_layer_min = -32
+range_layer_max = 4
+texture = SubResource("GradientTexture2D_bd4vw")
+texture_scale = 20.0
+
+[node name="EntityBackLight" type="PointLight2D" parent="."]
+energy = 5.0
+range_layer_min = -32
+range_layer_max = 32
+range_item_cull_mask = 32
+texture = SubResource("GradientTexture2D_0veuc")
+texture_scale = 20.0

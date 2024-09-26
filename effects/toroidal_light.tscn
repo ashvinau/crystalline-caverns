@@ -1,0 +1,65 @@
+[gd_scene load_steps=9 format=3 uid="uid://c5v4d7mdbwk73"]
+
+[ext_resource type="Script" path="res://effects/toroidal_light.gd" id="1_pdw5s"]
+[ext_resource type="PackedScene" uid="uid://cscope0gfmej6" path="res://effects/entity_light.tscn" id="1_sekkl"]
+
+[sub_resource type="Gradient" id="Gradient_twqtg"]
+offsets = PackedFloat32Array(0.0443686, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_tn0s1"]
+resource_local_to_scene = true
+gradient = SubResource("Gradient_twqtg")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.15, 0.15)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_ucnse"]
+resource_local_to_scene = true
+gradient = SubResource("Gradient_twqtg")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.15, 0.15)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_v8xpk"]
+resource_local_to_scene = true
+gradient = SubResource("Gradient_twqtg")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.15, 0.15)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_u3ey7"]
+resource_local_to_scene = true
+gradient = SubResource("Gradient_twqtg")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.15, 0.15)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_xksf0"]
+resource_local_to_scene = true
+gradient = SubResource("Gradient_twqtg")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.15, 0.15)
+
+[node name="ToroidalLight" type="Node2D"]
+script = ExtResource("1_pdw5s")
+
+[node name="CenterLight" parent="." instance=ExtResource("1_sekkl")]
+texture = SubResource("GradientTexture2D_tn0s1")
+
+[node name="LeftLight" parent="." instance=ExtResource("1_sekkl")]
+position = Vector2(-8192, 0)
+texture = SubResource("GradientTexture2D_ucnse")
+
+[node name="RightLight" parent="." instance=ExtResource("1_sekkl")]
+position = Vector2(8192, 0)
+texture = SubResource("GradientTexture2D_v8xpk")
+
+[node name="TopLight" parent="." instance=ExtResource("1_sekkl")]
+position = Vector2(0, -8192)
+texture = SubResource("GradientTexture2D_u3ey7")
+
+[node name="BottomLight" parent="." instance=ExtResource("1_sekkl")]
+position = Vector2(0, 8192)
+texture = SubResource("GradientTexture2D_xksf0")
