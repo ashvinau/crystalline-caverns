@@ -1,8 +1,21 @@
-[gd_scene load_steps=3 format=3 uid="uid://d2ytuearo62e4"]
+[gd_scene load_steps=5 format=3 uid="uid://d2ytuearo62e4"]
 
 [ext_resource type="Script" path="res://levels/crystal.gd" id="1_dveyc"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_pi00s"]
+
+[sub_resource type="Gradient" id="Gradient_7gjl2"]
+resource_local_to_scene = true
+offsets = PackedFloat32Array(0.11039, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_1xka7"]
+gradient = SubResource("Gradient_7gjl2")
+width = 32
+height = 32
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.15, 0.15)
 
 [node name="Crystal" type="Area2D"]
 z_index = 3
@@ -36,6 +49,19 @@ shape = SubResource("CircleShape2D_pi00s")
 [node name="ExpiryTimer" type="Timer" parent="."]
 wait_time = 2.5
 one_shot = true
+
+[node name="CrystalLight" type="PointLight2D" parent="."]
+range_layer_min = -32
+range_layer_max = 32
+texture = SubResource("GradientTexture2D_1xka7")
+
+[node name="CrystalBackLight" type="PointLight2D" parent="."]
+visible = false
+light_mask = 32
+energy = 5.0
+range_layer_min = -32
+range_layer_max = 32
+texture = SubResource("GradientTexture2D_1xka7")
 
 [connection signal="body_entered" from="AOE" to="." method="_on_aoe_body_entered"]
 [connection signal="timeout" from="ExpiryTimer" to="." method="_on_expiry_timer_timeout"]
