@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://dlyb44rrcjsdl"
-path="res://.godot/imported/Layn.otf-3136a60e5aa655b2542e8a38dfe63bda.fontdata"
+uid="uid://cfdxhivr54v7d"
+path="res://.godot/imported/Equilibrist Regular.ttf-4e294b0cd737b74d878a0f6d7dd687d6.fontdata"
 
 [deps]
 
-source_file="res://art/Layn.otf"
-dest_files=["res://.godot/imported/Layn.otf-3136a60e5aa655b2542e8a38dfe63bda.fontdata"]
+source_file="res://art/Equilibrist Regular.ttf"
+dest_files=["res://.godot/imported/Equilibrist Regular.ttf-4e294b0cd737b74d878a0f6d7dd687d6.fontdata"]
 
 [params]
 
