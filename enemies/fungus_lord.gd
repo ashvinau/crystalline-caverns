@@ -384,8 +384,9 @@ func _on_move_timer_timeout() -> void:
 			closest_player = player
 			closest_dist = cur_dist
 				
-	tgt_player_loc = Vector2i(closest_player.position)
-	tgt_map_loc = tgt_player_loc / 16
+	if is_instance_valid(closest_player):
+		tgt_player_loc = Vector2i(closest_player.position)
+		tgt_map_loc = tgt_player_loc / 16
 	
 	# We need to adjust tgt_player_loc x and y values if there is a difference of over half the width of the playfield
 	if abs(tgt_player_loc.x - self.position.x) > ((Globals.WIDTH*16)/2):

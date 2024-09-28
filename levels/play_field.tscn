@@ -165,7 +165,7 @@ sources/0 = SubResource("TileSetAtlasSource_02gco")
 
 [node name="PlayFieldMap" type="TileMap" parent="."]
 light_mask = 0
-z_index = 5
+z_index = 7
 z_as_relative = false
 tile_set = SubResource("TileSet_sqsad")
 format = 2

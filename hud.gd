@@ -91,10 +91,11 @@ func add_map_indicator(name: String, map_location: Vector2i) -> AnimatedSprite2D
 	$levelPreview.add_child.call_deferred(new_indicator)
 	return new_indicator
 	
-func update_indicators():	
-	var player_position: Vector2i = play_field_map.player_nodes[0].position
-	player_position = (player_position / 16) / 2
-	player_indicator.position = player_position
+func update_indicators():	# This will need iteration for more than one boss or multiplayer
+	if play_field_map.player_nodes.size() > 0:
+		var player_position: Vector2i = play_field_map.player_nodes[0].position
+		player_position = (player_position / 16) / 2
+		player_indicator.position = player_position
 	if (Globals.RAND_SEED != 42) && play_field_map.boss_nodes.size() > 0:
 		if is_instance_valid(play_field_map.boss_nodes[0]):
 			var boss_position: Vector2i = play_field_map.boss_nodes[0].position

@@ -42,6 +42,7 @@ var basic_bullet = preload("res://attacks/basic_bullet.tscn")
 var basic_melee = preload("res://attacks/basic_melee.tscn")
 var dmg_scene = preload("res://damage_display.tscn")
 var liquid_scene = preload("res://effects/liquid_splash.tscn")
+var chunk_scene = preload("res://effects/tilemap_smash.tscn")
 
 func set_player(color: Color):
 	$AnimatedSprite2D.material.set_shader_parameter("modulate",Globals.color_to_vector(color))
@@ -436,16 +437,11 @@ func hit(from_node, magnitude: float):
 		expire()
 	
 func expire():
-	var spark_inst = spark_scene.instantiate()
-	spark_inst.scale *= 4
-	spark_inst.position = self.global_position
-	play_field.add_child(spark_inst)
-	spark_inst.modulate = BLOOD_COLOR
-	spark_inst.emitting = true
-	get_node("../PlayFieldMap").respawn()
-	#$AnimatedSprite2D.visible = false
-	#$CollisionShape2D.set_deferred("disabled", true)
-	#$ExpiryTimer.start()
+	var chunk_inst = Globals.spawn_entity(chunk_scene,play_field,self.global_position)
+	chunk_inst.modulate = BLOOD_COLOR
+	chunk_inst.emitting = true	
+	play_field.get_node("PlayFieldMap").player_nodes.erase(self)
+	call_deferred("queue_free")
 	
 func range_attack(offset: Vector2i, direction: Vector2):
 	if not shot_lock && not freelook:
@@ -547,6 +543,3 @@ func check_player_loc():
 	elif (locY < 0):
 		$CollisionShape2D.set_deferred("disabled", true)
 		self.position.y = Globals.HEIGHT * 16
-
-func _on_expiry_timer_timeout() -> void:
-	pass	

@@ -9,6 +9,7 @@ var was_in_air: bool = false
 var jump_lock: bool = false
 var direction: Vector2 = Vector2.ZERO
 var bar_image: Image = Image.create(32,8,false, Image.FORMAT_RGBA8)
+var tgt_player_loc: Vector2i
 
 var STR: float
 var CON: float
@@ -328,7 +329,8 @@ func _on_move_timer_timeout() -> void:
 			closest_player = player
 			closest_dist = cur_dist
 				
-	var tgt_player_loc: Vector2i = Vector2i(closest_player.position)
+	if is_instance_valid(closest_player):
+		tgt_player_loc = Vector2i(closest_player.position)
 	
 	# We need to adjust tgt_player_loc x and y values if there is a difference of over half the width of the playfield
 	if abs(tgt_player_loc.x - self.position.x) > ((Globals.WIDTH*16)/2):
