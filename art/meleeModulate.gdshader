@@ -1,5 +1,5 @@
 shader_type canvas_item;
-
+render_mode unshaded;
 
 uniform vec4 modulate = vec4(1.0);
 

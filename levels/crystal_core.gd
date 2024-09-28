@@ -16,18 +16,22 @@ var expiring: bool = false
 @onready var collision_node = $CrystalCollision
 @onready var core_node = $CrystalCore
 @onready var hud_node = get_node("/root/GameCanvas/HUD")
-
+@onready var core_light_node = $ToroidalLight
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:	
 	set_linear_velocity(Vector2(randf_range(-20,20),randf_range(-300,-200)))
 	set_angular_velocity(randf_range(-8*PI,8*PI))
 	core_node.self_modulate = cur_color
+	remove_child(core_light_node)
+	get_parent().add_child(core_light_node)	
+	core_light_node.tex_scale = 10
+	core_light_node.energy = 0.7
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:	
+func _process(delta: float) -> void:		
 	check_core_loc()
-	if expiring:
+	if expiring && core_node.self_modulate.a > 0:
 		core_node.self_modulate.a -= delta * 4	
 		
 	if core_node.self_modulate.r > cur_color.r:
@@ -44,6 +48,10 @@ func _process(delta: float) -> void:
 		core_node.self_modulate.b -= delta
 	elif core_node.self_modulate.b < cur_color.b:
 		core_node.self_modulate.b += delta	
+		
+	core_light_node.position = global_position
+	core_light_node.color = core_node.self_modulate
+	core_light_node.update_params()
 	
 func check_core_loc():	
 	var locX = self.position.x
@@ -92,6 +100,7 @@ func _on_color_timer_timeout() -> void:
 	cur_color = color_array[cur_index]
 
 func _on_expiry_timer_timeout() -> void:
+	core_light_node.call_deferred("queue_free")
 	call_deferred("queue_free")
 
 func _on_pickup_collision_body_entered(body: Node2D) -> void:

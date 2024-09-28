@@ -24,7 +24,7 @@ fill_to = Vector2(0.15, 0.15)
 
 [node name="EntityLight" type="PointLight2D"]
 range_layer_min = -32
-range_layer_max = 4
+range_layer_max = 32
 texture = SubResource("GradientTexture2D_bd4vw")
 texture_scale = 20.0
 

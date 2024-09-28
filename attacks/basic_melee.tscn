@@ -1,13 +1,13 @@
 [gd_scene load_steps=18 format=3 uid="uid://d2iw2iovmunta"]
 
 [ext_resource type="Script" path="res://attacks/basic_melee.gd" id="1_exdix"]
-[ext_resource type="Shader" path="res://art/midModulate.gdshader" id="2_huj3m"]
+[ext_resource type="Shader" path="res://art/meleeModulate.gdshader" id="2_m3gec"]
 [ext_resource type="Texture2D" uid="uid://buyfouljcr5rq" path="res://art/melee-sheet.png" id="3_o8x58"]
 [ext_resource type="Texture2D" uid="uid://b5if5kbx24jv" path="res://art/spark_particle.png" id="4_y0hb6"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_awplc"]
 resource_local_to_scene = true
-shader = ExtResource("2_huj3m")
+shader = ExtResource("2_m3gec")
 shader_parameter/modulate = Vector4(1, 1, 1, 1)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_5do63"]
@@ -76,6 +76,7 @@ animations = [{
 }]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_i6bfi"]
+light_mode = 1
 particles_animation = true
 particles_anim_h_frames = 8
 particles_anim_v_frames = 1

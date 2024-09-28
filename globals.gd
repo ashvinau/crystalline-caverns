@@ -6,7 +6,7 @@ const NAV_SPEED: float = 0.5
 const AOE_SCALAR: float = 1.05
 
 # World Constants
-const RAND_SEED: int = 42069 # 42 for fast-loading debug level
+const RAND_SEED: int = 827702 # 42 for fast-loading debug level
 const WIDTH: int = 512
 const HEIGHT: int = 512
 const CLAMP: int = 120
@@ -24,7 +24,7 @@ var color_dict = {
 }
 
 # Customization
-const PLAYER_COLOR: Color = Color.FUCHSIA
+var PLAYER_COLOR: Color = Color(color_dict[CRYSTAL_TYPES.VIRIDIAN],1)
 
 # Player Stat Variables
 var STR: float = 5

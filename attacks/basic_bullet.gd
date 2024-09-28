@@ -9,7 +9,7 @@ var spark_scene = preload("res://effects/sparks.tscn")
 var liquid_scene = preload("res://effects/liquid_splash.tscn")
 var smash_scene = preload("res://effects/tilemap_smash.tscn")
 
-@onready var aura_node = get_node("Aura")
+@onready var aura_node = get_node("Expiry/Aura")
 @onready var expiry_node = get_node("Expiry")	
 
 func set_bullet(life_time: float, coll_mask: int, color: Color, weight: float, shape: String, player: CharacterBody2D):
@@ -19,20 +19,23 @@ func set_bullet(life_time: float, coll_mask: int, color: Color, weight: float, s
 	self.scale.x *= weight 
 	self.scale.y *= weight	
 	$AnimatedSprite2D.material.set_shader_parameter("modulate",Globals.color_to_vector(color))
-	$AnimatedSprite2D.modulate = color
-	aura_node.modulate = color
-	expiry_node.modulate = color
+	$AnimatedSprite2D.modulate = color	
+	$Expiry/ToroidalLight.color = color # update light size here?
+	$Expiry/ToroidalLight.update_params()
+	expiry_node.modulate = color	
 	player_node = player
 	bullet_weight = weight
 	$AnimatedSprite2D.play(shape)
+	remove_child(expiry_node)
+	get_parent().add_child(expiry_node)	
 
 func _physics_process(delta):
+	if not expiring:
+		expiry_node.position = global_position
 	position.x += velocity.x * delta
 	position.y += velocity.y * delta	
 	velocity.y += (Globals.GRAVITY * delta) * bullet_weight # effect of gravity
-	rotation_degrees += 100 * delta
-	if expiring:
-		expiry_node.modulate.a -= delta / 1.7
+	rotation_degrees += 100 * delta	
 	check_bullet_loc()
 
 func expire():
@@ -40,11 +43,12 @@ func expire():
 	$AnimatedSprite2D.visible = false
 	$CollisionShape2D.set_deferred("disabled", true)	
 	aura_node.emitting = false	
-	remove_child(expiry_node)
-	get_parent().add_child(expiry_node)
-	expiry_node.position = global_position	
+	aura_node.one_shot = true
+	aura_node.emitting = true
 	expiry_node.one_shot = true
 	expiry_node.emitting = true		
+	expiry_node.expiring = true
+	call_deferred("queue_free")	
 
 func _on_body_entered(body):
 	if (not expiring) && (not hit_list.has(body.name)):
@@ -74,9 +78,6 @@ func apply_shot_force(target_node):
 func _on_timer_timeout():
 	if not expiring:
 		expire()		
-	
-func _on_expiry_finished():	
-	call_deferred("queue_free")
 	
 func check_bullet_loc():
 	$CollisionShape2D.set_deferred("disabled", false)

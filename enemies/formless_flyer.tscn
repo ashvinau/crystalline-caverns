@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://bwqj2x7d6t416"]
+[gd_scene load_steps=20 format=3 uid="uid://bwqj2x7d6t416"]
 
 [ext_resource type="Script" path="res://enemies/formless_flyer.gd" id="1_vygiu"]
 [ext_resource type="Shader" path="res://art/midModulate.gdshader" id="2_jkr8x"]
@@ -121,6 +121,9 @@ animations = [{
 resource_local_to_scene = true
 height = 28.0
 
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_qgsmd"]
+light_mode = 1
+
 [node name="FormlessFlyer" type="CharacterBody2D"]
 z_as_relative = false
 collision_layer = 8388610
@@ -151,6 +154,7 @@ autostart = true
 collision_mask = 2048
 
 [node name="HealthBar" type="TextureRect" parent="."]
+material = SubResource("CanvasItemMaterial_qgsmd")
 offset_left = -16.0
 offset_top = -25.0
 offset_right = 16.0

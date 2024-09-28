@@ -4,6 +4,7 @@
 [ext_resource type="Script" path="res://effects/aura.gd" id="7_7m6ry"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_eat6m"]
+light_mode = 1
 particles_animation = true
 particles_anim_h_frames = 6
 particles_anim_v_frames = 1

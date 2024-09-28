@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://bvot2j11ciqix"]
+[gd_scene load_steps=21 format=3 uid="uid://bvot2j11ciqix"]
 
 [ext_resource type="Script" path="res://enemies/formless_crawler.gd" id="1_871so"]
 [ext_resource type="Texture2D" uid="uid://c0satayco5xgm" path="res://art/mob-sheet.png" id="1_qdm8h"]
@@ -139,6 +139,9 @@ resource_local_to_scene = true
 radius = 11.0
 height = 28.0
 
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_248ay"]
+light_mode = 1
+
 [node name="FormlessCrawler" type="CharacterBody2D"]
 z_as_relative = false
 collision_layer = 8388610
@@ -168,6 +171,7 @@ autostart = true
 collision_mask = 2048
 
 [node name="HealthBar" type="TextureRect" parent="."]
+material = SubResource("CanvasItemMaterial_248ay")
 offset_left = -16.0
 offset_top = -25.0
 offset_right = 16.0

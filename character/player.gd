@@ -174,6 +174,10 @@ func _physics_process(delta):
 	if Input.is_action_just_pressed("save_nav"): # M
 		get_node("../PlayFieldMap").save_boss_map()
 		
+	if Input.is_action_just_pressed("screenshot"):
+		var image = get_viewport().get_texture().get_image()
+		image.save_png("screenshot.png")
+		
 	if Input.is_action_just_pressed("use waterskin"):
 		if (Globals.skins > 0):
 			inc_dec_skins(-1)

@@ -32,6 +32,7 @@ var core_scene = preload("res://levels/crystal_core.tscn")
 
 @onready var play_field_map_node = get_node("../PlayFieldMap")
 @onready var hud_node = get_node("../../../../HUD")
+@onready var crystal_light_node = get_node("ToroidalLight")
 
 # Called when the node enters the scene tree for the first time.
 func _init() -> void:	
@@ -100,10 +101,13 @@ func _init() -> void:
 		spawn_coll_diamond(location)
 		
 func _ready():
-	$CrystalLight.texture_scale = nodes * 4
-	$CrystalLight.color = BLOOD_COLOR
-	$CrystalBackLight.texture_scale = nodes * 4
-	$CrystalBackLight.color = BLOOD_COLOR
+	print("Setting Light...")	
+	remove_child(crystal_light_node)
+	crystal_light_node.position = self.global_position
+	play_field_map_node.add_child(crystal_light_node)	
+	crystal_light_node.tex_scale = nodes * 4
+	crystal_light_node.color = BLOOD_COLOR
+	crystal_light_node.update_params()
 	print("Setting AOE...")
 	aoe_range = pow(nodes * 100,Globals.AOE_SCALAR)
 	get_node("AOE/Area").get_shape().radius = aoe_range
@@ -213,6 +217,8 @@ func spawn_coll_diamond(loc: Vector2i):
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	if expiring && $TextureRect.self_modulate.a > 0:
+		crystal_light_node.energy -= delta * 8
+		crystal_light_node.update_params()
 		$TextureRect.self_modulate.a -= delta * 8
 	if position != crystal_location && reeling:
 		position = position.move_toward(crystal_location,delta * 100)
@@ -240,11 +246,12 @@ func _on_aoe_body_entered(body: Node2D) -> void:
 		
 		char_aura.from_crystal = self
 		char_aura.emitting = true
-		char_aura.modulate = BLOOD_COLOR
+		char_aura.modulate = BLOOD_COLOR		
 		
 func start_heal_timer():
 	var heal_node = char_aura.get_node("HealTimer")
 	heal_node.call_deferred("start")
 
 func _on_expiry_timer_timeout() -> void:
+	crystal_light_node.call_deferred("queue_free")
 	call_deferred("queue_free")

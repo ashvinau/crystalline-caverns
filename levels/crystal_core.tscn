@@ -1,9 +1,10 @@
-[gd_scene load_steps=21 format=3 uid="uid://bludfkgikkhcc"]
+[gd_scene load_steps=23 format=3 uid="uid://bludfkgikkhcc"]
 
 [ext_resource type="Texture2D" uid="uid://cbq8uf58touw2" path="res://art/crystal_sheet.png" id="1_xjhkq"]
 [ext_resource type="Script" path="res://levels/crystal_core.gd" id="2_2dyci"]
 [ext_resource type="Texture2D" uid="uid://ekpk5p5g7pqb" path="res://art/sparkle_particle.png" id="2_xj1ds"]
 [ext_resource type="Script" path="res://levels/crystal_hit.gd" id="4_3tjar"]
+[ext_resource type="PackedScene" uid="uid://c5v4d7mdbwk73" path="res://effects/toroidal_light.tscn" id="5_ro0dx"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_177x0"]
 resource_local_to_scene = true
@@ -12,6 +13,7 @@ bounce = 0.5
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_jdu5g"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_v8hke"]
+light_mode = 1
 particles_animation = true
 particles_anim_h_frames = 6
 particles_anim_v_frames = 1
@@ -33,6 +35,9 @@ hue_variation_min = -1.0
 hue_variation_max = 1.0
 anim_speed_min = 1.0
 anim_speed_max = 2.0
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_4oqw2"]
+light_mode = 1
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_gmpg2"]
 atlas = ExtResource("1_xjhkq")
@@ -139,6 +144,7 @@ visibility_rect = Rect2(-1000, -1000, 2000, 2000)
 [node name="CrystalCore" type="AnimatedSprite2D" parent="."]
 z_index = 2
 z_as_relative = false
+material = SubResource("CanvasItemMaterial_4oqw2")
 sprite_frames = SubResource("SpriteFrames_3134g")
 autoplay = "default"
 frame_progress = 0.0825165
@@ -157,6 +163,8 @@ autostart = true
 
 [node name="ExpiryTimer" type="Timer" parent="."]
 one_shot = true
+
+[node name="ToroidalLight" parent="." instance=ExtResource("5_ro0dx")]
 
 [connection signal="body_entered" from="CrystalCore/PickupCollision" to="." method="_on_pickup_collision_body_entered"]
 [connection signal="timeout" from="ColorTimer" to="." method="_on_color_timer_timeout"]
